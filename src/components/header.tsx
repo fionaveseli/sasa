@@ -4,7 +4,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { MenuIcon, MountainIcon, PhoneIcon, SearchIcon } from "lucide-react";
+import { MenuIcon, SearchIcon } from "lucide-react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { SheetContent, SheetTrigger, Sheet } from "./ui/sheet";
@@ -13,15 +13,14 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-white dark:border-gray-800 dark:bg-gray-950">
       <div className="container mx-auto flex h-16 max-w-6xl items-center px-4 md:px-6">
-        {/* Logo */}
-        <Link href="#" className="flex items-center gap-2" prefetch={false}>
+        <Link href="/" className="flex items-center gap-2" prefetch={false}>
           <img src="logo.svg" alt="Logo" />
         </Link>
 
         {/* Navigation */}
         <nav className="flex items-center gap-12 text-sm font-medium ml-12">
           <Link
-            href="#"
+            href="/"
             className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
             prefetch={false}
           >
@@ -39,8 +38,13 @@ export default function Header() {
         {/* Right side elements */}
         <div className="flex items-center gap-4 ml-auto">
           <div className="hidden items-center gap-2 text-sm font-medium md:flex">
-            <Button variant="outline">Login</Button>
-            <Button variant="default">Get Started</Button>
+            <Link href="/login">
+              <Button variant="ghost">Login</Button>
+            </Link>
+
+            <Link href="/sign-up">
+              <Button variant="default">Get Started</Button>
+            </Link>
           </div>
 
           {/* Dropdown menu (Search) */}
