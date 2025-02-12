@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Card } from "./ui/card";
 
-export function ConfirmationCard({
+export function JoinUni({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
@@ -19,27 +19,24 @@ export function ConfirmationCard({
         {...props}
       >
         <div>
-          <h1 className="text-4xl">Please Check Your Email</h1>
+          <h1 className="text-4xl">You’re almost there!</h1>
           <p className="font-extralight text-lg">
-            We’ve sent a code to m@uni.edu
+            Just one more step to access your account.
           </p>
         </div>
-        <div className="grid grid-cols-6 gap-2">
-          {[...Array(6)].map((_, index) => (
-            <Input
-              key={index}
-              className="text-center text-2xl w-12 h-12"
-              maxLength={1}
-            />
-          ))}
+        <div className="grid gap-2 w-full">
+          <div className="flex items-center">
+            <Label htmlFor="password">Join a University</Label>
+          </div>
+          <Input id="password" type="password" required />
         </div>
         <Button variant={"submit"} className="w-full">
-          Verify Email
+          Ready for SASA
         </Button>
         <p className="text-sm">
-          Didn&apos;t receive an email?{" "}
+          Don't see your university here?{" "}
           <Link href="#" className="text-primary">
-            Resend code.
+            Add your university.
           </Link>
         </p>
       </div>
