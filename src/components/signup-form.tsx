@@ -11,7 +11,7 @@ export function SignupForm({
   return (
     <form className={cn("flex flex-col gap-6", className)} {...props}>
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-5xl ">Create Your Account</h1>
+        <h1 className="text-5xl">Create Your Account</h1>
         <p className="text-balance text-lg text-muted-foreground">
           Stay updated on your tournaments!
         </p>
@@ -42,7 +42,7 @@ export function SignupForm({
           <Input id="password" type="password" required />
         </div>
         <div className="flex gap-2 flex-col">
-          <Link href="/dashboard">
+          <Link href="/signup/confirmation">
             <Button type="submit" variant={"submit"} className="w-full">
               Create Account
             </Button>
