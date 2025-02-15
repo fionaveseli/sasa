@@ -5,7 +5,10 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 
-export function ConfirmationCard({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
+export function ConfirmationCard({
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<"div">) {
   return (
     <Card>
       <div className={cn("flex flex-col gap-6 items-center text-center p-10", className)} {...props}>
