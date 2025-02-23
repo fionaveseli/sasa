@@ -10,16 +10,16 @@ export default function DashboardPage() {
       <h1 className="text-2xl font-normal">Welcome, John</h1>
 
       <div className="grid min-h-fit grid-cols-1 lg:grid-cols-4 gap-4">
-        <div className="lg:col-span-3 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <StatsCard title="No. of Wins" value="5" />
           <StatsCard title="Total Matches" value="20" />
           <StatsCard title="Tournaments" value="2" />
 
-          <div className="col-span-1 md:col-span-2 lg:col-span-3">
+          <div className="col-span-1 sm:col-span-2 md:col-span-3">
             <MatchCard />
           </div>
 
-          <div className="col-span-1 md:col-span-2 lg:col-span-3">
+          <div className="col-span-1 sm:col-span-2 md:col-span-3">
             <BracketCard />
           </div>
         </div>
