@@ -9,13 +9,13 @@ const data = [
   { name: "Losses", value: 15 },
 ];
 
-const COLORS = ["#C7FF33", "#4B0082"]; // Lime-green (wins) & Dark purple (background)
+const COLORS = ["#C7FF33", "#4B0082"];
 
 export default function PerformanceCard() {
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true); // Ensures component only renders on the client
+    setIsClient(true);
   }, []);
 
   return (
@@ -24,8 +24,6 @@ export default function PerformanceCard() {
         <p className="text-lg font-semibold text-[#353535]">
           Performance Overview
         </p>
-
-        {/* Render chart only on client */}
         {isClient && (
           <div className="relative w-44 h-44 flex items-center justify-center">
             <PieChart width={120} height={120}>
