@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
-import Header from "@/components/header";
-import Footer from "@/components/footer";
 
 const outfitSans = Outfit({
   weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
