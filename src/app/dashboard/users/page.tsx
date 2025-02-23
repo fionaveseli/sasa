@@ -1,6 +1,3 @@
-import { GalleryVerticalEnd } from "lucide-react";
-
-import { LoginForm } from "@/components/login-form";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export default function Dashboard() {

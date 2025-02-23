@@ -22,8 +22,8 @@ export default function RootLayout({
             <Separator orientation="vertical" className="h-4" />
           </div>
         </header>
-        <div className="w-full p-3 flex-1 overflow-auto bg-primary-foreground">
-          <Card className="rounded-lg bg-white min-h-[90vh] w-full overflow-auto p-4">
+        <div className="w-full p-3 flex-1 bg-primary-foreground">
+          <Card className="rounded-lg bg-white min-h-[90vh] w-full overflow-y-auto p-4">
             {children}
           </Card>
         </div>
