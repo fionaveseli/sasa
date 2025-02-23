@@ -24,6 +24,7 @@ import {
   SidebarHeader,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { NavMain } from "./nav-main";
 
 // This is sample data.
 const data = {
@@ -32,6 +33,33 @@ const data = {
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg",
   },
+  navMain: [
+    {
+      title: "Playground",
+      url: "#",
+      icon: SquareTerminal,
+      isActive: true,
+      items: [
+        {
+          title: "History",
+          url: "#",
+        },
+        {
+          title: "Starred",
+          url: "#",
+        },
+        {
+          title: "Settings",
+          url: "#",
+        },
+      ],
+    },
+    {
+      title: "Models",
+      url: "#",
+      icon: Bot,
+    },
+  ],
   projects: [
     {
       name: "Home",
@@ -68,6 +96,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <img className="h-8" src="logo1.svg" alt="Logo" />
       </SidebarHeader>
       <SidebarContent>
+        <NavMain items={data.navMain} />
+
         <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
