@@ -26,7 +26,6 @@ import {
 } from "@/components/ui/sidebar";
 import { NavMain } from "./nav-main";
 
-// This is sample data.
 const data = {
   user: {
     name: "shadcn",
@@ -35,56 +34,29 @@ const data = {
   },
   navMain: [
     {
-      title: "Playground",
-      url: "#",
+      title: "Home",
+      url: "/dashboard",
       icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "History",
-          url: "#",
-        },
-        {
-          title: "Starred",
-          url: "#",
-        },
-        {
-          title: "Settings",
-          url: "#",
-        },
-      ],
     },
     {
-      title: "Models",
-      url: "#",
+      title: "Teams",
+      url: "/dashboard/teams",
+      icon: SquareTerminal,
+    },
+    {
+      title: "Tournaments",
+      url: "/dashboard/tournaments",
+      icon: SquareTerminal,
+    },
+    {
+      title: "University Page",
+      url: "/dashboard/university",
+      icon: SquareTerminal,
+    },
+    {
+      title: "Team Page",
+      url: "/dashboard/team-page",
       icon: Bot,
-    },
-  ],
-  projects: [
-    {
-      name: "Home",
-      url: "#",
-      icon: Frame,
-    },
-    {
-      name: "Teams",
-      url: "#",
-      icon: PieChart,
-    },
-    {
-      name: "Tournaments",
-      url: "#",
-      icon: Map,
-    },
-    {
-      name: "University Page",
-      url: "#",
-      icon: Map,
-    },
-    {
-      name: "Team Page",
-      url: "#",
-      icon: Map,
     },
   ],
 };
@@ -93,12 +65,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
-        <img className="h-8" src="logo1.svg" alt="Logo" />
+        <img className="h-8" src="/logo1.svg" alt="Logo" />
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} />
-
-        <NavProjects projects={data.projects} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data.user} />

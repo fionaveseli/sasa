@@ -2,8 +2,6 @@
 
 import JoinTeam from "@/components/dashboard/join-team";
 import CreateTeamModal from "@/components/modal/create-team";
-import CreateTeam from "@/components/modal/join-team-modal";
-import JoinTeamModal from "@/components/modal/join-team-modal";
 import SearchInput from "@/components/search-input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -45,6 +43,7 @@ const teams = [
     places: 1,
   },
 ];
+
 export default function TeamsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   return (
