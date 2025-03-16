@@ -6,7 +6,7 @@ import TeamCard from "@/components/dashboard/team-card";
 
 export default function DashboardPage() {
   return (
-    <div className="flex flex-col space-y-4 p-4">
+    <div className="flex flex-col space-y-4">
       <h1 className="text-2xl font-normal">Welcome, John</h1>
 
       <div className="grid min-h-fit grid-cols-1 lg:grid-cols-4 gap-4">

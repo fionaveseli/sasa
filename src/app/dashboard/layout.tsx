@@ -23,7 +23,7 @@ export default function RootLayout({
           </div>
         </header>
         <div className="w-full p-3 flex-1 bg-primary-foreground">
-          <Card className="rounded-lg bg-white min-h-[90vh] w-full overflow-y-auto p-4">
+          <Card className="rounded-lg bg-white min-h-[90vh] w-full overflow-y-auto p-6">
             {children}
           </Card>
         </div>

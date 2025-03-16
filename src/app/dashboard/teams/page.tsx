@@ -1,7 +1,7 @@
 "use client";
 
 import JoinTeam from "@/components/dashboard/join-team";
-import CreateTeamModal from "@/components/modal/create-team";
+import CreateTeamModal from "@/components/modal/create-team-modal";
 import SearchInput from "@/components/search-input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
