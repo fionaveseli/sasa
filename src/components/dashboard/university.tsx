@@ -4,6 +4,8 @@ import { getSearchParams } from "@/utils/paginationUtils";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import Table from "../table";
+import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 
 export default function Users() {
   const searchParams = useSearchParams();
@@ -14,40 +16,70 @@ export default function Users() {
 
   // Define table columns
   const columns = [
-    { accessorKey: "firstname", header: "First Name" },
-    { accessorKey: "lastname", header: "Last Name" },
-    { accessorKey: "email", header: "Email" },
+    { accessorKey: "tournamentname", header: "TOURNAMENT NAME" },
+    { accessorKey: "startdate", header: "START DATE" },
+    { accessorKey: "enddate", header: "END DATE" },
+    { accessorKey: "status", header: "STATUS" },
+    { accessorKey: "teamsparticipating", header: "TEAMS PARTICIPATING" },
+    { accessorKey: "actions", header: "ACTIONS" },
   ];
 
   // Dummy data for table rows
   const rows = [
-    { firstname: "John", lastname: "Doe", email: "john.doe@example.com" },
-    { firstname: "Jane", lastname: "Smith", email: "jane.smith@example.com" },
-    { firstname: "Alice", lastname: "Brown", email: "alice.brown@example.com" },
-    { firstname: "Bob", lastname: "Johnson", email: "bob.johnson@example.com" },
     {
-      firstname: "Charlie",
-      lastname: "Williams",
-      email: "charlie.w@example.com",
-    },
-    { firstname: "Emily", lastname: "Davis", email: "emily.davis@example.com" },
-    {
-      firstname: "Michael",
-      lastname: "Miller",
-      email: "michael.miller@example.com",
-    },
-    { firstname: "Emma", lastname: "Moore", email: "emma.moore@example.com" },
-    {
-      firstname: "Olivia",
-      lastname: "Taylor",
-      email: "olivia.taylor@example.com",
+      tournamentname: "RIT Kosovo 2024",
+      startdate: "10/11/2024",
+      enddate: "20/11/2024",
+      status: <Badge>Upcoming</Badge>,
+      teamsparticipating: 16,
+      actions: (
+        <div className="flex gap-2">
+          <Button>Join</Button>
+          <Button > View</Button>
+        </div>
+      ),
     },
     {
-      firstname: "Liam",
-      lastname: "Anderson",
-      email: "liam.anderson@example.com",
+      tournamentname: "International Open 2024",
+      startdate: "15/08/2024",
+      enddate: "25/08/2024",
+      status: <Badge>Finished</Badge>,
+      teamsparticipating: 32,
+      actions: (
+        <Button > View</Button> // Only View if finished
+      ),
+    },
+    {
+      tournamentname: "Global Masters 2024",
+      startdate: "05/09/2024",
+      enddate: "15/09/2024",
+      status: <Badge > Active</Badge>,
+      teamsparticipating: 24,
+      actions: <Button > View</Button>,
+    },
+    {
+      tournamentname: "Summer Showdown",
+      startdate: "12/07/2024",
+      enddate: "22/07/2024",
+      status: <Badge > Finished</Badge>,
+      teamsparticipating: 20,
+      actions: <Button > View</Button>,
+    },
+    {
+      tournamentname: "Winter Cup",
+      startdate: "01/12/2024",
+      enddate: "10/12/2024",
+      status: <Badge > Upcoming</Badge>,
+      teamsparticipating: 12,
+      actions: (
+        <div className="flex gap-2">
+          <Button > Join</Button>
+          <Button > View</Button>
+        </div>
+      ),
     },
   ];
+  
 
   useEffect(() => {
     const allParams = getSearchParams(searchParams);
