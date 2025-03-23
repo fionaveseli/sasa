@@ -1,3 +1,5 @@
+"use client"; 
+import { useRouter } from "next/navigation";
 import * as React from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import {
@@ -18,6 +20,7 @@ import {
 import Paginations from "./paginations";
 import EmptyState from "./empty-state";
 import { SkeletonLoader } from "./skeleton-loader";
+import { Button } from "@/components/ui/button";
 
 interface Row {
   [key: string]: any;
@@ -44,10 +47,15 @@ export const ShadcnTable = ({
 }: TableProps) => {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const totalPages = Math.ceil(totalRows / size);
+  const router = useRouter();
+
+  const enhancedColumns: ColumnDef<any>[] = [
+    ...columns,
+  ];
 
   const table = useReactTable({
     data: rows,
-    columns,
+    columns: enhancedColumns,
     state: { sorting },
     getCoreRowModel: getCoreRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
@@ -71,7 +79,7 @@ export const ShadcnTable = ({
           ))}
         </TableHeader>
         {loading && (
-          <SkeletonLoader type="table" rowCount={10} columnCount={columns.length} />
+          <SkeletonLoader type="table" rowCount={10} columnCount={enhancedColumns.length} />
         )}
         {!loading && (
           <TableBody>
@@ -87,7 +95,7 @@ export const ShadcnTable = ({
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={columns.length} className="p-4 text-center text-gray-500">
+                <TableCell colSpan={enhancedColumns.length} className="p-4 text-center text-gray-500">
                   <EmptyState message="No data available" />
                 </TableCell>
               </TableRow>
@@ -97,7 +105,7 @@ export const ShadcnTable = ({
       </Table>
       {!disablePaginations && totalRows > 0 && (
         <div className="flex justify-end mt-4">
-          <Paginations totalPages={totalPages} page={page} handlePage={() => { } } numbers={[]} />
+          <Paginations totalPages={totalPages} page={page} handlePage={() => {}} numbers={[]} />
         </div>
       )}
     </div>
