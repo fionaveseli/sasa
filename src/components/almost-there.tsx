@@ -43,7 +43,7 @@ export function AlmostThereCard({
         </Link>
         <p className="text-sm">
           Don't see your university here?{" "}
-          <Link href="#" className="text-primary">
+          <Link href="/signup/new-university" className="text-primary">
             Add your university
           </Link>
         </p>

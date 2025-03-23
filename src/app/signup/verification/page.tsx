@@ -1,11 +1,11 @@
-import { JoinUni } from "@/components/join-uni";
+import { UserVerificationCard } from "@/components/user-verification";
 
-export default function SignUpPage() {
+export default function Verification() {
   return (
     <div className="grid min-h-svh">
       <div className="flex m items-center justify-center py-8">
         <div className="w-full max-w-xl">
-          <JoinUni />
+          <UserVerificationCard />
         </div>
       </div>
     </div>
