@@ -37,12 +37,12 @@ export function SignupForm({
         </div>
         <div className="grid gap-2">
           <div className="flex items-center">
-            <Label htmlFor="password"> Confirm Password</Label>
+            <Label htmlFor="password">Confirm Password</Label>
           </div>
           <Input id="password" type="password" required />
         </div>
         <div className="flex gap-2 flex-col">
-          <Link href="/signup/confirmation">
+          <Link href="/signup/verification">
             <Button type="submit" variant={"submit"} className="w-full">
               Create Account
             </Button>

@@ -1,11 +1,11 @@
-import { JoinUni } from "@/components/join-uni";
+import { NewUni } from "@/components/new-uni";
 
-export default function SignUpPage() {
+export default function NewUniversityPage() {
   return (
     <div className="grid min-h-svh">
       <div className="flex m items-center justify-center py-8">
         <div className="w-full max-w-xl">
-          <JoinUni />
+          <NewUni />
         </div>
       </div>
     </div>
