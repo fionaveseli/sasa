@@ -1,19 +1,36 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Header from "@/components/header";
 import Footer from "@/components/footer";
 import { Button } from "@/components/ui/button";
 import VoteModal from "@/components/modal/votemodal";
+import { TournamentVote } from "@/types/dto/votes/TournamentVotes";
+import { getTournamentVotes } from "@/api/voteService";
 
 export default function Home() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [hasVoted, setHasVoted] = useState(false);
+  const [votes, setVotes] = useState<TournamentVote[]>([]); 
 
   const handleVoteSubmit = () => {
     setHasVoted(true);
     setIsModalOpen(false);
   };
+
+  useEffect(() => {
+    const fetchVotes = async () => {
+      const response = await getTournamentVotes(1); 
+      if (response.data) {
+        setVotes(response.data);
+        console.log("Fetched votes:", response.data);
+      } else {
+        console.error("Failed to fetch votes:", response);
+      }
+    };
+
+    fetchVotes();
+  }, []);
 
   return (
     <div>
@@ -62,8 +79,7 @@ export default function Home() {
 
         <div className="w-1/2 flex flex-col justify-start items-center p-2">
           <div className="text-center w-full">
-          <p className="min-w-[40%] text-2xl">
-          Vote for your favorite team!</p>
+            <p className="min-w-[40%] text-2xl">Vote for your favorite team!</p>
             <img
               src="/favorite-team.svg"
               alt="Favorite Team"

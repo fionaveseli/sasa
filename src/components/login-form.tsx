@@ -30,7 +30,7 @@ export function LoginForm({
       if (res.data) {
         const { user, authToken } = res.data;
 
-        // Optional: Save token to localStorage
+      
         setToken("TOKEN", authToken.toString());
         setToken("USER", JSON.stringify(user));
 
