@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useRouter } from "next/navigation";
-import { setToken } from "@/utils/services"; // if you want to store tokens
+import { setToken } from "@/utils/services";
 import { login } from "@/api/userService";
 
 export function LoginForm({
@@ -25,24 +25,21 @@ export function LoginForm({
     setLoading(true);
     setError("");
 
-    try {
-      const res = await login({ email, password });
-      if (res.data) {
-        const { user, authToken } = res.data;
+    const res = await login({ email, password });
+    console.log("Login response:", res);
 
-      
-        setToken("TOKEN", authToken.toString());
-        setToken("USER", JSON.stringify(user));
+    if (res.data) {
+      const { user, authToken } = res.data;
 
-        router.push("/dashboard");
-      } else {
-        setError(res.error?.title || "Login failed");
-      }
-    } catch (err) {
-      setError("Something went wrong.");
-    } finally {
-      setLoading(false);
+      setToken("TOKEN", JSON.stringify(authToken));
+      setToken("USER", JSON.stringify(user));
+
+      router.push("/dashboard");
+    } else {
+      setError(res.error?.title || "Login failed");
     }
+
+    setLoading(false);
   };
 
   return (
@@ -52,7 +49,7 @@ export function LoginForm({
       {...props}
     >
       <div className="flex flex-col items-center gap-2 text-center">
-        <h1 className="text-5xl ">Welcome back</h1>
+        <h1 className="text-5xl">Welcome back</h1>
         <p className="text-balance text-lg text-muted-foreground">
           Stay updated on your tournaments!
         </p>

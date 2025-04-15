@@ -21,7 +21,7 @@ export function SignupForm({
     confirmPassword: "",
     graduationYear: "",
     role: "student",
-    university_id: "",
+    university_id: "1", // ✅ set the university_id directly here
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
 
@@ -59,6 +59,8 @@ export function SignupForm({
       if (form.role === "student") {
         payload.university_id = parseInt(form.university_id);
       }
+
+      console.log("Payload before register:", payload);
 
       const res = await registerUser(payload);
 
@@ -157,8 +159,8 @@ export function SignupForm({
           />
         </div>
 
-        <input type="hidden" name="role" value="student" />
-        <input type="hidden" name="university_id" value="1" />
+        {/* ❌ Removed the unnecessary hidden input */}
+        {/* <input type="hidden" name="university_id" value="1" /> */}
 
         <div className="flex gap-2 flex-col">
           <Button
