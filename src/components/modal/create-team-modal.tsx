@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import {
   Dialog,
@@ -10,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { X } from "lucide-react";
 import { Textarea } from "../ui/textarea";
+import { createTeam } from "@/api/teamService"; // ✅ Import your function
 
 interface CreateTeamModalProps {
   isOpen: boolean;
@@ -24,10 +27,36 @@ export default function CreateTeamModal({
   const [members, setMembers] = useState("");
   const [teamBio, setTeamBio] = useState("");
   const [logo, setLogo] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files.length > 0) {
       setLogo(event.target.files[0]);
+    }
+  };
+
+  const handleCreateTeam = async () => {
+    setError(null);
+    setLoading(true);
+
+    try {
+      const response = await createTeam({
+        name: teamName,
+        university_id: 1, // or pass this as a prop if dynamic
+      });
+
+      if (response.data) {
+        console.log("Created team:", response.data);
+        onClose(); // Close modal
+      } else {
+        setError(response.data || "Something went wrong.");
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Unexpected error while creating team.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -42,6 +71,8 @@ export default function CreateTeamModal({
 
         {/* Form */}
         <div className="flex flex-col gap-4 mt-4">
+          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
           <div>
             <label className="block text-gray-700 ">
               Team Name <span className="text-red-500">*</span>
@@ -97,9 +128,10 @@ export default function CreateTeamModal({
         <DialogFooter className="mt-4">
           <Button
             className="w-full bg-lime-400 text-black font-semibold hover:bg-lime-500"
-            onClick={() => alert("Team Created!")}
+            onClick={handleCreateTeam}
+            disabled={loading}
           >
-            Create Team
+            {loading ? "Creating..." : "Create Team"}
           </Button>
         </DialogFooter>
       </DialogContent>
