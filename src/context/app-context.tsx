@@ -31,12 +31,13 @@ export function AppContextProvider({ children }: SettingsProps) {
   const publicRoutes = ["/login", "/register"];
 
   useEffect(() => {
-    const userToken: Users = getToken(TokenType.USER);
+    const token = getToken(TokenType.USER);
+    const userToken: Users | null = token ? (JSON.parse(token) as Users) : null;
 
-    // if (!userToken && !publicRoutes.includes(pathname)) {
-    //   redirect("/login");
-    //   return;
-    // }
+    if (!userToken && !publicRoutes.includes(pathname)) {
+      redirect("/login");
+      return;
+    }
 
     if (!userToken) {
       setLoading(false);

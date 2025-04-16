@@ -29,10 +29,10 @@ export function LoginForm({
     console.log("Login response:", res);
 
     if (res.data) {
-      const { user, authToken } = res.data;
+      const { user, token } = res.data;
 
-      setToken("TOKEN", JSON.stringify(authToken));
-      setToken("USER", JSON.stringify(user));
+      setToken("TOKEN", token); // save raw token
+      localStorage.setItem("USER", JSON.stringify(user)); // save full user
 
       router.push("/dashboard");
     } else {

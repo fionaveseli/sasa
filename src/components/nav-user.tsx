@@ -27,7 +27,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { deleteToken } from "@/utils/services";
 
+export const logout = () => {
+  deleteToken("TOKEN");
+  deleteToken("USER");
+  if (typeof window !== "undefined") {
+    window.location.href = "/login";
+  }
+};
 export function NavUser({
   user,
 }: {
@@ -97,9 +105,9 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={logout}>
               <LogOut />
-              Log out
+              Log Out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

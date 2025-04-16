@@ -6,16 +6,15 @@ export const setToken = (tokenType: string, token: string) => {
   }
 };
 
-export const getToken = (tokenType: string) => {
+export const getToken = (tokenType: string): string | null => {
   if (isBrowser) {
-    const storage = localStorage.getItem(tokenType);
-    if (storage) return JSON.parse(storage);
+    return localStorage.getItem(tokenType);
   }
-  return;
+  return null;
 };
 
 export const deleteToken = (tokenType: string) => {
   if (isBrowser) {
-    if (localStorage) localStorage.removeItem(tokenType);
+    localStorage.removeItem(tokenType);
   }
 };

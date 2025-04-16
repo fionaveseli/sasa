@@ -6,7 +6,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { registerUser } from "@/api/userService";
+import { checkIfUniversitiesExist, registerUser } from "@/api/userService";
+import { RegisterUser } from "@/types/dto/users/RegisterUser";
 
 export function SignupForm({
   className,
@@ -20,8 +21,6 @@ export function SignupForm({
     password: "",
     confirmPassword: "",
     graduationYear: "",
-    role: "student",
-    university_id: "1", // ✅ set the university_id directly here
     timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
   });
 
@@ -47,27 +46,28 @@ export function SignupForm({
     setLoading(true);
 
     try {
-      const payload: any = {
+      const universitiesExist = await checkIfUniversitiesExist();
+
+      if (!universitiesExist) {
+        router.push("/signup/new-university");
+        return;
+      }
+
+      const payload: RegisterUser = {
         fullName: form.fullName,
         email: form.email,
         password: form.password,
-        role: form.role,
         graduationYear: parseInt(form.graduationYear),
         timeZone: form.timeZone,
+        role: "Student",
       };
-
-      if (form.role === "student") {
-        payload.university_id = parseInt(form.university_id);
-      }
-
-      console.log("Payload before register:", payload);
 
       const res = await registerUser(payload);
 
       if (res.data) {
         const { user, authToken } = res.data;
 
-        localStorage.setItem("TOKEN", authToken.toString());
+        localStorage.setItem("TOKEN", authToken);
         localStorage.setItem("USER", JSON.stringify(user));
 
         router.push("/dashboard");
@@ -158,9 +158,6 @@ export function SignupForm({
             required
           />
         </div>
-
-        {/* ❌ Removed the unnecessary hidden input */}
-        {/* <input type="hidden" name="university_id" value="1" /> */}
 
         <div className="flex gap-2 flex-col">
           <Button

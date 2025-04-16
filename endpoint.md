@@ -37,7 +37,7 @@ Body:
     "fullName": "Admin User",
     "email": "admin@sasa.com",
     "password": "password123",
-    "role": "admin",
+    "role": "admin", //default Student role
     "graduationYear": 2024,
     "timeZone": "UTC"
 }

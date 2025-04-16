@@ -1,5 +1,4 @@
-export interface AuthToken {
-    accessToken: string;
-    expirationUtc?: string;
-    
-  }
+export interface Token {
+  accessToken: string;
+  expirationUtc?: string;
+}
