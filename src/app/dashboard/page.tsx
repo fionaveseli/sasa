@@ -15,7 +15,7 @@ export default function DashboardPage() {
           <StatsCard title="Total Matches" value="20" />
           <StatsCard title="Tournaments" value="2" />
 
-          <div className="col-span-1 sm:col-span-2 md:col-span-3">
+          <div className="col-span-1 sm:col-span-2 md:col-span-3 ">
             <MatchCard />
           </div>
 
