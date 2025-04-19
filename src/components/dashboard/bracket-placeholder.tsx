@@ -1,19 +1,31 @@
+"use client";
+import { Bracket, IRoundProps } from "@sportsgram/brackets";
 import { Card, CardContent } from "@/components/ui/card";
 
-const bracketData = [
-  [
-    "Tigers",
-    "Strikers",
-    "Titans",
-    "Infernos",
-    "Shadows",
-    "Phoenix",
-    "Cipher",
-    "Echo",
-  ], // Round 1
-  ["RIT Tigers", "Titans", "Phoenix", "Cipher"], // Quarterfinals
-  ["RIT Tigers", "Cipher"], // Semifinals
-  ["?"], // Final (TBD)
+const bracketRounds: IRoundProps[] = [
+  {
+    title: "Quarterfinals",
+    seeds: [
+      { id: 1, teams: [{ name: "Tigers" }, { name: "Strikers" }] },
+      { id: 2, teams: [{ name: "Titans" }, { name: "Infernos" }] },
+      { id: 3, teams: [{ name: "Shadows" }, { name: "Phoenix" }] },
+      { id: 4, teams: [{ name: "Cipher" }, { name: "Echo" }] },
+    ],
+  },
+  {
+    title: "Semifinals",
+    seeds: [
+      {
+        id: 5,
+        teams: [{ name: "RIT Tigers" }, { name: "Titans" }],
+      },
+      { id: 6, teams: [{ name: "Phoenix" }, { name: "Cipher" }] },
+    ],
+  },
+  {
+    title: "Final",
+    seeds: [{ id: 7, teams: [{ name: "?" }, { name: "?" }] }],
+  },
 ];
 
 export default function BracketCard() {
@@ -24,39 +36,8 @@ export default function BracketCard() {
           Bracket for RIT Kosovo Spring 2025
         </p>
 
-        <div className="mt-4 grid grid-cols-4 gap-x-10">
-          {bracketData.map((round, roundIndex) => (
-            <div
-              key={roundIndex}
-              className={`grid gap-y-${2 ** roundIndex} items-center`}
-            >
-              {round.map((team, teamIndex) => (
-                <div
-                  key={teamIndex}
-                  className="relative flex items-center justify-center"
-                >
-                  {roundIndex > 0 && (
-                    <>
-                      <div className="absolute left-[-10px] top-1/2 w-6 h-0.5 bg-purple-400"></div>
-                      <div
-                        className={`absolute left-[-10px] ${
-                          teamIndex % 2 === 0 ? "top-0" : "bottom-0"
-                        } w-0.5 h-full bg-purple-400`}
-                      ></div>
-                    </>
-                  )}
-
-                  <div className="bg-purple-100 text-purple-800 text-sm font-medium px-4 py-2 rounded-lg shadow-md w-32 text-center">
-                    {team}
-                  </div>
-
-                  {roundIndex < bracketData.length - 1 && (
-                    <div className="absolute right-[-10px] top-1/2 w-6 h-0.5 bg-purple-400"></div>
-                  )}
-                </div>
-              ))}
-            </div>
-          ))}
+        <div className="mt-4">
+          <Bracket rounds={bracketRounds}  />
         </div>
       </CardContent>
     </Card>
