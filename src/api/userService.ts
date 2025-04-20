@@ -13,7 +13,7 @@ export const login = (
 
 type RegisterResponse = {
   user: Users;
-  authToken: string;
+  token: string;
 };
 export const registerUser = (
   data: RegisterUser
@@ -23,19 +23,41 @@ export const registerUser = (
 export type University = {
   id: number;
   name: string;
-  // Add other fields if needed
 };
-// 1. Get all universities
-export const getUniversities = (): Promise<ApiResponse<University[]>> =>
-  getRequest<University[]>("uni/universities-g");
+export const getUniversities = (
+  token: string
+): Promise<ApiResponse<{ universities: University[] }>> =>
+  getRequest<{ universities: University[] }>("api/uni/universities-g", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
 
-// 2. Check if any exist
-export const checkIfUniversitiesExist = async (): Promise<boolean> => {
+export const checkIfUniversitiesExist = async (
+  token: string
+): Promise<boolean> => {
   try {
-    const res = await getUniversities();
+    const res = await getUniversities(token);
     return Array.isArray(res.data) && res.data.length > 0;
   } catch (err) {
     console.error("Failed to fetch universities", err);
     return false;
   }
 };
+
+export const createUniversity = (
+  data: {
+    universityName: string;
+    universityAddress: string;
+    contactNumber: string;
+    logo?: string;
+    bannerColor: string;
+    bio: string;
+  },
+  token: string
+) =>
+  postRequest("api/uni/universities-r", data, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });

@@ -2,8 +2,8 @@ export interface RegisterUser {
     fullName: string;
     email: string;
     password: string;
-    role: "Admin" | "University_Manager" | "Student";
+    role?: "admin" | "university_manager" | "student";
     graduationYear: number;
     timeZone: string;
-    university_id?: number;
+    id?: number;  
   }

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { checkIfUniversitiesExist, registerUser } from "@/api/userService";
+import { registerUser } from "@/api/userService";
 import { RegisterUser } from "@/types/dto/users/RegisterUser";
 
 export function SignupForm({
@@ -21,7 +21,7 @@ export function SignupForm({
     password: "",
     confirmPassword: "",
     graduationYear: "",
-    timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    timeZone: "UTC",
   });
 
   const [loading, setLoading] = useState(false);
@@ -46,31 +46,26 @@ export function SignupForm({
     setLoading(true);
 
     try {
-      const universitiesExist = await checkIfUniversitiesExist();
-
-      if (!universitiesExist) {
-        router.push("/signup/new-university");
-        return;
-      }
-
       const payload: RegisterUser = {
         fullName: form.fullName,
         email: form.email,
         password: form.password,
         graduationYear: parseInt(form.graduationYear),
         timeZone: form.timeZone,
-        role: "Student",
+        role: "student",
       };
+
+      console.log("Registering with payload:", payload);
 
       const res = await registerUser(payload);
 
       if (res.data) {
-        const { user, authToken } = res.data;
-
-        localStorage.setItem("TOKEN", authToken);
+        const { user, token } = res.data;
+        console.log(res.data);
+        localStorage.setItem("TOKEN", token);
         localStorage.setItem("USER", JSON.stringify(user));
 
-        router.push("/dashboard");
+        router.push("/signup/almost-there");
       } else {
         setError(res.error?.title || "Registration failed.");
       }

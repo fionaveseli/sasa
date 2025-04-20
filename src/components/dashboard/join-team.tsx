@@ -4,6 +4,7 @@ import { useState } from "react";
 import JoinTeamModal from "../modal/join-team-modal";
 
 interface JoinTeamProps {
+  teamId: number;
   image: string;
   teamName: string;
   university: string;

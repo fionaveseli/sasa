@@ -11,6 +11,9 @@ const outfitSans = Outfit({
 export const metadata: Metadata = {
   title: "Sasa",
   description: "Gameboard Tournament",
+  icons: {
+    icon: "/favicon.ico",
+  },
 };
 
 export default function RootLayout({
