@@ -10,21 +10,30 @@ interface JoinTeamProps {
   university: string;
   members: string[];
   places: number;
+  isUserTeam?: boolean;
+  onJoinSuccess?: () => void;
 }
 
 export default function JoinTeam({
+  teamId,
   image,
   teamName,
   university,
   members,
   places,
+  isUserTeam = false,
+  onJoinSuccess,
 }: JoinTeamProps) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const isFull = places === 0;
 
   return (
     <>
-      <Card className="p-3 h-full flex flex-col">
+      <Card
+        className={`p-3 h-full flex flex-col ${
+          isUserTeam ? "border-secondary border-2" : ""
+        }`}
+      >
         <CardContent className="flex p-4 pb-1 flex-col items-center text-center gap-2 flex-grow">
           <div className="flex gap-2 items-center">
             <img
@@ -32,7 +41,14 @@ export default function JoinTeam({
               alt="Team Logo"
               className="w-12 h-12 rounded-full"
             />
-            <h2 className="text-xl font-semibold">{teamName}</h2>
+            <h2 className="text-xl font-semibold">
+              {teamName}
+              {isUserTeam && (
+                <span className="ml-2 text-xs bg-secondary text-black px-2 py-1 rounded-full">
+                  Your Team
+                </span>
+              )}
+            </h2>
           </div>
           <div className="text-start flex flex-col gap-2 flex-grow">
             <p className="text-gray-600">University: {university}</p>
@@ -52,12 +68,14 @@ export default function JoinTeam({
           <Button
             variant="submit"
             className={`w-full ${
-              isFull ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""
+              isFull || isUserTeam
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : ""
             }`}
-            onClick={() => !isFull && setIsModalOpen(true)}
-            disabled={isFull}
+            onClick={() => !isFull && !isUserTeam && setIsModalOpen(true)}
+            disabled={isFull || isUserTeam}
           >
-            {isFull ? "Full" : "Join"}
+            {isUserTeam ? "Your Team" : isFull ? "Full" : "Join"}
           </Button>
         </div>
       </Card>
@@ -65,6 +83,8 @@ export default function JoinTeam({
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         teamName={teamName}
+        teamId={teamId}
+        onSuccess={onJoinSuccess}
       />
     </>
   );

@@ -62,7 +62,7 @@ export function SignupForm({
       if (res.data) {
         const { user, token } = res.data;
         console.log(res.data);
-        localStorage.setItem("TOKEN", token);
+        localStorage.setItem("token", token);
         localStorage.setItem("USER", JSON.stringify(user));
 
         router.push("/signup/almost-there");

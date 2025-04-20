@@ -32,49 +32,69 @@ import {
 import { NavMain } from "./nav-main";
 import { cn } from "@/lib/utils";
 
-const data = {
-  user: {
-    name: "Fiona",
-    email: "fionav@auk.org",
-    avatar: "/avatars/shadcn.jpg",
+const navItems = [
+  {
+    title: "Home",
+    url: "/dashboard",
+    icon: House,
   },
-  navMain: [
-    {
-      title: "Home",
-      url: "/dashboard",
-      icon: House,
-    },
-    {
-      title: "Teams",
-      url: "/dashboard/teams",
-      icon: Users,
-    },
-    {
-      title: "Tournaments",
-      url: "/dashboard/tournaments",
-      icon: Trophy,
-    },
-    {
-      title: "University Page",
-      url: "/dashboard/university",
-      icon: University,
-    },
-    {
-      title: "Team Page",
-      url: "/dashboard/team-page",
-      icon: Contact,
-    },
-  ],
-};
+  {
+    title: "Teams",
+    url: "/dashboard/teams",
+    icon: Users,
+  },
+  {
+    title: "Tournaments",
+    url: "/dashboard/tournaments",
+    icon: Trophy,
+  },
+  {
+    title: "University Page",
+    url: "/dashboard/university",
+    icon: University,
+  },
+  {
+    title: "Team Page",
+    url: "/dashboard/team-page",
+    icon: Contact,
+  },
+];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { open } = useSidebar();
   const [sidebarImage, setSidebarImage] = React.useState("/logo1.svg");
+  const [userData, setUserData] = React.useState({
+    name: "User",
+    email: "user@example.com",
+    avatar: "/avatars/shadcn.jpg",
+  });
+
   React.useEffect(() => {
+    // Update sidebar image based on open state
     if (open) {
       setSidebarImage(`/logo1.svg`);
     } else setSidebarImage("/vercel.svg");
+
+    // Get user data from localStorage
+    const getUserData = () => {
+      try {
+        const storedUser = localStorage.getItem("USER");
+        if (storedUser) {
+          const user = JSON.parse(storedUser);
+          setUserData({
+            name: user.fullName || "User",
+            email: user.email || "user@example.com",
+            avatar: user.avatar || "/avatars/shadcn.jpg",
+          });
+        }
+      } catch (error) {
+        console.error("Error retrieving user data:", error);
+      }
+    };
+
+    getUserData();
   }, [open]);
+
   return (
     <Sidebar collapsible="icon" {...props}>
       <SidebarHeader>
@@ -85,10 +105,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navItems} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <NavUser user={userData} />
       </SidebarFooter>
       <SidebarRail />
     </Sidebar>

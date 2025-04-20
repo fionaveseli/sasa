@@ -7,28 +7,27 @@ export const createTeam = (
 ): Promise<ApiResponse<TeamResponse>> =>
   postRequest<TeamResponse, CreateTeam>("teams", data);
 
-  export type Team = {
-    id: number;
-    name: string;
-    university_id: number;
-    status: string;
-    created_by: number;
-    createdAt: string;
-    updatedAt: string;
-    players: any[]; 
-  };
-  
-  export const getUniversityTeams = (
-    universityId: number,
-    token: string
-  ): Promise<{ data?: { teams: Team[] }; error?: any }> => {
-    return getRequest<{ teams: Team[] }>(
-      `api/university/${universityId}/teams`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      }
-    );
-  };
-  
+export type Team = {
+  id: number;
+  name: string;
+  university_id: number;
+  status: string;
+  created_by: number;
+  createdAt: string;
+  updatedAt: string;
+  players: any[];
+};
+
+export const getUniversityTeams = (
+  universityId: number,
+  token: string
+): Promise<{ data?: { teams: Team[] }; error?: any }> => {
+  return getRequest<{ teams: Team[] }>(
+    `api/university/${universityId}/teams`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};

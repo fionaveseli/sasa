@@ -10,9 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X } from "lucide-react";
 import { Textarea } from "../ui/textarea";
-import { createTeam } from "@/api/teamService"; // ✅ Import your function
+import { api } from "@/services/api"; // Updated import to use our API service
 
 interface CreateTeamModalProps {
   isOpen: boolean;
@@ -24,7 +23,6 @@ export default function CreateTeamModal({
   onClose,
 }: CreateTeamModalProps) {
   const [teamName, setTeamName] = useState("");
-  const [members, setMembers] = useState("");
   const [teamBio, setTeamBio] = useState("");
   const [logo, setLogo] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
@@ -37,24 +35,49 @@ export default function CreateTeamModal({
   };
 
   const handleCreateTeam = async () => {
+    if (!teamName.trim()) {
+      setError("Team name is required");
+      return;
+    }
+
     setError(null);
     setLoading(true);
 
     try {
-      const response = await createTeam({
+      // Use our updated API function
+      console.log("Attempting to create team with name:", teamName);
+      const team = await api.createTeam({
         name: teamName,
-        university_id: 1, // or pass this as a prop if dynamic
       });
 
-      if (response.data) {
-        console.log("Created team:", response.data);
-        onClose(); // Close modal
+      console.log("Created team successfully:", team);
+
+      // Show success message before reloading
+      setError(null);
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (err: any) {
+      console.error("Error creating team:", err);
+      // Detailed error message to help debug the issue
+      let errorMessage = "Failed to create team: ";
+
+      if (err.response) {
+        // Server responded with an error
+        errorMessage += `Server error (${err.response.status}): ${
+          err.response.data?.message || JSON.stringify(err.response.data)
+        }`;
+        console.log("Server response data:", err.response.data);
+      } else if (err.request) {
+        // Request made but no response received
+        errorMessage +=
+          "No response from server. Check your network connection.";
       } else {
-        setError(response.data || "Something went wrong.");
+        // Something else caused the error
+        errorMessage += err.message || "Unknown error";
       }
-    } catch (err) {
-      console.error(err);
-      setError("Unexpected error while creating team.");
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -81,14 +104,6 @@ export default function CreateTeamModal({
               value={teamName}
               onChange={(e) => setTeamName(e.target.value)}
               required
-            />
-          </div>
-
-          <div>
-            <label className="block text-gray-700 ">Members</label>
-            <Input
-              value={members}
-              onChange={(e) => setMembers(e.target.value)}
             />
           </div>
 

@@ -18,7 +18,7 @@ import { deleteToken, getToken } from "./services";
 
 const baseURL = process.env.NEXT_PUBLIC_API;
 
-const TOKEN_KEY = "TOKEN";
+const TOKEN_KEY = "token";
 const USER_KEY = "USER";
 
 const axiosInstance: AxiosInstance = axios.create({
@@ -63,9 +63,9 @@ const handleNotAuthorized = () => {
 axiosInstance.interceptors.request.use(
   (config) => {
     if (typeof window !== "undefined") {
-      const token = getToken(TOKEN_KEY);
-      if (token && !isTokenExpired(token)) {
-        config.headers["Authorization"] = `Bearer ${token.accessToken}`;
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (token) {
+        config.headers["Authorization"] = `Bearer ${token}`;
       }
     }
     return config;

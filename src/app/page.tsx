@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Footer from "@/components/footer";
 import Header from "@/components/header";
 import InfoCard from "@/components/info-card";
@@ -7,6 +11,16 @@ import { Star } from "lucide-react";
 import Link from "next/link";
 
 export default function Home() {
+  const router = useRouter();
+
+  useEffect(() => {
+    // Check if user is logged in
+    const token = localStorage.getItem("token");
+    if (token) {
+      router.push("/dashboard");
+    }
+  }, [router]);
+
   return (
     <div>
       <Header />
@@ -28,10 +42,10 @@ export default function Home() {
                   <Button variant="ghost">Login</Button>
                 </Link>
 
-                <Link href="/sign-up">
+                <Link href="/signup">
                   <Button variant="default">Get Started</Button>
                 </Link>
-              </div>
+              </div>  
               <img src="/homepage.svg" alt="Image" className="max-w-full" />
               <img
                 src="/homepage1.svg"

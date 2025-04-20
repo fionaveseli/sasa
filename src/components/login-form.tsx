@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { useRouter } from "next/navigation";
-import { setToken } from "@/utils/services";
-import { login } from "@/api/userService";
+import { api } from "@/services/api";
 
 export function LoginForm({
   className,
@@ -25,21 +24,20 @@ export function LoginForm({
     setLoading(true);
     setError("");
 
-    const res = await login({ email, password });
-    console.log("Login response:", res);
+    try {
+      const response = await api.login(email, password);
 
-    if (res.data) {
-      const { user, token } = res.data;
-
-      setToken("TOKEN", token); // save raw token
-      localStorage.setItem("USER", JSON.stringify(user)); // save full user
+      // Store token in localStorage
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("USER", JSON.stringify(response.user)); // save full user
 
       router.push("/dashboard");
-    } else {
-      setError(res.error?.title || "Login failed");
+    } catch (error: any) {
+      console.error("Login error:", error);
+      setError(error.response?.data?.message || "Invalid login credentials");
+    } finally {
+      setLoading(false);
     }
-
-    setLoading(false);
   };
 
   return (
@@ -100,7 +98,6 @@ export function LoginForm({
           </Button>
 
           <Button variant="outline" className="w-full">
-            {/* Replace with actual Google auth logic */}
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
               <path
                 d="M12 .297c-6.63 0-12 5.373-12 12..."

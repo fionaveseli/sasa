@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { getUniversities, University } from "@/api/userService";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 export function AlmostThereCard({
   className,
@@ -16,12 +17,13 @@ export function AlmostThereCard({
   const [universities, setUniversities] = useState<University[]>([]);
   const [selectedUniversity, setSelectedUniversity] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const router = useRouter();
 
   useEffect(() => {
     const fetchUniversities = async () => {
-      const token = localStorage.getItem("TOKEN");
+      const token = localStorage.getItem("token");
       if (!token) {
         setError("Authorization token is missing.");
         return;
@@ -38,8 +40,46 @@ export function AlmostThereCard({
     fetchUniversities();
   }, []);
 
-  const handleNext = () => {
-    router.push("/signup/success");
+  const handleNext = async () => {
+    if (!selectedUniversity) {
+      setError("Please select a university");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        setError("Authorization token is missing.");
+        return;
+      }
+
+      // Update the user with the selected university ID
+      const API_BASE_URL =
+        process.env.NEXT_PUBLIC_API_URL ||
+        "https://web-production-3dd4c.up.railway.app/api";
+      await axios.patch(
+        `${API_BASE_URL}/users/me`,
+        { university_id: parseInt(selectedUniversity) },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      // Update user data in localStorage to include university_id
+      const userData = JSON.parse(localStorage.getItem("USER") || "{}");
+      userData.university_id = parseInt(selectedUniversity);
+      localStorage.setItem("USER", JSON.stringify(userData));
+
+      router.push("/signup/success");
+    } catch (err: any) {
+      console.error("Failed to update university:", err);
+      setError(err.response?.data?.message || "Failed to update university");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -83,9 +123,9 @@ export function AlmostThereCard({
           onClick={handleNext}
           variant={"submit"}
           className="w-full"
-          disabled={!selectedUniversity}
+          disabled={!selectedUniversity || loading}
         >
-          Ready for sasa
+          {loading ? "Processing..." : "Ready for sasa"}
         </Button>
 
         <p className="text-sm">

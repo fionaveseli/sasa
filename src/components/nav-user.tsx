@@ -27,15 +27,15 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { deleteToken } from "@/utils/services";
 
 export const logout = () => {
-  deleteToken("TOKEN");
-  deleteToken("USER");
+  localStorage.removeItem("token");
+  localStorage.removeItem("USER");
   if (typeof window !== "undefined") {
     window.location.href = "/login";
   }
 };
+
 export function NavUser({
   user,
 }: {
