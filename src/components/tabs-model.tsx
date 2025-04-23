@@ -3,12 +3,13 @@
 import type { JSX } from "react";
 import { useState } from "react";
 
+import type { TabsType } from "@/types/dto/TabsType";
+import { getSearchParams, handleTab } from "@/utils/paginationUtils";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { memo } from "react";
-import type { TabsType } from "@/types/dto/TabsType";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import EmptyState from "./empty-state";
-import { getSearchParams, handleTab } from "@/utils/paginationUtils";
+import CreateTournamentModal from "./modal/create-tournament-modal";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface TabsModelProps {
   tabs: TabsType[];
@@ -57,17 +58,20 @@ export default function TabsModel({
   return (
     <Tabs defaultValue={activeTab}>
       <div className="overflow-x-auto">
-        <TabsList>
-          {filteredTabs.map((tab) => (
-            <TabsTrigger
-              key={tab.value}
-              value={tab.value}
-              onClick={() => handleTabClick(tab.value)}
-            >
-              {tab.label}
-            </TabsTrigger>
-          ))}
-        </TabsList>
+        <div className="flex items-center justify-between">
+          <TabsList>
+            {filteredTabs.map((tab) => (
+              <TabsTrigger
+                key={tab.value}
+                value={tab.value}
+                onClick={() => handleTabClick(tab.value)}
+              >
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          <CreateTournamentModal />
+        </div>
       </div>
       {filteredTabs.map((tab) => (
         <MemoizedTabsContent

@@ -310,6 +310,52 @@ export const api = {
     return Object.values(rounds);
   },
 
+  createTournament: async (tournamentData: {
+    name: string;
+    type: string;
+    registration_deadline: string;
+    start_date: string;
+    end_date: string;
+    university_id: number;
+    bracket_type: string;
+    description: string;
+    rules: string;
+    time_zone: string;
+  }): Promise<any> => {
+    const response = await axios.post(
+      `${API_BASE_URL}/tournaments`,
+      tournamentData
+    );
+    return response.data;
+  },
+
+  registerTeamInTournament: async (
+    tournamentId: number,
+    teamId: number
+  ): Promise<any> => {
+    const response = await axios.post(
+      `${API_BASE_URL}/tournaments/${tournamentId}/register`,
+      { team_id: teamId }
+    );
+    return response.data;
+  },
+
+  updateTournamentStatus: async (
+    tournamentId: number,
+    status: string
+  ): Promise<any> => {
+    const response = await axios.post(
+      `${API_BASE_URL}/tournaments/${tournamentId}/status`,
+      { status }
+    );
+    return response.data;
+  },
+
+  getTournaments: async (): Promise<any> => {
+    const response = await axios.get(`${API_BASE_URL}/tournaments`);
+    return response.data;
+  },
+
   // University endpoints
   getUniversities: async (): Promise<University[]> => {
     const response = await axios.get(`${API_BASE_URL}/uni/universities-g`);
@@ -317,12 +363,16 @@ export const api = {
   },
 
   getUniversityTeams: async (universityId: number): Promise<Team[]> => {
-    const response = await axios.get(`${API_BASE_URL}/university/${universityId}/teams`);
+    const response = await axios.get(
+      `${API_BASE_URL}/university/${universityId}/teams`
+    );
     return response.data.teams || [];
   },
 
   getUniversityById: async (id: number): Promise<University> => {
-    const response = await axios.get(`${API_BASE_URL}/uni/universities-g/${id}`);
+    const response = await axios.get(
+      `${API_BASE_URL}/uni/universities-g/${id}`
+    );
     return response.data.university;
   },
 
