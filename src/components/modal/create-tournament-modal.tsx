@@ -11,6 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
+import { api } from "@/services/api";
 
 interface CreateTournamentModalProps {
   isOpen: boolean;
@@ -37,46 +38,31 @@ export default function CreateTournamentModal({
     setLoading(true);
 
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("User not authenticated");
+      const userResponse = await api.getCurrentUser();
+      const university_id = userResponse.user.university_id;
 
-      const userRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/users/me`,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        }
-      );
-      const userData = await userRes.json();
-      const university_id = userData.user.university_id;
-
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/tournaments`, {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: tournamentName,
-          type: "international",
-          registration_deadline: new Date(date).toISOString(),
-          start_date: new Date(date).toISOString(),
-          end_date: new Date(date).toISOString(),
-          university_id,
-          bracket_type: "single_elimination",
-          description: "International tournament",
-          rules: "Standard tournament rules apply.",
-          time_zone: "UTC",
-        }),
-      });
-
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.message || "Failed to create tournament");
+      if (!university_id) {
+        throw new Error("You must be associated with a university to create a tournament");
       }
 
-      setTimeout(() => window.location.reload(), 1000);
+      await api.createTournament({
+        name: tournamentName,
+        type: "international",
+        registration_deadline: new Date(date).toISOString(),
+        start_date: new Date(date).toISOString(),
+        end_date: new Date(date).toISOString(),
+        university_id,
+        bracket_type: "single_elimination",
+        description: "International tournament",
+        rules: "Standard tournament rules apply.",
+        time_zone: "UTC"
+      });
+
+      onClose();
+      window.location.reload();
     } catch (err: any) {
-      setError(err.message || "An error occurred");
+      console.error("Error creating tournament:", err);
+      setError(err.message || "Failed to create tournament");
     } finally {
       setLoading(false);
     }

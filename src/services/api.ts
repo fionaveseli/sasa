@@ -282,4 +282,63 @@ export const api = {
 
     return Object.values(rounds);
   },
+
+  createTournament: async (tournamentData: {
+    name: string;
+    type: string;
+    registration_deadline: string;
+    start_date: string;
+    end_date: string;
+    university_id: number;
+    bracket_type: string;
+    description: string;
+    rules: string;
+    time_zone: string;
+  }) => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      // Ensure the data matches the exact API specification
+      const formattedData = {
+        name: tournamentData.name,
+        type: tournamentData.type,
+        registration_deadline: new Date(tournamentData.registration_deadline).toISOString(),
+        start_date: new Date(tournamentData.start_date).toISOString(),
+        end_date: new Date(tournamentData.end_date).toISOString(),
+        university_id: tournamentData.university_id,
+        bracket_type: tournamentData.bracket_type,
+        description: tournamentData.description,
+        rules: tournamentData.rules,
+        time_zone: tournamentData.time_zone
+      };
+
+      const response = await axios.post(
+        `${API_BASE_URL}/tournaments`,
+        formattedData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+
+      return response.data;
+    } catch (error: any) {
+      console.error("Tournament creation error:", error.response?.data || error.message);
+      if (error.response?.status === 401) {
+        throw new Error("Unauthorized. Please check your authentication token.");
+      } else if (error.response?.status === 403) {
+        throw new Error("Insufficient permissions. Only university managers can create tournaments.");
+      } else if (error.response?.status === 400) {
+        throw new Error(error.response.data.message || "Invalid tournament data");
+      } else {
+        throw new Error("Failed to create tournament. Please try again.");
+      }
+    }
+  },
 };
