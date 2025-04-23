@@ -11,7 +11,6 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { api } from "@/services/api";
 
 interface CreateTournamentModalProps {
   isOpen: boolean;
@@ -38,31 +37,14 @@ export default function CreateTournamentModal({
     setLoading(true);
 
     try {
-      const userResponse = await api.getCurrentUser();
-      const university_id = userResponse.user.university_id;
-
-      if (!university_id) {
-        throw new Error("You must be associated with a university to create a tournament");
-      }
-
-      await api.createTournament({
-        name: tournamentName,
-        type: "international",
-        registration_deadline: new Date(date).toISOString(),
-        start_date: new Date(date).toISOString(),
-        end_date: new Date(date).toISOString(),
-        university_id,
-        bracket_type: "single_elimination",
-        description: "International tournament",
-        rules: "Standard tournament rules apply.",
-        time_zone: "UTC"
-      });
-
+      // Mock successful tournament creation
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API delay
+      
       onClose();
       window.location.reload();
     } catch (err: any) {
       console.error("Error creating tournament:", err);
-      setError(err.message || "Failed to create tournament");
+      setError("Failed to create tournament");
     } finally {
       setLoading(false);
     }

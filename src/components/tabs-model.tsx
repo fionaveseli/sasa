@@ -14,6 +14,7 @@ interface TabsModelProps {
   tabs: TabsType[];
   defaultTab: string;
   viewPermissions: string[];
+  actions?: React.ReactNode;
 }
 
 const MemoizedTabsContent = memo(
@@ -26,6 +27,7 @@ export default function TabsModel({
   tabs,
   defaultTab,
   viewPermissions,
+  actions,
 }: TabsModelProps) {
   const searchParams = useSearchParams();
   const pathname = usePathname();
@@ -56,7 +58,7 @@ export default function TabsModel({
 
   return (
     <Tabs defaultValue={activeTab}>
-      <div className="overflow-x-auto">
+      <div className="flex items-center justify-between w-full">
         <TabsList>
           {filteredTabs.map((tab) => (
             <TabsTrigger
@@ -68,6 +70,7 @@ export default function TabsModel({
             </TabsTrigger>
           ))}
         </TabsList>
+        {actions}
       </div>
       {filteredTabs.map((tab) => (
         <MemoizedTabsContent

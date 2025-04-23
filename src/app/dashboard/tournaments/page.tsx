@@ -34,20 +34,20 @@ export default function TournamentsPage() {
 
   return (
     <div className="flex flex-col space-y-4 px-4 py-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-2xl font-normal">Tournaments</h1>
-        <Button
-          variant="secondary"
-          onClick={() => setIsModalOpen(true)}
-        >
-          Create Tournament
-        </Button>
-      </div>
+      <h1 className="text-2xl font-normal">Tournaments</h1>
 
       <TabsModel
         tabs={tabs}
         defaultTab={Tabs.University}
         viewPermissions={allowedViews}
+        actions={
+          <Button
+            variant="secondary"
+            onClick={() => setIsModalOpen(true)}
+          >
+            Create Tournament
+          </Button>
+        }
       />
 
       <CreateTournamentModal
