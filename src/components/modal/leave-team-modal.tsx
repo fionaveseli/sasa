@@ -7,18 +7,52 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+import { api } from "@/services/api";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface LeaveTeamModalProps {
   isOpen: boolean;
   onClose: () => void;
   teamName: string;
+  teamId: number;
+  onSuccess?: () => void;
 }
 
 export default function LeaveTeamModal({
   isOpen,
   onClose,
   teamName,
+  teamId,
+  onSuccess,
 }: LeaveTeamModalProps) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleLeaveTeam = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      await api.leaveTeam(teamId);
+      onClose();
+      // Call onSuccess callback if provided
+      if (onSuccess) {
+        onSuccess();
+      } else {
+        // Force reload the page to update the UI
+        window.location.reload();
+      }
+    } catch (err: any) {
+      console.error("Error leaving team:", err);
+      setError(
+        err.response?.data?.message || "Failed to leave team. Please try again."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-md">
@@ -28,15 +62,23 @@ export default function LeaveTeamModal({
             Are you sure you want to leave this team?
           </DialogDescription>
         </DialogHeader>
+
+        {error && (
+          <div className="bg-red-50 p-3 text-red-600 text-sm rounded">
+            {error}
+          </div>
+        )}
+
         <DialogFooter className="flex sm:justify-center gap-2">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
             Cancel
           </Button>
           <Button
             variant="destructive"
-            onClick={() => alert("You have left the team!")}
+            onClick={handleLeaveTeam}
+            disabled={loading}
           >
-            Confirm
+            {loading ? "Leaving..." : "Confirm"}
           </Button>
         </DialogFooter>
       </DialogContent>

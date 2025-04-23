@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "../ui/button";
 import { useState } from "react";
 import JoinTeamModal from "../modal/join-team-modal";
+import LeaveTeamModal from "../modal/leave-team-modal";
 
 interface JoinTeamProps {
   teamId: number;
@@ -24,7 +25,8 @@ export default function JoinTeam({
   isUserTeam = false,
   onJoinSuccess,
 }: JoinTeamProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
+  const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
   const isFull = places === 0;
 
   return (
@@ -65,27 +67,46 @@ export default function JoinTeam({
           </div>
         </CardContent>
         <div className="p-2 mt-auto w-full">
-          <Button
-            variant="submit"
-            className={`w-full ${
-              isFull || isUserTeam
-                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
-                : ""
-            }`}
-            onClick={() => !isFull && !isUserTeam && setIsModalOpen(true)}
-            disabled={isFull || isUserTeam}
-          >
-            {isUserTeam ? "Your Team" : isFull ? "Full" : "Join"}
-          </Button>
+          {isUserTeam ? (
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="secondary"
+                className="w-full"
+                onClick={() => setIsLeaveModalOpen(true)}
+              >
+                Leave Team
+              </Button>
+            </div>
+          ) : (
+            <Button
+              variant="submit"
+              className={`w-full ${
+                isFull ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""
+              }`}
+              onClick={() => !isFull && setIsJoinModalOpen(true)}
+              disabled={isFull}
+            >
+              {isFull ? "Full" : "Join"}
+            </Button>
+          )}
         </div>
       </Card>
       <JoinTeamModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        isOpen={isJoinModalOpen}
+        onClose={() => setIsJoinModalOpen(false)}
         teamName={teamName}
         teamId={teamId}
         onSuccess={onJoinSuccess}
       />
+      {isUserTeam && (
+        <LeaveTeamModal
+          isOpen={isLeaveModalOpen}
+          onClose={() => setIsLeaveModalOpen(false)}
+          teamName={teamName}
+          teamId={teamId}
+          onSuccess={onJoinSuccess}
+        />
+      )}
     </>
   );
 }

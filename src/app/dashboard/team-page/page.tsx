@@ -16,6 +16,12 @@ export default function TeamPage() {
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
 
+  const handleTeamLeave = () => {
+    // Redirect to teams page after leaving
+    setTeam(null);
+    router.push("/dashboard/teams");
+  };
+
   useEffect(() => {
     // Check if user is logged in
     const token = localStorage.getItem("token");
@@ -60,6 +66,12 @@ export default function TeamPage() {
           return;
         }
 
+        // Don't set error for users not in a team - we'll handle this in the UI
+        if (error.message === "User is not a member of any team") {
+          setLoading(false);
+          return;
+        }
+
         setError("Failed to load team data. Please try again later.");
       } finally {
         setLoading(false);
@@ -89,9 +101,17 @@ export default function TeamPage() {
 
   if (!team) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
-        <p className="text-lg">You are not part of any team yet</p>
-        <Button onClick={() => setIsModalOpen(true)}>Create Team</Button>
+      <div className="flex flex-col items-center -mt-[10vh] justify-center min-h-screen gap-4">
+        <p className="text-lg">You are not part of any team yet!</p>
+        <div className="flex gap-3">
+          <Button onClick={() => setIsModalOpen(true)}>Create Team</Button>
+          <Button
+            variant="outline"
+            onClick={() => router.push("/dashboard/teams")}
+          >
+            Browse Teams
+          </Button>
+        </div>
         <CreateTeamModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
@@ -176,6 +196,8 @@ export default function TeamPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         teamName={team.name}
+        teamId={team.id}
+        onSuccess={handleTeamLeave}
       />
     </div>
   );

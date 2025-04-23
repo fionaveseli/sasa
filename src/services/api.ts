@@ -198,6 +198,19 @@ export const api = {
     }
   },
 
+  leaveTeam: async (teamId: number): Promise<any> => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/teams/${teamId}/leave`
+      );
+      console.log("Team leave response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error leaving team:", error);
+      throw error;
+    }
+  },
+
   // Tournament endpoints
   getCurrentTournament: async () => {
     const response = await axios.get(`${API_BASE_URL}/tournaments`);
