@@ -82,6 +82,20 @@ export interface BracketRound {
   }[];
 }
 
+export interface University {
+  id: number;
+  name: string;
+  email_domain: string;
+  location: string;
+  contact_info: string;
+  logo: string | null;
+  banner_color: string;
+  bio: string;
+  manager_id: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export const api = {
   // User endpoints
   login: async (email: string, password: string) => {
@@ -294,5 +308,44 @@ export const api = {
     }, {});
 
     return Object.values(rounds);
+  },
+
+  // University endpoints
+  getUniversities: async (): Promise<University[]> => {
+    const response = await axios.get(`${API_BASE_URL}/uni/universities-g`);
+    return response.data.universities;
+  },
+
+  getUniversityTeams: async (universityId: number): Promise<Team[]> => {
+    const response = await axios.get(`${API_BASE_URL}/university/${universityId}/teams`);
+    return response.data.teams || [];
+  },
+
+  getUniversityById: async (id: number): Promise<University> => {
+    const response = await axios.get(`${API_BASE_URL}/uni/universities-g/${id}`);
+    return response.data.university;
+  },
+
+  createUniversity: async (universityData: {
+    universityName: string;
+    universityAddress: string;
+    contactNumber: string;
+    logo?: string;
+    bannerColor: string;
+    bio: string;
+  }): Promise<{ university: University; user: any }> => {
+    const response = await axios.post(
+      `${API_BASE_URL}/uni/universities-r`,
+      universityData
+    );
+    return response.data;
+  },
+
+  joinUniversity: async (data: {
+    university_id: number;
+    email: string;
+  }): Promise<{ message: string; user: any }> => {
+    const response = await axios.post(`${API_BASE_URL}/uni/join`, data);
+    return response.data;
   },
 };
