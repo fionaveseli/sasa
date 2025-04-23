@@ -211,9 +211,7 @@ export default function TeamPage() {
       <div className="mt-6">
         <h2 className="text-xl font-semibold">TEAM BIO</h2>
         <p className="text-gray-600 mt-2">
-          {/* If your API doesn't provide a bio, show a default message */}
-          {team.bio ||
-            `Team ${team.name} from university ID ${team.university_id}`}
+          {team.bio || `Team ${team.name}`}
         </p>
       </div>
       <Button

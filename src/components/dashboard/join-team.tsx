@@ -17,6 +17,8 @@ interface JoinTeamProps {
   isUniversityManager?: boolean;
   onJoinSuccess?: () => void;
   disableJoin?: boolean;
+  name: string;
+  sport: string;
 }
 
 export default function JoinTeam({
@@ -30,6 +32,8 @@ export default function JoinTeam({
   isUniversityManager = false,
   onJoinSuccess,
   disableJoin = false,
+  name,
+  sport,
 }: JoinTeamProps) {
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
@@ -60,7 +64,11 @@ export default function JoinTeam({
             </h2>
           </div>
           <div className="text-start flex flex-col gap-2 flex-grow">
-            <p className="text-gray-600">University: {university}</p>
+            <div className="flex flex-col gap-2">
+              <div className="text-sm text-gray-500">University: {university}</div>
+              <div className="text-sm text-gray-500">Team Name: {name}</div>
+              <div className="text-sm text-gray-500">Sport: {sport}</div>
+            </div>
             <p className="text-gray-600">Members: {members.join(", ")}</p>
             <div
               className={`text-sm font-medium px-3 py-1 rounded-md w-fit ${

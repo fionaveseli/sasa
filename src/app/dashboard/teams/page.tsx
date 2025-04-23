@@ -48,6 +48,11 @@ export default function TeamsPage() {
           return;
         }
 
+        // Get university details first
+        const universitiesResponse = await api.getUniversities();
+        const universityData = universitiesResponse.find(uni => uni.id === universityId);
+        const universityName = universityData?.name || "";
+
         // Get all teams from the user's university
         const API_BASE_URL =
           process.env.NEXT_PUBLIC_API_URL ||
@@ -60,8 +65,7 @@ export default function TeamsPage() {
         // Add university name to each team
         allTeams = allTeams.map((team) => ({
           ...team,
-          university_name:
-            userData.user.university_name || `University ID: ${universityId}`,
+          university_name: universityName
         }));
 
         // If not a university manager, try to get the user's current team
@@ -77,7 +81,6 @@ export default function TeamsPage() {
             }));
           } catch (teamError: any) {
             console.log("User is not part of a team:", teamError.message);
-            // Clear userTeam to ensure the create team button is enabled
             setUserTeam(null);
           }
         }
@@ -155,7 +158,7 @@ export default function TeamsPage() {
                 teamId={team.id}
                 image="/logo.svg"
                 teamName={team.name}
-                university={team.university_name || "University"}
+                university={team.university_name || ""}
                 members={(team.players || []).map(
                   (p) => p.fullName || "Player"
                 )}
@@ -164,6 +167,8 @@ export default function TeamsPage() {
                 isUniversityManager={isUniversityManager}
                 onJoinSuccess={handleTeamChange}
                 disableJoin={userTeam !== null}
+                name={team.name}
+                sport={team.sport}
               />
             ))}
 
