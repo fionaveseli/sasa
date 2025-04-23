@@ -67,6 +67,7 @@ export interface Team {
   // Additional properties that might be returned by API
   wins?: number;
   bio?: string;
+  logo?: string;
   players: {
     id: number;
     fullName: string;

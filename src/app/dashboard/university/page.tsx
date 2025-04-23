@@ -4,6 +4,8 @@ import { Trophy, Calendar, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api, University, Team, Match } from "@/services/api";
 import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import CreateTeamModal from "@/components/modal/create-team-modal";
 
 export default function UniversityPage() {
   const router = useRouter();
@@ -13,6 +15,8 @@ export default function UniversityPage() {
   const [teams, setTeams] = useState<Team[]>([]);
   const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState("bracket");
+  const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchUniversityData = async () => {
@@ -70,6 +74,23 @@ export default function UniversityPage() {
     fetchUniversityData();
   }, []);
 
+  // Format dates for upcoming matches
+  const formatMatchDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return (
+      date.toLocaleDateString("en-US", {
+        day: "numeric",
+        month: "short",
+      }) +
+      " " +
+      date.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      })
+    );
+  };
+
   if (loading) {
     return <div className="p-4">Loading...</div>;
   }
@@ -81,6 +102,69 @@ export default function UniversityPage() {
   if (!university) {
     return <div className="p-4">No university data available</div>;
   }
+
+  // Render the teams tab content
+  const renderTeamsTab = () => {
+    return (
+      <div className="mt-4">
+        {teams.length === 0 ? (
+          <div className="bg-gray-100 p-6 rounded-lg text-center">
+            <p className="text-gray-600">No teams found for this university.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+            {teams.map((team) => (
+              <div key={team.id} className="bg-white p-3 rounded-lg shadow border">
+                <div className="flex items-center gap-2 mb-2">
+                  <img src="/logo.svg" alt="Team Logo" className="h-6" />
+                  <h4 className="text-base font-medium">{team.name}</h4>
+                </div>
+                
+                <div className="mb-2">
+                  <h5 className="text-xs font-medium text-gray-500 mb-1">Team Members</h5>
+                  <p className="text-xs text-gray-700">
+                    {team.players.map(player => player.fullName).join(", ")}
+                  </p>
+                </div>
+                
+                <div className="mb-2">
+                  <h5 className="text-xs font-medium text-gray-500 mb-1">Team Bio</h5>
+                  <p className="text-xs text-gray-700">
+                    {team.bio || `Team ${team.name} from ${university.name}`}
+                  </p>
+                </div>
+                
+                <div className="flex items-center gap-1">
+                  <Trophy className="text-yellow-500 h-3 w-3" />
+                  <span className="text-xs">{team.wins || 0} Wins</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Render the bracket tab content
+  const renderBracketTab = () => {
+    return (
+      <div className="mt-4 bg-gray-100 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold mb-2">Tournament Bracket</h3>
+        <p className="text-gray-600">Tournament bracket will be displayed here.</p>
+      </div>
+    );
+  };
+
+  // Render the support tab content
+  const renderSupportTab = () => {
+    return (
+      <div className="mt-4 bg-gray-100 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold mb-2">Support</h3>
+        <p className="text-gray-600">Support information will be displayed here.</p>
+      </div>
+    );
+  };
 
   return (
     <div>
@@ -105,52 +189,106 @@ export default function UniversityPage() {
         )}
       </div>
 
-      <div className="flex justify-between">
-        <div className="flex justify-between items-center mt-4 gap-2">
-          <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-md">
-            <Trophy className="text-yellow-500" />
-            <span>{teams.length} Teams</span>
-          </div>
-          {upcomingMatches.slice(0, 2).map((match, index) => (
-            <div key={index} className="flex items-center gap-2 bg-gray-100 p-2 rounded-md">
-              <Calendar className="text-blue-500" />
-              <span>{new Date(match.scheduled_time).toLocaleDateString()}</span>
-            </div>
-          ))}
+      {/* Stats Section */}
+      <div className="flex items-center gap-4 mt-4">
+        {/* Winner Count */}
+        <div className="bg-white shadow-sm rounded-xl px-5 py-3 flex items-center gap-3">
+          <Trophy className="text-yellow-400 w-5 h-5" />
+          <span className="text-[15px]">3 Times Winner</span>
         </div>
-        <div className="flex justify-between items-center mt-4">
-          <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-md">
-            <Users className="text-gray-500" />
-            <span>{teams.length} Teams Signed</span>
+
+        {/* Next Matches */}
+        <div className="bg-white shadow-sm rounded-xl px-5 py-3 flex items-center gap-3">
+          <Calendar className="text-gray-400 w-5 h-5" />
+          <div>
+            <div className="text-[15px]">30 Sep</div>
+            <div className="text-xs text-gray-500">Next Match</div>
           </div>
+        </div>
+
+        <div className="bg-white shadow-sm rounded-xl px-5 py-3 flex items-center gap-3">
+          <Calendar className="text-gray-400 w-5 h-5" />
+          <div>
+            <div className="text-[15px]">1 Nov</div>
+            <div className="text-xs text-gray-500">Next Match</div>
+          </div>
+        </div>
+
+        {/* Teams Signed */}
+        <div className="ml-auto bg-white shadow-sm rounded-xl px-5 py-3 flex items-center gap-3">
+          <div className="text-[15px]">Teams Signed</div>
+          <div className="text-xl font-medium">{teams.length}</div>
         </div>
       </div>
 
-      <div className="mt-6">
-        <h2 className="text-xl font-semibold">UNIVERSITY BIO</h2>
-        <p className="text-gray-600 mt-2">{university.bio}</p>
-      </div>
-
-      <div className="mt-6">
-        <div className="flex border-b pb-2 space-x-4">
-          <button className="px-4 py-2 text-blue-600 border-b-2 border-blue-600">
-            Bracket
-          </button>
-          <button className="px-4 py-2 text-gray-500">Teams</button>
-          <button className="px-4 py-2 text-gray-500">Support</button>
+      <div className="flex gap-8 mt-6">
+        {/* Left side - University Bio */}
+        <div className="flex-1">
+          <h2 className="text-lg font-semibold uppercase">UNIVERSITY BIO</h2>
+          <p className="text-gray-600 mt-4 leading-relaxed">
+            {university.bio}
+          </p>
         </div>
 
-        <div className="mt-4 bg-gray-100 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold mb-2">Current Teams</h3>
-          <div className="grid grid-cols-3 gap-2">
-            {teams.map((team) => (
-              <div key={team.id} className="bg-white p-2 rounded-md shadow">
-                {team.name}
+        {/* Right side - Teams Panel */}
+        <div className="w-[360px] bg-white rounded-lg shadow-sm">
+          <div className="flex border-b">
+            <button 
+              className={`px-3 py-2 text-sm ${activeTab === "bracket" ? "text-gray-600" : "text-gray-600"}`}
+              onClick={() => setActiveTab("bracket")}
+            >
+              Bracket
+            </button>
+            <button 
+              className={`px-3 py-2 text-sm ${activeTab === "teams" ? "text-purple-600 border-b-2 border-purple-600" : "text-gray-600"}`}
+              onClick={() => setActiveTab("teams")}
+            >
+              Teams
+            </button>
+            <button 
+              className={`px-3 py-2 text-sm ${activeTab === "support" ? "text-gray-600" : "text-gray-600"}`}
+              onClick={() => setActiveTab("support")}
+            >
+              Support
+            </button>
+          </div>
+
+          <div className="p-3">
+            {activeTab === "teams" && (
+              <div className="h-[280px] overflow-y-auto pr-2">
+                <div className="grid grid-cols-2 gap-3">
+                  {teams.map((team) => (
+                    <div key={team.id} className="bg-white rounded-lg shadow p-3">
+                      <div className="flex items-start gap-2">
+                        <div className="w-6 h-6 bg-gray-100 rounded-full flex-shrink-0 flex items-center justify-center">
+                          <img 
+                            src="/logo.svg" 
+                            alt="Team Logo" 
+                            className="w-4 h-4"
+                          />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-medium mb-0.5">{team.name}</h4>
+                          <p className="text-xs text-gray-600">
+                            Members: {team.players.slice(0, 2).map(player => player.fullName).join(", ")}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+            )}
+            {activeTab === "bracket" && renderBracketTab()}
+            {activeTab === "support" && renderSupportTab()}
           </div>
         </div>
       </div>
+
+      <CreateTeamModal
+        isOpen={isCreateTeamModalOpen}
+        onClose={() => setIsCreateTeamModalOpen(false)}
+      />
     </div>
   );
 }
