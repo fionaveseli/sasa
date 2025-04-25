@@ -1,6 +1,6 @@
 "use client";
 
-import { Trophy, Calendar, Users } from "lucide-react";
+import { Trophy, Calendar, Users, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { api, University, Team, Match } from "@/services/api";
 import { useRouter } from "next/navigation";
@@ -17,6 +17,7 @@ export default function UniversityPage() {
   const [userRole, setUserRole] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("bracket");
   const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
+  const [tournamentWins, setTournamentWins] = useState(0);
 
   useEffect(() => {
     const fetchUniversityData = async () => {
@@ -61,6 +62,14 @@ export default function UniversityPage() {
             universityTeamIds.includes(match.team2_id)
           );
           setUpcomingMatches(universityMatches.filter(match => match.status === "scheduled"));
+
+          // Calculate tournament wins
+          const completedMatches = matches.filter(match => match.status === "completed");
+          const wins = completedMatches.filter(match => {
+            const winningTeamId = match.winner_id;
+            return winningTeamId !== null && universityTeamIds.includes(winningTeamId);
+          }).length;
+          setTournamentWins(wins);
         }
 
         setLoading(false);
@@ -151,7 +160,27 @@ export default function UniversityPage() {
     return (
       <div className="mt-4 bg-gray-100 p-4 rounded-lg">
         <h3 className="text-lg font-semibold mb-2">Tournament Bracket</h3>
-        <p className="text-gray-600">Tournament bracket will be displayed here.</p>
+        {upcomingMatches.length > 0 ? (
+          <div className="space-y-4">
+            {upcomingMatches.map((match) => (
+              <div key={match.id} className="bg-white p-4 rounded-lg shadow">
+                <div className="flex justify-between items-center">
+                  <div>
+                    <p className="font-medium">{match.team1.name}</p>
+                    <p className="text-sm text-gray-500">vs</p>
+                    <p className="font-medium">{match.team2.name}</p>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm">{formatMatchDate(match.scheduled_time)}</p>
+                    <p className="text-sm text-gray-500">{match.status}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="text-gray-600">No upcoming matches scheduled.</p>
+        )}
       </div>
     );
   };
@@ -159,9 +188,30 @@ export default function UniversityPage() {
   // Render the support tab content
   const renderSupportTab = () => {
     return (
-      <div className="mt-4 bg-gray-100 p-4 rounded-lg">
-        <h3 className="text-lg font-semibold mb-2">Support</h3>
-        <p className="text-gray-600">Support information will be displayed here.</p>
+      <div className="mt-4">
+        {teams.length === 0 ? (
+          <div className="bg-gray-100 p-6 rounded-lg text-center">
+            <p className="text-gray-600">No teams signed yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-2">
+            {teams.map((team, index) => (
+              <div 
+                key={team.id} 
+                className="flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-gray-600">{index + 1}.</span>
+                  <span>{team.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Heart className="text-pink-500 h-4 w-4" />
+                  <span>0</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     );
   };
@@ -170,15 +220,15 @@ export default function UniversityPage() {
     <div>
       <div
         className="flex items-center justify-between border-b rounded-md"
-        style={{ backgroundColor: university.banner_color || "#e37339" }}
+        style={{ backgroundColor: university?.banner_color || "#e37339" }}
       >
         <div className="flex items-center gap-3 p-4 rounded-md">
           <img
-            src={university.logo || "/default-university-logo.png"}
+            src={university?.logo || "/default-university-logo.png"}
             alt="University Logo"
             className="h-10"
           />
-          <h1 className="text-2xl">{university.name}</h1>
+          <h1 className="text-2xl">{university?.name}</h1>
         </div>
         {userRole === "university_manager" && (
           <div className="p-4">
@@ -194,25 +244,29 @@ export default function UniversityPage() {
         {/* Winner Count */}
         <div className="bg-white shadow-sm rounded-xl px-5 py-3 flex items-center gap-3">
           <Trophy className="text-yellow-400 w-5 h-5" />
-          <span className="text-[15px]">3 Times Winner</span>
+          <span className="text-[15px]">{tournamentWins} Times Winner</span>
         </div>
 
         {/* Next Matches */}
-        <div className="bg-white shadow-sm rounded-xl px-5 py-3 flex items-center gap-3">
-          <Calendar className="text-gray-400 w-5 h-5" />
-          <div>
-            <div className="text-[15px]">30 Sep</div>
-            <div className="text-xs text-gray-500">Next Match</div>
+        {upcomingMatches.length > 0 ? (
+          upcomingMatches.slice(0, 2).map((match) => (
+            <div key={match.id} className="bg-white shadow-sm rounded-xl px-5 py-3 flex items-center gap-3">
+              <Calendar className="text-gray-400 w-5 h-5" />
+              <div>
+                <div className="text-[15px]">{formatMatchDate(match.scheduled_time).split(" ")[0]} {formatMatchDate(match.scheduled_time).split(" ")[1]}</div>
+                <div className="text-xs text-gray-500">Next Match</div>
+              </div>
+            </div>
+          ))
+        ) : (
+          <div className="bg-white shadow-sm rounded-xl px-5 py-3 flex items-center gap-3">
+            <Calendar className="text-gray-400 w-5 h-5" />
+            <div>
+              <div className="text-[15px]">Next Match</div>
+              <div className="text-xs text-gray-500">Coming Soon</div>
+            </div>
           </div>
-        </div>
-
-        <div className="bg-white shadow-sm rounded-xl px-5 py-3 flex items-center gap-3">
-          <Calendar className="text-gray-400 w-5 h-5" />
-          <div>
-            <div className="text-[15px]">1 Nov</div>
-            <div className="text-xs text-gray-500">Next Match</div>
-          </div>
-        </div>
+        )}
 
         {/* Teams Signed */}
         <div className="ml-auto bg-white shadow-sm rounded-xl px-5 py-3 flex items-center gap-3">
@@ -234,7 +288,7 @@ export default function UniversityPage() {
         <div className="w-[360px] bg-white rounded-lg shadow-sm">
           <div className="flex border-b">
             <button 
-              className={`px-3 py-2 text-sm ${activeTab === "bracket" ? "text-gray-600" : "text-gray-600"}`}
+              className={`px-3 py-2 text-sm ${activeTab === "bracket" ? "text-purple-600 border-b-2 border-purple-600" : "text-gray-600"}`}
               onClick={() => setActiveTab("bracket")}
             >
               Bracket
@@ -246,7 +300,7 @@ export default function UniversityPage() {
               Teams
             </button>
             <button 
-              className={`px-3 py-2 text-sm ${activeTab === "support" ? "text-gray-600" : "text-gray-600"}`}
+              className={`px-3 py-2 text-sm ${activeTab === "support" ? "text-purple-600 border-b-2 border-purple-600" : "text-gray-600"}`}
               onClick={() => setActiveTab("support")}
             >
               Support
