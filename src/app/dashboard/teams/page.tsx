@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { api, Team } from "@/services/api";
 import { useRouter } from "next/navigation";
 import axios from "axios";
+import { toast } from "sonner"; // ✅ keep Sonner
 
 interface ExtendedTeam extends Team {
   isUserTeam?: boolean;
@@ -32,6 +33,8 @@ export default function TeamsPage() {
 
     const fetchTeams = async () => {
       try {
+        setLoading(true);
+
         const userData = await api.getCurrentUser();
         const universityId = userData.user.university_id;
         const userRole = userData.user.role;
@@ -40,6 +43,7 @@ export default function TeamsPage() {
 
         if (!universityId) {
           setError("You are not associated with a university");
+          toast.error("You are not associated with a university.");
           setLoading(false);
           return;
         }
@@ -68,26 +72,29 @@ export default function TeamsPage() {
             const userTeamData = await api.getCurrentTeam();
             setUserTeam(userTeamData);
 
-            // ✅ ADD: Save teamId to localStorage when user has a team
             localStorage.setItem("teamId", String(userTeamData.id));
 
             allTeams = allTeams.map((team) => ({
               ...team,
               isUserTeam: team.id === userTeamData.id,
             }));
+
+            toast.success(`You are part of team "${userTeamData.name}"`);
           } catch (teamError: any) {
             console.log("User is not part of a team:", teamError.message);
             setUserTeam(null);
-
-            // ✅ ADD: Remove teamId from localStorage if no team
             localStorage.removeItem("teamId");
+
+            toast.info("You are not part of any team yet.");
           }
         }
 
         setTeams(allTeams);
+        // ❌ Removed toast.success("Teams loaded successfully!");
       } catch (err) {
         console.error("Error fetching teams:", err);
         setError("Failed to load teams. Please try again later.");
+        toast.error("Failed to load teams.");
       } finally {
         setLoading(false);
       }
@@ -109,12 +116,18 @@ export default function TeamsPage() {
 
       <div className="flex justify-between">
         <SearchInput
-          handleSearch={(search) => console.log(search)}
+          handleSearch={(search) => {
+            console.log(search);
+            toast(`Searching: ${search}`);
+          }}
           placeholder="Search..."
         />
         <Button
           variant="secondary"
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => {
+            setIsModalOpen(true);
+            toast("Opening create team modal...");
+          }}
           disabled={userTeam !== null || isUniversityManager}
         >
           {isUniversityManager

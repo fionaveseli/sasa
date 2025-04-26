@@ -8,6 +8,7 @@ import PerformanceCard from "@/components/dashboard/performance-card";
 import StatsCard from "@/components/dashboard/stats-card";
 import TeamCard from "@/components/dashboard/team-card";
 import { api, DashboardStats, Match, Team, BracketRound } from "@/services/api";
+import {PropagateLoader } from "react-spinners"
 
 export default function DashboardPage() {
   const [user, setUser] = useState<any>(null);
@@ -102,9 +103,9 @@ export default function DashboardPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <p className="text-lg">Loading dashboard...</p>
-      </div>
+      <div className="flex items-center justify-center h-screen">
+  <PropagateLoader color="#baff25" />
+</div>
     );
   }
 

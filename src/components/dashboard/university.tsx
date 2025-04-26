@@ -7,8 +7,9 @@ import { useContext, useEffect, useState } from "react";
 import Table from "../table";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Eye, List } from "lucide-react";
+import { List } from "lucide-react";
 import { AppContext } from "@/context/app-context";
+import { toast } from "sonner"; 
 
 export default function Users() {
   const searchParams = useSearchParams();
@@ -19,6 +20,7 @@ export default function Users() {
   const [tournaments, setTournaments] = useState<any[]>([]);
   const { user } = useContext(AppContext);
   const userRole = user?.role;
+
   const columns = [
     { accessorKey: "name", header: "TOURNAMENT NAME" },
     {
@@ -128,10 +130,13 @@ export default function Users() {
   const fetchTournaments = async () => {
     try {
       setLoading(true);
+      
       const response = await api.getTournaments();
       setTournaments(formatTournaments(response.tournaments));
+      toast.success("Tournaments loaded successfully!");
     } catch (error) {
       console.error("Error fetching tournaments:", error);
+      toast.error("Failed to load tournaments. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -142,6 +147,7 @@ export default function Users() {
       const teamIdString = localStorage.getItem("teamId");
 
       if (!teamIdString) {
+        toast.error("No teamId found in your account. Please create/join a team first.");
         console.error("No teamId found in localStorage.");
         return;
       }
@@ -149,18 +155,23 @@ export default function Users() {
       const teamId = parseInt(teamIdString, 10);
 
       if (isNaN(teamId)) {
+        toast.error("Invalid teamId found. Please re-login.");
         console.error("Invalid teamId stored in localStorage.");
         return;
       }
 
+      
       await api.registerTeamInTournament(tournamentId, teamId);
+      toast.success("Successfully joined the tournament!");
       await fetchTournaments();
     } catch (error) {
       console.error("Error joining tournament:", error);
+      toast.error("Failed to join tournament. Please try again.");
     }
   };
 
   const handleViewTournament = (tournamentId: number) => {
+    toast("Opening tournament details...");
     window.location.href = `/dashboard/tournaments/${tournamentId}`;
   };
 
