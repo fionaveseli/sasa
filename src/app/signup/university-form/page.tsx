@@ -8,6 +8,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createUniversity } from "@/api/userService";
+import { toast } from "sonner"; // <-- ADD THIS
 
 export default function AddUniversityForm() {
   const [step, setStep] = useState(1);
@@ -41,31 +42,35 @@ export default function AddUniversityForm() {
     setError(null);
     setLoading(true);
     try {
-      const token = localStorage.getItem("TOKEN");
+      const oldToken = localStorage.getItem("TOKEN");
 
-      const res = (await createUniversity(form, token!)) as {
+      const res = (await createUniversity(form, oldToken!)) as {
         data: CreateUniversity;
       };
 
       if (res.data) {
         const { user, token: authToken } = res.data;
 
-        // ✅ Save updated token and user info
-        if (token) {
-          localStorage.setItem("TOKEN", token);
+        // ✅ Save the NEW token and user info
+        if (authToken) {
+          localStorage.setItem("TOKEN", authToken);
         }
         if (user) {
           localStorage.setItem("USER", JSON.stringify(user));
         }
 
+        toast.success("University created successfully! 🎓"); // <-- SUCCESS TOAST
+
         // ✅ Redirect to dashboard
         router.push("/dashboard");
       } else {
         setError("Something went wrong.");
+        toast.error("Failed to create university. Please try again."); // <-- ERROR TOAST
       }
     } catch (err) {
       console.error(err);
       setError("Unexpected error occurred.");
+      toast.error("An unexpected error occurred. Please try again."); // <-- UNEXPECTED ERROR TOAST
     } finally {
       setLoading(false);
     }
