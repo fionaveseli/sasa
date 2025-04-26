@@ -18,8 +18,8 @@ export default function AddUniversityForm() {
     universityName: "",
     universityAddress: "",
     contactNumber: "",
-    logo: "",
-    bannerColor: "#E7712E",
+    logo: "", // optional for now
+    banner_color: "#E7712E",
     bio: "",
     agreeToTerms: false,
   });
@@ -47,7 +47,6 @@ export default function AddUniversityForm() {
       const res = (await createUniversity(form, oldToken!)) as {
         data: CreateUniversity;
       };
-      console.log("createUniversity response:", res);
 
       if (res.data) {
         const { user, token: authToken } = res.data;
@@ -163,8 +162,8 @@ export default function AddUniversityForm() {
                   <Label>Banner Color</Label>
                   <Input
                     type="text"
-                    name="bannerColor"
-                    value={form.bannerColor}
+                    name="banner_color"
+                    value={form.banner_color}
                     onChange={handleChange}
                   />
                 </div>
@@ -185,7 +184,7 @@ export default function AddUniversityForm() {
                 </Button>
                 <Button
                   onClick={handleSubmit}
-                  disabled={loading || !form.bio || !form.bannerColor}
+                  disabled={loading || !form.bio || !form.banner_color}
                 >
                   {loading ? "Submitting..." : "Submit"}
                 </Button>
