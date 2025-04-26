@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import Table from "../table";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
+import { Eye, List } from "lucide-react";
 
 export default function Users() {
   const searchParams = useSearchParams();
@@ -16,104 +17,135 @@ export default function Users() {
   const [loading, setLoading] = useState<boolean>(true);
   const [tournaments, setTournaments] = useState<any[]>([]);
 
-  // Define table columns
   const columns = [
     { accessorKey: "name", header: "TOURNAMENT NAME" },
     { accessorKey: "start_date", header: "START DATE" },
     { accessorKey: "end_date", header: "END DATE" },
-    { accessorKey: "status", header: "STATUS" },
+    {
+      accessorKey: "status",
+      header: "STATUS",
+      cell: ({ row }: { row: { original: any } }) =>
+        getStatusBadge(row.original.status),
+    },
     { accessorKey: "teams_count", header: "TEAMS PARTICIPATING" },
-    { accessorKey: "actions", header: "ACTIONS" },
+    {
+      accessorKey: "actions",
+      header: "ACTIONS",
+      cell: ({ row }: { row: { original: any } }) => (
+        <Button
+          className="border-0 hover:text-primary bg-transparent"
+          variant={"outline"}
+          onClick={() => handleViewTournament(row.original.id)}
+        >
+          <List />
+          <span className="sr-only">View tournament</span>
+        </Button>
+      ),
+    },
   ];
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "draft":
-        return <Badge variant="outline" className="bg-yellow-100 text-yellow-800 border-yellow-200">Draft</Badge>;
+        return (
+          <Badge
+            variant="outline"
+            className="bg-yellow-100 text-yellow-800 border-yellow-200"
+          >
+            Draft
+          </Badge>
+        );
       case "in_progress":
-        return <Badge variant="outline" className="bg-blue-100 text-blue-800 border-blue-200">In Progress</Badge>;
+        return (
+          <Badge
+            variant="outline"
+            className="bg-blue-100 text-blue-800 border-blue-200"
+          >
+            In Progress
+          </Badge>
+        );
       case "completed":
-        return <Badge variant="outline" className="bg-green-100 text-green-800 border-green-200">Completed</Badge>;
+        return (
+          <Badge
+            variant="outline"
+            className="bg-green-100 text-green-800 border-green-200"
+          >
+            Completed
+          </Badge>
+        );
       case "cancelled":
-        return <Badge variant="outline" className="bg-red-100 text-red-800 border-red-200">Cancelled</Badge>;
+        return (
+          <Badge
+            variant="outline"
+            className="bg-red-100 text-red-800 border-red-200"
+          >
+            Cancelled
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
   };
 
-  useEffect(() => {
-    const fetchTournaments = async () => {
-      try {
-        setLoading(true);
-        const response = await api.getTournaments();
-        const formattedTournaments = response.tournaments.map((tournament: any) => ({
-          name: tournament.name,
-          start_date: new Date(tournament.start_date).toLocaleDateString(),
-          end_date: new Date(tournament.end_date).toLocaleDateString(),
-          status: getStatusBadge(tournament.status),
-          teams_count: tournament.teams_count || 0,
-          actions: (
-            <div className="flex gap-2">
-              {tournament.status === "draft" && (
-                <Button onClick={() => handleJoinTournament(tournament.id)}>Join</Button>
-              )}
-              <Button onClick={() => handleViewTournament(tournament.id)}>View</Button>
-            </div>
-          ),
-        }));
-        setTournaments(formattedTournaments);
-      } catch (error) {
-        console.error("Error fetching tournaments:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const formatTournaments = (data: any[]) => {
+    return data.map((tournament: any, index: number) => ({
+      id: tournament.id || index + 1,
+      name: tournament.name,
+      start_date: new Date(tournament.start_date).toLocaleDateString(),
+      end_date: new Date(tournament.end_date).toLocaleDateString(),
+      status: tournament.status,
+      teams_count: tournament.teams_count || 0,
+      actions: (
+        <div className="flex gap-2">
+          {tournament.status === "draft" && (
+            <Button onClick={() => handleJoinTournament(tournament.id)}>
+              Join
+            </Button>
+          )}
+          <Button onClick={() => handleViewTournament(tournament.id)}>
+            View
+          </Button>
+        </div>
+      ),
+    }));
+  };
 
-    fetchTournaments();
-  }, []);
+  const fetchTournaments = async () => {
+    try {
+      setLoading(true);
+      const response = await api.getTournaments();
+      setTournaments(formatTournaments(response.tournaments));
+    } catch (error) {
+      console.error("Error fetching tournaments:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleJoinTournament = async (tournamentId: number) => {
     try {
-      const teamId = 3; // Replace with actual team ID
+      const teamId = 3; // Replace with actual team ID logic
       await api.registerTeamInTournament(tournamentId, teamId);
-      // Refresh tournaments list
-      const response = await api.getTournaments();
-      const formattedTournaments = response.tournaments.map((tournament: any) => ({
-        name: tournament.name,
-        start_date: new Date(tournament.start_date).toLocaleDateString(),
-        end_date: new Date(tournament.end_date).toLocaleDateString(),
-        status: getStatusBadge(tournament.status),
-        teams_count: tournament.teams_count || 0,
-        actions: (
-          <div className="flex gap-2">
-            {tournament.status === "draft" && (
-              <Button onClick={() => handleJoinTournament(tournament.id)}>Join</Button>
-            )}
-            <Button onClick={() => handleViewTournament(tournament.id)}>View</Button>
-          </div>
-        ),
-      }));
-      setTournaments(formattedTournaments);
+      await fetchTournaments();
     } catch (error) {
       console.error("Error joining tournament:", error);
     }
   };
 
   const handleViewTournament = (tournamentId: number) => {
-    // Navigate to tournament details page
     window.location.href = `/dashboard/tournaments/${tournamentId}`;
   };
 
   useEffect(() => {
     const allParams = getSearchParams(searchParams);
-    const page = Number(allParams.page) || 0;
-    const size = Number(allParams.size) || 10;
-    const search = allParams.search || "";
-
-    setPage(page);
-    setSize(size);
-    setSearch(search);
+    setPage(Number(allParams.page) || 0);
+    setSize(Number(allParams.size) || 10);
+    setSearch(allParams.search || "");
   }, [searchParams]);
+
+  useEffect(() => {
+    fetchTournaments();
+  }, []);
 
   return (
     <div className="w-full h-full flex flex-col gap-4 overflow-auto">

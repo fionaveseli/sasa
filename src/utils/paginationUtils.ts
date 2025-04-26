@@ -1,4 +1,4 @@
-import { SearchParams } from "@/types/dto/axios";
+import { SearchParams } from "@/types/dto/Axios";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 
 export const getSearchParams = (
