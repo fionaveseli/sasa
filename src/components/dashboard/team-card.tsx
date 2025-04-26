@@ -10,9 +10,13 @@ export default function TeamCard({ team }: TeamCardProps) {
   return (
     <Card className="flex flex-col items-center text-center shadow-lg rounded-xl p-6 space-y-2">
       <img
-        src="/logo.svg"
-        className="w-20 h-20 mx-auto rounded-full shadow-md"
+        src={team.logo || "/teamtigers.svg"}
+        className="w-20 h-20 mx-auto rounded-full shadow-md object-cover"
         alt="Team Logo"
+        onError={(e) => {
+          // Fallback if the team logo URL is invalid
+          e.currentTarget.src = "/teamtigers.svg";
+        }}
       />
       <p className="text-xl font-semibold text-[#353535]">{team.name}</p>
       <p className="text-sm text-[#353535]">Status: {team.status}</p>

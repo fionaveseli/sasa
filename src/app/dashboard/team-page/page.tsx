@@ -3,10 +3,10 @@
 import CreateTeamModal from "@/components/modal/create-team-modal";
 import LeaveTeamModal from "@/components/modal/leave-team-modal";
 import { Button } from "@/components/ui/button";
-import { Trophy, Calendar, Users } from "lucide-react";
-import { useState, useEffect } from "react";
+import { api, Match, Team } from "@/services/api";
+import { Calendar, Trophy } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { api, Team, Match } from "@/services/api";
+import { useEffect, useState } from "react";
 
 export default function TeamPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -178,7 +178,15 @@ export default function TeamPage() {
     <div>
       <div className="flex items-center justify-between border-b rounded-md">
         <div className="flex items-center gap-3 p-4 rounded-md">
-          <img src="/logo.svg" alt="Team Logo" className="h-10" />
+          <img 
+            src={team.logo || "/teamtigers.svg"} 
+            alt="Team Logo" 
+            className="h-10 w-10 object-cover rounded-full" 
+            onError={(e) => {
+              // Fallback if the team logo URL is invalid
+              e.currentTarget.src = "/teamtigers.svg";
+            }}
+          />
           <h1 className="text-2xl">{team.name}</h1>
         </div>
       </div>

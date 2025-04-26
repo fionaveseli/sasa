@@ -1,17 +1,17 @@
 "use client";
 
-import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "../ui/textarea";
 import { api } from "@/services/api"; // Updated import to use our API service
+import { useState } from "react";
+import { Textarea } from "../ui/textarea";
 
 interface CreateTeamModalProps {
   isOpen: boolean;
@@ -44,10 +44,27 @@ export default function CreateTeamModal({
     setLoading(true);
 
     try {
-      // Use our updated API function
+      let logoUrl: string | undefined = undefined;
+      
+      // First upload the logo if one was selected
+      if (logo) {
+        try {
+          logoUrl = await api.uploadLogo(logo);
+          console.log("Logo uploaded successfully:", logoUrl);
+        } catch (logoError: any) {
+          console.error("Error uploading logo:", logoError);
+          setError("Failed to upload logo: " + (logoError.message || "Unknown error"));
+          setLoading(false);
+          return;
+        }
+      }
+
+      // Now create the team with the logo URL and bio
       console.log("Attempting to create team with name:", teamName);
       const team = await api.createTeam({
         name: teamName,
+        bio: teamBio,
+        logo: logoUrl,
       });
 
       console.log("Created team successfully:", team);
