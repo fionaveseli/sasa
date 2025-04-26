@@ -67,6 +67,7 @@ export interface Team {
   // Additional properties that might be returned by API
   wins?: number;
   bio?: string;
+  logo?: string;
   players: {
     id: number;
     fullName: string;
@@ -221,6 +222,17 @@ export const api = {
       return response.data;
     } catch (error) {
       console.error("Error leaving team:", error);
+      throw error;
+    }
+  },
+
+  deleteTeam: async (teamId: number): Promise<any> => {
+    try {
+      const response = await axios.delete(`${API_BASE_URL}/teams/${teamId}`);
+      console.log("Team delete response:", response.data);
+      return response.data;
+    } catch (error) {
+      console.error("Error deleting team:", error);
       throw error;
     }
   },

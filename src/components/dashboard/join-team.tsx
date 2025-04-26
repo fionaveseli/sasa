@@ -3,6 +3,8 @@ import { Button } from "../ui/button";
 import { useState } from "react";
 import JoinTeamModal from "../modal/join-team-modal";
 import LeaveTeamModal from "../modal/leave-team-modal";
+import DeleteTeamModal from "../modal/delete-team-modal";
+import { Trash2 } from "lucide-react";
 
 interface JoinTeamProps {
   teamId: number;
@@ -12,7 +14,11 @@ interface JoinTeamProps {
   members: string[];
   places: number;
   isUserTeam?: boolean;
+  isUniversityManager?: boolean;
   onJoinSuccess?: () => void;
+  disableJoin?: boolean;
+  name: string;
+  sport: string;
 }
 
 export default function JoinTeam({
@@ -23,10 +29,15 @@ export default function JoinTeam({
   members,
   places,
   isUserTeam = false,
+  isUniversityManager = false,
   onJoinSuccess,
+  disableJoin = false,
+  name,
+  sport,
 }: JoinTeamProps) {
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const isFull = places === 0;
 
   return (
@@ -53,7 +64,11 @@ export default function JoinTeam({
             </h2>
           </div>
           <div className="text-start flex flex-col gap-2 flex-grow">
-            <p className="text-gray-600">University: {university}</p>
+            <div className="flex flex-col gap-2">
+              <div className="text-sm text-gray-500">University: {university}</div>
+              <div className="text-sm text-gray-500">Team Name: {name}</div>
+              <div className="text-sm text-gray-500">Sport: {sport}</div>
+            </div>
             <p className="text-gray-600">Members: {members.join(", ")}</p>
             <div
               className={`text-sm font-medium px-3 py-1 rounded-md w-fit ${
@@ -67,7 +82,16 @@ export default function JoinTeam({
           </div>
         </CardContent>
         <div className="p-2 mt-auto w-full">
-          {isUserTeam ? (
+          {isUniversityManager ? (
+            <Button
+              variant="destructive"
+              size="sm"
+              className="w-full flex items-center gap-1"
+              onClick={() => setIsDeleteModalOpen(true)}
+            >
+              <Trash2 size={16} /> Delete Team
+            </Button>
+          ) : isUserTeam ? (
             <div className="flex flex-col gap-2">
               <Button
                 variant="secondary"
@@ -81,12 +105,16 @@ export default function JoinTeam({
             <Button
               variant="submit"
               className={`w-full ${
-                isFull ? "bg-gray-300 text-gray-500 cursor-not-allowed" : ""
+                isFull || disableJoin
+                  ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  : ""
               }`}
-              onClick={() => !isFull && setIsJoinModalOpen(true)}
-              disabled={isFull}
+              onClick={() =>
+                !isFull && !disableJoin && setIsJoinModalOpen(true)
+              }
+              disabled={isFull || disableJoin}
             >
-              {isFull ? "Full" : "Join"}
+              {isFull ? "Full" : disableJoin ? "Already in a team" : "Join"}
             </Button>
           )}
         </div>
@@ -102,6 +130,15 @@ export default function JoinTeam({
         <LeaveTeamModal
           isOpen={isLeaveModalOpen}
           onClose={() => setIsLeaveModalOpen(false)}
+          teamName={teamName}
+          teamId={teamId}
+          onSuccess={onJoinSuccess}
+        />
+      )}
+      {isUniversityManager && (
+        <DeleteTeamModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
           teamName={teamName}
           teamId={teamId}
           onSuccess={onJoinSuccess}

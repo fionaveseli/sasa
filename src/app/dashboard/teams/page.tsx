@@ -21,6 +21,7 @@ export default function TeamsPage() {
   const [userTeam, setUserTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUniversityManager, setIsUniversityManager] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -36,12 +37,21 @@ export default function TeamsPage() {
         // Get the current user
         const userData = await api.getCurrentUser();
         const universityId = userData.user.university_id;
+        const userRole = userData.user.role;
+
+        // Check if user is a university manager
+        setIsUniversityManager(userRole === "university_manager");
 
         if (!universityId) {
           setError("You are not associated with a university");
           setLoading(false);
           return;
         }
+
+        // Get university details first
+        const universitiesResponse = await api.getUniversities();
+        const universityData = universitiesResponse.find(uni => uni.id === universityId);
+        const universityName = universityData?.name || "";
 
         // Get all teams from the user's university
         const API_BASE_URL =
@@ -55,23 +65,24 @@ export default function TeamsPage() {
         // Add university name to each team
         allTeams = allTeams.map((team) => ({
           ...team,
-          university_name:
-            userData.user.university_name || `University ID: ${universityId}`,
+          university_name: universityName
         }));
 
-        // Try to get the user's current team
-        try {
-          const userTeamData = await api.getCurrentTeam();
-          setUserTeam(userTeamData);
+        // If not a university manager, try to get the user's current team
+        if (!isUniversityManager) {
+          try {
+            const userTeamData = await api.getCurrentTeam();
+            setUserTeam(userTeamData);
 
-          // Mark the user's team in the list
-          allTeams = allTeams.map((team) => ({
-            ...team,
-            isUserTeam: team.id === userTeamData.id,
-          }));
-        } catch (teamError) {
-          console.log("User is not part of a team");
-          // No team for the user, that's fine
+            // Mark the user's team in the list
+            allTeams = allTeams.map((team) => ({
+              ...team,
+              isUserTeam: team.id === userTeamData.id,
+            }));
+          } catch (teamError: any) {
+            console.log("User is not part of a team:", teamError.message);
+            setUserTeam(null);
+          }
         }
 
         setTeams(allTeams);
@@ -106,9 +117,13 @@ export default function TeamsPage() {
         <Button
           variant="secondary"
           onClick={() => setIsModalOpen(true)}
-          disabled={userTeam !== null}
+          disabled={userTeam !== null || isUniversityManager}
         >
-          {userTeam ? "Already in a team" : "Create Team"}
+          {isUniversityManager
+            ? "University Managers cannot join teams"
+            : userTeam
+            ? "Already in a team"
+            : "Create Team"}
         </Button>
       </div>
 
@@ -118,11 +133,17 @@ export default function TeamsPage() {
         <p className="text-red-500">{error}</p>
       ) : (
         <>
-          {userTeam && (
+          {isUniversityManager && (
             <div className="bg-purple-50 p-4 rounded-md mb-4">
-              {/* <h2 className="text-lg font-semibold text-green-800">
-                Your Team
-              </h2> */}
+              <p className="text-primary">
+                As a University Manager, you can delete teams but cannot join or
+                create teams.
+              </p>
+            </div>
+          )}
+
+          {userTeam && !isUniversityManager && (
+            <div className="bg-purple-50 p-4 rounded-md mb-4">
               <p className="text-primary">
                 You are currently a member of team{" "}
                 <strong>{userTeam.name}</strong>
@@ -137,13 +158,17 @@ export default function TeamsPage() {
                 teamId={team.id}
                 image="/logo.svg"
                 teamName={team.name}
-                university={team.university_name || "University"}
+                university={team.university_name || ""}
                 members={(team.players || []).map(
                   (p) => p.fullName || "Player"
                 )}
                 places={2 - (team.players || []).length}
                 isUserTeam={team.isUserTeam}
+                isUniversityManager={isUniversityManager}
                 onJoinSuccess={handleTeamChange}
+                disableJoin={userTeam !== null}
+                name={team.name}
+                sport={team.sport}
               />
             ))}
 

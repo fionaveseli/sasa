@@ -1,95 +1,89 @@
 "use client";
 
-import { useState } from "react";
-import { Edit, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AppContext } from "@/context/app-context";
+import { Pencil } from "lucide-react";
+import { useContext, useState } from "react";
+import { RoleLabels } from "@/types/enums/AppRole";
 import EditProfileModal from "@/components/modal/edit-profile-modal";
 
 export default function ProfilePage() {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  // Dummy profile data
-  const profile = {
-    name: "Fiona Veseli",
-    role: "Team Player",
-    university: "RIT Kosovo",
-    email: "fionav@rit.edu",
-    contact: "+383 49 500 600",
-    avatar: "", // Empty for now (placeholder)
-  };
+  const { user } = useContext(AppContext);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const roleLabel = user?.role ? RoleLabels[user.role] : '';
 
   return (
-    <div>
-      {/* Profile Header */}
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">My Profile</h1>
+        <h1 className="text-2xl font-medium">My Profile</h1>
       </div>
 
-      {/* Profile Card */}
-      <div className="mt-4 bg-white p-6 rounded-xl shadow-md relative">
-        {/* Edit Button */}
-
-        {/* Profile Info */}
-        <div className="flex justify-between">
-          <div className="flex items-center gap-6">
-            {/* Profile Image */}
-            <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center">
-              {/* Placeholder Avatar */}
-              {profile.avatar ? (
-                <img
-                  src={profile.avatar}
-                  alt="Profile"
-                  className="w-full h-full rounded-full"
-                />
-              ) : (
-                <div className="text-gray-400 text-lg">👤</div>
-              )}
-            </div>
-
-            {/* Profile Details */}
-            <div>
-              <h2 className="text-xl font-semibold">{profile.name}</h2>
-              <p className="text-gray-600">{profile.role}</p>
-              <p className="text-gray-600">{profile.university}</p>
-            </div>
-          </div>
-          <Button variant={"secondary"} onClick={() => setIsModalOpen(true)}>
-            Edit Profile
-          </Button>
+      <div className="flex items-start gap-4 pb-6">
+        <div className="h-24 w-24 rounded-full bg-muted flex items-center justify-center">
+          {/* Placeholder for profile image */}
+          <span className="text-2xl text-muted-foreground">
+            {user?.fullName?.charAt(0)}
+          </span>
         </div>
+        <div className="space-y-1">
+          <h2 className="text-xl font-medium">{user?.fullName}</h2>
+          <p className="text-muted-foreground">{roleLabel}</p>
+          {user?.university_id && (
+            <p className="text-sm text-muted-foreground">RIT Kosovo</p>
+          )}
+        </div>
+        <Button 
+          size="sm" 
+          variant="secondary" 
+          className="ml-auto gap-2"
+          onClick={() => setIsEditModalOpen(true)}
+        >
+          <Pencil className="h-4 w-4" />
+          Edit
+        </Button>
+      </div>
 
-        {/* Personal Information */}
-        <div className="mt-6">
-          <h3 className="text-lg font-semibold">Personal Information</h3>
-          <div className="grid grid-cols-2 gap-4 mt-2">
-            {/* Name */}
-            <div>
-              <p className="text-gray-500 text-sm">Name</p>
-              <p className="text-black">{profile.name}</p>
+      <div className="space-y-6">
+        <div>
+          <h3 className="text-lg font-medium mb-4">Personal Information</h3>
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Name</p>
+              <p>{user?.fullName}</p>
             </div>
-
-            {/* Role */}
-            <div>
-              <p className="text-gray-500 text-sm">Role</p>
-              <p className="text-black">{profile.role}</p>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Role</p>
+              <p>{roleLabel}</p>
             </div>
-
-            {/* Email */}
-            <div>
-              <p className="text-gray-500 text-sm">Email</p>
-              <p className="text-black">{profile.email}</p>
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Email</p>
+              <p>{user?.email}</p>
             </div>
-
-            {/* Contact Number */}
-            <div>
-              <p className="text-gray-500 text-sm">Contact Number</p>
-              <p className="text-black">{profile.contact}</p>
+            {user?.graduationYear && (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">Graduation Year</p>
+                <p>{user.graduationYear}</p>
+              </div>
+            )}
+            <div className="space-y-2">
+              <p className="text-sm text-muted-foreground">Time Zone</p>
+              <p>{user?.timeZone}</p>
             </div>
+            {user?.university_id && (
+              <div className="space-y-2">
+                <p className="text-sm text-muted-foreground">University</p>
+                <p>RIT Kosovo</p>
+              </div>
+            )}
           </div>
         </div>
       </div>
-      <EditProfileModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+
+      <EditProfileModal 
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        user={user}
       />
     </div>
   );

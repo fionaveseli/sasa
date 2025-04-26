@@ -14,6 +14,7 @@ export default function TeamPage() {
   const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isUniversityManager, setIsUniversityManager] = useState(false);
   const router = useRouter();
 
   const handleTeamLeave = () => {
@@ -32,6 +33,16 @@ export default function TeamPage() {
 
     const fetchTeamData = async () => {
       try {
+        // First check if user is a university manager
+        const userData = await api.getCurrentUser();
+        const userRole = userData.user?.role;
+
+        if (userRole === "university_manager") {
+          setIsUniversityManager(true);
+          setLoading(false);
+          return; // Don't try to fetch team data for university managers
+        }
+
         // Get the team data
         const teamData = await api.getCurrentTeam();
         setTeam(teamData);
@@ -68,6 +79,8 @@ export default function TeamPage() {
 
         // Don't set error for users not in a team - we'll handle this in the UI
         if (error.message === "User is not a member of any team") {
+          // Just set team to null without showing an error
+          setTeam(null);
           setLoading(false);
           return;
         }
@@ -94,6 +107,24 @@ export default function TeamPage() {
       <div className="flex items-center justify-center min-h-screen">
         <div className="bg-red-50 p-4 rounded-md text-red-600">
           <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isUniversityManager) {
+    return (
+      <div className="flex flex-col items-center -mt-[10vh] justify-center min-h-screen gap-4">
+        <p className="text-lg">
+          As a University Manager, you cannot join or create teams.
+        </p>
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={() => router.push("/dashboard/teams")}
+          >
+            Manage Teams
+          </Button>
         </div>
       </div>
     );
@@ -180,9 +211,7 @@ export default function TeamPage() {
       <div className="mt-6">
         <h2 className="text-xl font-semibold">TEAM BIO</h2>
         <p className="text-gray-600 mt-2">
-          {/* If your API doesn't provide a bio, show a default message */}
-          {team.bio ||
-            `Team ${team.name} from university ID ${team.university_id}`}
+          {team.bio || `Team ${team.name}`}
         </p>
       </div>
       <Button
