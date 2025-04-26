@@ -1,10 +1,10 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "../ui/button";
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
+import DeleteTeamModal from "../modal/delete-team-modal";
 import JoinTeamModal from "../modal/join-team-modal";
 import LeaveTeamModal from "../modal/leave-team-modal";
-import DeleteTeamModal from "../modal/delete-team-modal";
-import { Trash2 } from "lucide-react";
+import { Button } from "../ui/button";
 
 interface JoinTeamProps {
   teamId: number;
@@ -50,9 +50,13 @@ export default function JoinTeam({
         <CardContent className="flex p-4 pb-1 flex-col items-center text-center gap-2 flex-grow">
           <div className="flex gap-2 items-center">
             <img
-              src={image}
+              src={image || "/teamtigers.svg"}
               alt="Team Logo"
-              className="w-12 h-12 rounded-full"
+              className="w-12 h-12 rounded-full object-cover"
+              onError={(e) => {
+                // Fallback if the team logo URL is invalid
+                e.currentTarget.src = "/teamtigers.svg";
+              }}
             />
             <h2 className="text-xl font-semibold">
               {teamName}

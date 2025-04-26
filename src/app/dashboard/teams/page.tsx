@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import JoinTeam from "@/components/dashboard/join-team";
 import CreateTeamModal from "@/components/modal/create-team-modal";
 import SearchInput from "@/components/search-input";
 import { Button } from "@/components/ui/button";
 import { api, Team } from "@/services/api";
-import { useRouter } from "next/navigation";
 import axios from "axios";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 interface ExtendedTeam extends Team {
   isUserTeam?: boolean;
@@ -154,7 +154,7 @@ export default function TeamsPage() {
               <JoinTeam
                 key={team.id}
                 teamId={team.id}
-                image="/logo.svg"
+                image={team.logo || "/teamtigers.svg"}
                 teamName={team.name}
                 university={team.university_name || ""}
                 members={(team.players || []).map(

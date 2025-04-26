@@ -168,7 +168,11 @@ export const api = {
     }
   },
 
-  createTeam: async (teamData: { name: string }): Promise<Team> => {
+  createTeam: async (teamData: {
+    name: string;
+    bio?: string;
+    logo?: string;
+  }): Promise<Team> => {
     // First get the current user to get their university_id
     try {
       const userResponse = await api.getCurrentUser();
@@ -409,5 +413,19 @@ export const api = {
   }): Promise<{ message: string; user: any }> => {
     const response = await axios.post(`${API_BASE_URL}/uni/join`, data);
     return response.data;
+  },
+
+  // Image upload functions
+  uploadLogo: async (logoFile: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append("logo", logoFile);
+
+    const response = await axios.post(`${API_BASE_URL}/upload/logo`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+
+    return response.data.file.url;
   },
 };

@@ -26,17 +26,17 @@ import { logout } from "@/components/nav-user";
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { user } = useContext(AppContext);
   const router = useRouter();
-  
+
   // Get initials from user's full name
   const getInitials = (name: string) => {
     return name
-      .split(' ')
-      .map(word => word[0])
-      .join('')
+      .split(" ")
+      .map((word) => word[0])
+      .join("")
       .toUpperCase();
   };
 
-  const userInitials = user?.fullName ? getInitials(user.fullName) : '?';
+  const userInitials = user?.fullName ? getInitials(user.fullName) : "?";
 
   return (
     <SidebarProvider>
@@ -73,16 +73,22 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-[200px]">
-                <DropdownMenuItem className="cursor-pointer" onSelect={() => router.push('/dashboard/profile')}>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onSelect={() => router.push("/dashboard/profile")}
+                >
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer" onSelect={() => router.push('/dashboard/settings')}>
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onSelect={() => router.push("/dashboard/settings")}
+                >
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <div className="p-2 flex justify-center">
-                  <Button 
-                    variant="secondary" 
+                  <Button
+                    variant="secondary"
                     className="w-full justify-center text-center"
                     onClick={logout}
                   >
@@ -93,7 +99,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             </DropdownMenu>
           </div>
         </header>
-        <div className="w-full p-3 flex-1 bg-primary-foreground">
+        <div className="w-full p-3 pt-0 flex-1 bg-primary-foreground">
           <Card className="rounded-lg bg-white min-h-[90vh] w-full overflow-y-auto p-6">
             {children}
           </Card>
