@@ -27,7 +27,7 @@ export default function Users() {
       header: "JOIN",
       cell: ({ row }: { row: { original: any } }) => (
         <Button
-          className="px-3 py-1 bg-secondary hover:bg-green-600 text-primary"
+          variant={"secondary"}
           onClick={() => handleJoinTournament(row.original.id)}
           disabled={userRole === "university_manager"}
         >
