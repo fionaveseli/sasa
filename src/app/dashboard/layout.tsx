@@ -55,7 +55,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
               <Input
                 type="search"
                 placeholder="Search..."
-                className="w-full pl-8 h-8"
+                className="w-full pl-8 h-8 border-[#5B4A6B] focus:border-[#5B4A6B] focus:ring-[#5B4A6B]"
               />
             </div>
           </div>
