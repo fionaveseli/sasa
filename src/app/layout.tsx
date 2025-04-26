@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   title: "Sasa",
   description: "Gameboard Tournament",
   icons: {
-    icon: "/favicon.ico",
+    icon: "/vercel.svg",
   },
 };
 
