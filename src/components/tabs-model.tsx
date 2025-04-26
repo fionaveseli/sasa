@@ -8,7 +8,6 @@ import { getSearchParams, handleTab } from "@/utils/paginationUtils";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { memo } from "react";
 import EmptyState from "./empty-state";
-import CreateTournamentModal from "./modal/create-tournament-modal";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 
 interface TabsModelProps {
@@ -70,7 +69,6 @@ export default function TabsModel({
               </TabsTrigger>
             ))}
           </TabsList>
-          <CreateTournamentModal />
         </div>
       </div>
       {filteredTabs.map((tab) => (

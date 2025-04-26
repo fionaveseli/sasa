@@ -1,4 +1,4 @@
-"use client"; 
+"use client";
 import { useRouter } from "next/navigation";
 import * as React from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
@@ -49,9 +49,7 @@ export const ShadcnTable = ({
   const totalPages = Math.ceil(totalRows / size);
   const router = useRouter();
 
-  const enhancedColumns: ColumnDef<any>[] = [
-    ...columns,
-  ];
+  const enhancedColumns: ColumnDef<any>[] = [...columns];
 
   const table = useReactTable({
     data: rows,
@@ -65,37 +63,59 @@ export const ShadcnTable = ({
   });
 
   return (
-    <div className="w-full p-4 bg-white shadow-md rounded-xl">
+    <div className="w-full p-y4 bg-white shadow-md rounded-xl">
       <Table className="w-full border-separate border-spacing-y-2">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="bg-gray-100 text-gray-700">
+            <TableRow
+              key={headerGroup.id}
+              className="bg-gray-100 text-gray-700"
+            >
               {headerGroup.headers.map((header) => (
-                <TableHead key={header.id} className="p-4 text-left text-sm font-semibold">
-                  {flexRender(header.column.columnDef.header, header.getContext())}
+                <TableHead
+                  key={header.id}
+                  className="p-4 text-left text-sm font-semibold"
+                >
+                  {flexRender(
+                    header.column.columnDef.header,
+                    header.getContext()
+                  )}
                 </TableHead>
               ))}
             </TableRow>
           ))}
         </TableHeader>
         {loading && (
-          <SkeletonLoader type="table" rowCount={10} columnCount={enhancedColumns.length} />
+          <SkeletonLoader
+            type="table"
+            rowCount={10}
+            columnCount={enhancedColumns.length}
+          />
         )}
         {!loading && (
           <TableBody>
             {rows.length > 0 ? (
               table.getRowModel().rows.map((row) => (
-                <TableRow key={row.id} className="bg-white hover:bg-gray-50 transition">
+                <TableRow
+                  key={row.id}
+                  className="bg-white hover:bg-gray-50 transition"
+                >
                   {row.getVisibleCells().map((cell) => (
                     <TableCell key={cell.id} className="p-4 text-sm">
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
                     </TableCell>
                   ))}
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={enhancedColumns.length} className="p-4 text-center text-gray-500">
+                <TableCell
+                  colSpan={enhancedColumns.length}
+                  className="p-4 text-center text-gray-500"
+                >
                   <EmptyState message="No data available" />
                 </TableCell>
               </TableRow>
@@ -105,7 +125,12 @@ export const ShadcnTable = ({
       </Table>
       {!disablePaginations && totalRows > 0 && (
         <div className="flex justify-end mt-4">
-          <Paginations totalPages={totalPages} page={page} handlePage={() => {}} numbers={[]} />
+          <Paginations
+            totalPages={totalPages}
+            page={page}
+            handlePage={() => {}}
+            numbers={[]}
+          />
         </div>
       )}
     </div>
