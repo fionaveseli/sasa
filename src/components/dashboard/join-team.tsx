@@ -18,7 +18,7 @@ interface JoinTeamProps {
   onJoinSuccess?: () => void;
   disableJoin?: boolean;
   name: string;
-  sport: string;
+  sport?: string;
 }
 
 export default function JoinTeam({
@@ -65,7 +65,9 @@ export default function JoinTeam({
           </div>
           <div className="text-start flex flex-col gap-2 flex-grow">
             <div className="flex flex-col gap-2">
-              <div className="text-sm text-gray-500">University: {university}</div>
+              <div className="text-sm text-gray-500">
+                University: {university}
+              </div>
               <div className="text-sm text-gray-500">Team Name: {name}</div>
               <div className="text-sm text-gray-500">Sport: {sport}</div>
             </div>

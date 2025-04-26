@@ -2,25 +2,34 @@
 
 import { Button } from "@/components/ui/button";
 import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { AppContext } from "@/context/app-context";
 import { api } from "@/services/api";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useContext, useState } from "react";
 
 export default function CreateTournamentModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-
+  const { user } = useContext(AppContext);
+  const userRole = user?.role;
+  console.log(userRole);
   const [formData, setFormData] = useState({
     name: "",
     type: "university",
@@ -31,7 +40,7 @@ export default function CreateTournamentModal() {
     bracket_type: "single_elimination",
     description: "",
     rules: "",
-    time_zone: "UTC"
+    time_zone: "UTC",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -51,9 +60,13 @@ export default function CreateTournamentModal() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   return (
@@ -63,7 +76,7 @@ export default function CreateTournamentModal() {
           Create Tournament
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px]">
+      <DialogContent className="sm:max-w-[600px] max-h-[600px] overflow-auto">
         <DialogHeader>
           <DialogTitle>Create New Tournament</DialogTitle>
         </DialogHeader>
@@ -84,7 +97,9 @@ export default function CreateTournamentModal() {
             <Select
               name="type"
               value={formData.type}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, type: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, type: value }))
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select type" />
@@ -137,14 +152,20 @@ export default function CreateTournamentModal() {
             <Select
               name="bracket_type"
               value={formData.bracket_type}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, bracket_type: value }))}
+              onValueChange={(value) =>
+                setFormData((prev) => ({ ...prev, bracket_type: value }))
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select bracket type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="single_elimination">Single Elimination</SelectItem>
-                <SelectItem value="double_elimination">Double Elimination</SelectItem>
+                <SelectItem value="single_elimination">
+                  Single Elimination
+                </SelectItem>
+                <SelectItem value="double_elimination">
+                  Double Elimination
+                </SelectItem>
                 <SelectItem value="round_robin">Round Robin</SelectItem>
               </SelectContent>
             </Select>
@@ -188,4 +209,4 @@ export default function CreateTournamentModal() {
       </DialogContent>
     </Dialog>
   );
-} 
+}

@@ -3,11 +3,12 @@
 import { api } from "@/services/api";
 import { getSearchParams } from "@/utils/paginationUtils";
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import Table from "../table";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Eye, List } from "lucide-react";
+import { AppContext } from "@/context/app-context";
 
 export default function Users() {
   const searchParams = useSearchParams();
@@ -16,9 +17,23 @@ export default function Users() {
   const [search, setSearch] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [tournaments, setTournaments] = useState<any[]>([]);
-
+  const { user } = useContext(AppContext);
+  const userRole = user?.role;
   const columns = [
     { accessorKey: "name", header: "TOURNAMENT NAME" },
+    {
+      accessorKey: "join",
+      header: "JOIN",
+      cell: ({ row }: { row: { original: any } }) => (
+        <Button
+          className="px-3 py-1 bg-secondary hover:bg-green-600 text-primary"
+          onClick={() => handleJoinTournament(row.original.id)}
+          disabled={userRole === "university_manager"}
+        >
+          Join
+        </Button>
+      ),
+    },
     { accessorKey: "start_date", header: "START DATE" },
     { accessorKey: "end_date", header: "END DATE" },
     {
@@ -29,8 +44,8 @@ export default function Users() {
     },
     { accessorKey: "teams_count", header: "TEAMS PARTICIPATING" },
     {
-      accessorKey: "actions",
-      header: "ACTIONS",
+      accessorKey: "details",
+      header: "Details",
       cell: ({ row }: { row: { original: any } }) => (
         <Button
           className="border-0 hover:text-primary bg-transparent"
@@ -95,7 +110,7 @@ export default function Users() {
       end_date: new Date(tournament.end_date).toLocaleDateString(),
       status: tournament.status,
       teams_count: tournament.teams_count || 0,
-      actions: (
+      details: (
         <div className="flex gap-2">
           {tournament.status === "draft" && (
             <Button onClick={() => handleJoinTournament(tournament.id)}>
@@ -124,7 +139,20 @@ export default function Users() {
 
   const handleJoinTournament = async (tournamentId: number) => {
     try {
-      const teamId = 3; // Replace with actual team ID logic
+      const teamIdString = localStorage.getItem("teamId");
+
+      if (!teamIdString) {
+        console.error("No teamId found in localStorage.");
+        return;
+      }
+
+      const teamId = parseInt(teamIdString, 10);
+
+      if (isNaN(teamId)) {
+        console.error("Invalid teamId stored in localStorage.");
+        return;
+      }
+
       await api.registerTeamInTournament(tournamentId, teamId);
       await fetchTournaments();
     } catch (error) {

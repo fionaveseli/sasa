@@ -9,7 +9,6 @@ import { api, Team } from "@/services/api";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 
-// Extended Team interface with additional UI properties
 interface ExtendedTeam extends Team {
   isUserTeam?: boolean;
   university_name?: string;
@@ -25,7 +24,6 @@ export default function TeamsPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if user is logged in
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
@@ -34,12 +32,10 @@ export default function TeamsPage() {
 
     const fetchTeams = async () => {
       try {
-        // Get the current user
         const userData = await api.getCurrentUser();
         const universityId = userData.user.university_id;
         const userRole = userData.user.role;
 
-        // Check if user is a university manager
         setIsUniversityManager(userRole === "university_manager");
 
         if (!universityId) {
@@ -48,12 +44,12 @@ export default function TeamsPage() {
           return;
         }
 
-        // Get university details first
         const universitiesResponse = await api.getUniversities();
-        const universityData = universitiesResponse.find(uni => uni.id === universityId);
+        const universityData = universitiesResponse.find(
+          (uni) => uni.id === universityId
+        );
         const universityName = universityData?.name || "";
 
-        // Get all teams from the user's university
         const API_BASE_URL =
           process.env.NEXT_PUBLIC_API_URL ||
           "https://web-production-3dd4c.up.railway.app/api";
@@ -62,19 +58,19 @@ export default function TeamsPage() {
         );
         let allTeams: ExtendedTeam[] = response.data.teams || [];
 
-        // Add university name to each team
         allTeams = allTeams.map((team) => ({
           ...team,
-          university_name: universityName
+          university_name: universityName,
         }));
 
-        // If not a university manager, try to get the user's current team
         if (!isUniversityManager) {
           try {
             const userTeamData = await api.getCurrentTeam();
             setUserTeam(userTeamData);
 
-            // Mark the user's team in the list
+            // ✅ ADD: Save teamId to localStorage when user has a team
+            localStorage.setItem("teamId", String(userTeamData.id));
+
             allTeams = allTeams.map((team) => ({
               ...team,
               isUserTeam: team.id === userTeamData.id,
@@ -82,6 +78,9 @@ export default function TeamsPage() {
           } catch (teamError: any) {
             console.log("User is not part of a team:", teamError.message);
             setUserTeam(null);
+
+            // ✅ ADD: Remove teamId from localStorage if no team
+            localStorage.removeItem("teamId");
           }
         }
 
@@ -97,7 +96,6 @@ export default function TeamsPage() {
     fetchTeams();
   }, [router]);
 
-  // Function to handle team refresh after joining/creating
   const handleTeamChange = () => {
     setLoading(true);
     setTimeout(() => {
@@ -168,7 +166,6 @@ export default function TeamsPage() {
                 onJoinSuccess={handleTeamChange}
                 disableJoin={userTeam !== null}
                 name={team.name}
-                sport={team.sport}
               />
             ))}
 
