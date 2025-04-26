@@ -36,7 +36,7 @@ export default function CreateTournamentModal() {
     registration_deadline: "",
     start_date: "",
     end_date: "",
-    university_id: 2, // Default university ID
+    university_id: user?.university_id || 0,
     bracket_type: "single_elimination",
     description: "",
     rules: "",
@@ -72,7 +72,11 @@ export default function CreateTournamentModal() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="submit" className="bg-primary text-white">
+        <Button
+          variant="submit"
+          className="bg-primary text-white"
+          disabled={userRole === "student"}
+        >
           Create Tournament
         </Button>
       </DialogTrigger>

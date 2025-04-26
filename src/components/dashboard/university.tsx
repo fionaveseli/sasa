@@ -9,6 +9,7 @@ import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
 import { Eye, List } from "lucide-react";
 import { AppContext } from "@/context/app-context";
+import CreateTournamentModal from "../modal/create-tournament-modal";
 
 export default function Users() {
   const searchParams = useSearchParams();
@@ -26,7 +27,7 @@ export default function Users() {
       header: "JOIN",
       cell: ({ row }: { row: { original: any } }) => (
         <Button
-          className="px-3 py-1 bg-secondary hover:bg-green-600 text-primary"
+          variant={"secondary"}
           onClick={() => handleJoinTournament(row.original.id)}
           disabled={userRole === "university_manager"}
         >
@@ -179,6 +180,9 @@ export default function Users() {
     <div className="w-full h-full flex flex-col gap-4 overflow-auto">
       <div className="w-full">
         <div className="overflow-x-auto">
+          <div className="flex justify-end">
+            <CreateTournamentModal />
+          </div>
           <Table
             columns={columns}
             rows={tournaments}

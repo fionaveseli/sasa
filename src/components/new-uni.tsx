@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card"; // Assuming Card is in components/ui/card
+import { Card } from "@/components/ui/card";
 import Link from "next/link";
 
 export function NewUni({
