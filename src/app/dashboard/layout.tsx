@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { logout } from "@/components/nav-user";
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { user } = useContext(AppContext);
@@ -75,12 +76,16 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                 <DropdownMenuItem className="cursor-pointer" onSelect={() => router.push('/dashboard/profile')}>
                   Profile
                 </DropdownMenuItem>
-                <DropdownMenuItem className="cursor-pointer">
+                <DropdownMenuItem className="cursor-pointer" onSelect={() => router.push('/dashboard/settings')}>
                   Settings
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <div className="p-2">
-                  <Button variant="secondary" className="w-full justify-start">
+                <div className="p-2 flex justify-center">
+                  <Button 
+                    variant="secondary" 
+                    className="w-full justify-center text-center"
+                    onClick={logout}
+                  >
                     Log out
                   </Button>
                 </div>
