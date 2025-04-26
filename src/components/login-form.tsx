@@ -5,9 +5,9 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
 import { useRouter } from "next/navigation";
 import { api } from "@/services/api";
+import { toast } from "sonner";
 
 export function LoginForm({
   className,
@@ -27,14 +27,19 @@ export function LoginForm({
     try {
       const response = await api.login(email, password);
 
-      // Store token in localStorage
       localStorage.setItem("token", response.token);
-      localStorage.setItem("USER", JSON.stringify(response.user)); // save full user
+      localStorage.setItem("USER", JSON.stringify(response.user));
+
+      toast.success("Logged in successfully!");
 
       router.push("/dashboard");
     } catch (error: any) {
       console.error("Login error:", error);
-      setError(error.response?.data?.message || "Invalid login credentials");
+      const errorMessage =
+        error.response?.data?.message || "Invalid login credentials";
+      setError(errorMessage);
+
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

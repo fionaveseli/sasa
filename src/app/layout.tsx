@@ -1,10 +1,11 @@
 import type { Metadata } from "next";
 import { Outfit } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/components/ui/sonner";
 
-const outfit = Outfit({ 
+const outfit = Outfit({
   subsets: ["latin"],
-  display: 'swap',
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -23,7 +24,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={outfit.className}>
-        <main>{children}</main>
+        <main>
+          {children}
+          <Toaster />
+        </main>
       </body>
     </html>
   );
