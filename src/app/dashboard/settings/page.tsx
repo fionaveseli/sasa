@@ -224,7 +224,7 @@ export default function SettingsPage() {
   return (
     <div className="p-6">
       <h1 className="text-2xl font-normal mb-6">Settings</h1>
-      <div className="bg-white rounded-xl overflow-hidden">
+      <div className="bg-white rounded-xl overflow-hidden [&_[role=tablist]]:!w-48">
         <TabsModel
           tabs={tabs}
           defaultTab={Tabs.Security}
