@@ -35,22 +35,26 @@ export default function LeaveTeamModal({
       setLoading(true);
       setError(null);
       await api.leaveTeam(teamId);
-      onClose();
-      // Call onSuccess callback if provided
-      if (onSuccess) {
-        onSuccess();
-      } else {
-        // Force reload the page to update the UI
-        window.location.reload();
-      }
+
+      // Add a delay to allow toast to be visible
+      setTimeout(() => {
+        onClose();
+        // Call onSuccess callback if provided
+        if (onSuccess) {
+          onSuccess();
+        } else {
+          // Force reload the page to update the UI
+          window.location.reload();
+        }
+      }, 1000); // 1 second delay
     } catch (err: any) {
       console.error("Error leaving team:", err);
       setError(
         err.response?.data?.message || "Failed to leave team. Please try again."
       );
-    } finally {
       setLoading(false);
     }
+    // Don't set loading to false if we're going to navigate
   };
 
   return (

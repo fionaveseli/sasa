@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { api } from "@/services/api"; // Updated import to use our API service
 import { useState } from "react";
 import { Textarea } from "../ui/textarea";
+import { toast } from "sonner";
 
 interface CreateTeamModalProps {
   isOpen: boolean;
@@ -37,6 +38,7 @@ export default function CreateTeamModal({
   const handleCreateTeam = async () => {
     if (!teamName.trim()) {
       setError("Team name is required");
+      toast.error("Team name is required");
       return;
     }
 
@@ -45,7 +47,7 @@ export default function CreateTeamModal({
 
     try {
       let logoUrl: string | undefined = undefined;
-      
+
       // First upload the logo if one was selected
       if (logo) {
         try {
@@ -53,7 +55,10 @@ export default function CreateTeamModal({
           console.log("Logo uploaded successfully:", logoUrl);
         } catch (logoError: any) {
           console.error("Error uploading logo:", logoError);
-          setError("Failed to upload logo: " + (logoError.message || "Unknown error"));
+          const errorMsg =
+            "Failed to upload logo: " + (logoError.message || "Unknown error");
+          setError(errorMsg);
+          toast.error(errorMsg);
           setLoading(false);
           return;
         }
@@ -70,6 +75,7 @@ export default function CreateTeamModal({
       console.log("Created team successfully:", team);
 
       // Show success message before reloading
+      toast.success("Team created successfully!");
       setError(null);
       setTimeout(() => {
         window.location.reload();
@@ -95,6 +101,7 @@ export default function CreateTeamModal({
       }
 
       setError(errorMessage);
+      toast.error(errorMessage);
     } finally {
       setLoading(false);
     }

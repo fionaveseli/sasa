@@ -60,32 +60,33 @@ export default function JoinTeam({
         }`}
       >
         <CardContent className="flex p-2 pb-1 flex-col items-start text-center gap-2 flex-grow">
-          {isUserTeam && (
-            <Badge
-              className="h-6 px-3 text-xs border-secondary "
-              variant={"outline"}
-            >
-              Your Team
-            </Badge>
-          )}
-          <div className="flex gap-2 items-start">
+          <div className="flex gap-3 items-start w-full">
             <img
               src={image || "/teamtigers.svg"}
               alt="Team Logo"
-              className="w-12 h-12 rounded-full object-cover"
+              className="w-20 h-20 rounded-full object-cover"
               onError={(e) => {
                 // Fallback if the team logo URL is invalid
                 e.currentTarget.src = "/teamtigers.svg";
               }}
             />
-          </div>
-
-          <div className="text-start flex flex-col gap-2 text-sm text-gray-500">
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col items-start">
               <h2 className="text-xl font-semibold text-gray-800">
                 {teamName}
               </h2>
+              {isUserTeam && (
+                <Badge
+                  className="h-6 px-3 text-xs border-secondary mt-1"
+                  variant={"outline"}
+                >
+                  Your Team
+                </Badge>
+              )}
+            </div>
+          </div>
 
+          <div className="text-start flex flex-col gap-2 text-sm text-gray-500 w-full">
+            <div className="flex flex-col gap-2">
               <p>
                 <span className="text-gray-700">University:</span> {university}
               </p>

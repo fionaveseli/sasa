@@ -9,7 +9,6 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { api } from "@/services/api";
-import axios from "axios";
 
 interface JoinTeamModalProps {
   isOpen: boolean;
@@ -34,36 +33,24 @@ export default function JoinTeamModal({
     setError(null);
 
     try {
-      // Get the current user to know their university
-      const userData = await api.getCurrentUser();
+      // Use the api.joinTeam function which has toast notifications
+      await api.joinTeam(teamId);
 
-      // Use the proper endpoint format with the teamId
-      const API_BASE_URL =
-        process.env.NEXT_PUBLIC_API_URL ||
-        "https://web-production-3dd4c.up.railway.app/api";
-
-      await axios.post(
-        `${API_BASE_URL}/teams/${teamId}/join`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
+      // Add a delay to allow the toast to be visible
+      setTimeout(() => {
+        onClose();
+        if (onSuccess) {
+          onSuccess();
         }
-      );
-
-      onClose();
-      if (onSuccess) {
-        onSuccess();
-      }
+      }, 1000); // 1 second delay
     } catch (err: any) {
       console.error("Error joining team:", err);
       setError(
         err.response?.data?.message || "Failed to join team. Please try again."
       );
-    } finally {
       setLoading(false);
     }
+    // Don't set loading to false if we're going to close the modal
   };
 
   return (

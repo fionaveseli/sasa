@@ -146,7 +146,15 @@ export default function UniversityPage() {
                 className="bg-white p-3 rounded-lg shadow border"
               >
                 <div className="flex items-center gap-2 mb-2">
-                  <img src="/logo.svg" alt="Team Logo" className="h-6" />
+                  <img
+                    src={team.logo || "/teamtigers.svg"}
+                    alt="Team Logo"
+                    className="h-10 w-10 rounded-full object-cover"
+                    onError={(e) => {
+                      // Fallback if the team logo URL is invalid
+                      e.currentTarget.src = "/teamtigers.svg";
+                    }}
+                  />
                   <h4 className="text-base font-medium">{team.name}</h4>
                 </div>
               </div>

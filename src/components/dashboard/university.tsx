@@ -10,6 +10,7 @@ import { Button } from "../ui/button";
 import { Eye, List } from "lucide-react";
 import { AppContext } from "@/context/app-context";
 import CreateTournamentModal from "../modal/create-tournament-modal";
+import { toast } from "sonner";
 
 export default function Users() {
   const searchParams = useSearchParams();
@@ -161,6 +162,9 @@ export default function Users() {
 
       if (!teamIdString) {
         console.error("No teamId found in localStorage.");
+        toast.error(
+          "You need to be part of a team before joining a tournament."
+        );
         return;
       }
 
@@ -168,11 +172,15 @@ export default function Users() {
 
       if (isNaN(teamId)) {
         console.error("Invalid teamId stored in localStorage.");
+        toast.error("Invalid team data. Please try again later.");
         return;
       }
 
       await api.registerTeamInTournament(tournamentId, teamId);
-      await fetchTournaments();
+
+      setTimeout(() => {
+        fetchTournaments();
+      }, 1000);
     } catch (error) {
       console.error("Error joining tournament:", error);
     }
