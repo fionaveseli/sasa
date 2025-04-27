@@ -99,7 +99,7 @@ export default function MatchesPage() {
       value: Tabs.Matches,
       label: "Matches",
       component: (
-        <div className="p-6">
+        <div>
           <MatchesTable />
         </div>
       ),

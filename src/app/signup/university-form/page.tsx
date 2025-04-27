@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createUniversity } from "@/api/userService";
 import { toast } from "sonner";
-import { api } from "@/services/api"; // for logo upload!
+import { api } from "@/services/api";
 
 export default function AddUniversityForm() {
   const [step, setStep] = useState(1);
@@ -197,8 +197,8 @@ export default function AddUniversityForm() {
                   <Label>Banner Color</Label>
                   <Input
                     type="text"
-                    name="banner_color"
-                    value={form.banner_color}
+                    name="bannerColor"
+                    value={form.bannerColor}
                     onChange={handleChange}
                   />
                 </div>
@@ -219,7 +219,7 @@ export default function AddUniversityForm() {
                 </Button>
                 <Button
                   onClick={handleSubmit}
-                  disabled={loading || !form.bio || !form.banner_color}
+                  disabled={loading || !form.bio || !form.bannerColor}
                 >
                   {loading ? "Submitting..." : "Submit"}
                 </Button>
