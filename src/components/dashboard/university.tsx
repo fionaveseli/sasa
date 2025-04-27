@@ -12,7 +12,7 @@ import { AppContext } from "@/context/app-context";
 import CreateTournamentModal from "../modal/create-tournament-modal";
 import { toast } from "sonner";
 
-export default function Users() {
+export default function Tournament() {
   const searchParams = useSearchParams();
   const [page, setPage] = useState<number>(0);
   const [size, setSize] = useState<number>(10);

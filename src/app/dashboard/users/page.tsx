@@ -1,148 +1,77 @@
 "use client";
 
-import { useEffect, useState, useContext } from "react";
-import { useParams, useSearchParams } from "next/navigation";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { useContext, useEffect, useState } from "react";
+
 import { AppContext } from "@/context/app-context";
-import { getUsersFromUniversity, UniversityUser } from "@/api/userService";
-import { getSearchParams } from "@/utils/paginationUtils";
+import { getUsersFromUniversity } from "@/api/userService";
+import { Badge } from "@/components/ui/badge";
 import Table from "@/components/table";
-import MoonLoader from "react-spinners/MoonLoader";
-import { toast } from "sonner";
 
-export default function Users() {
-  const searchParams = useSearchParams();
-  const params = useParams();
-  const universityId = Number(params.id);
-
-  const [users, setUsers] = useState<UniversityUser[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [page, setPage] = useState(0);
-  const [size, setSize] = useState(10);
-  const [search, setSearch] = useState("");
-
+export default function UniversityUsers() {
   const { user } = useContext(AppContext);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [users, setUsers] = useState<any[]>([]);
 
-  const fetchUniversityUsers = async () => {
-    try {
-      setLoading(true);
-      const token = localStorage.getItem("TOKEN");
-      if (!token) {
-        toast.error("No token found!");
-        return;
+  const universityId = user?.university_id;
+  const token =
+    typeof window !== "undefined" ? localStorage.getItem("token") : null;
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      try {
+        if (!universityId || !token) return;
+
+        setLoading(true);
+        const response = await getUsersFromUniversity(universityId, token);
+        setUsers(formatUsers(response.data?.users ?? []));
+      } catch (error) {
+        console.error("Error fetching users from university:", error);
+      } finally {
+        setLoading(false);
       }
+    };
 
-      const res = await getUsersFromUniversity(universityId, token);
-      if (res.data?.users) {
-        setUsers(res.data.users);
-      }
-    } catch (error) {
-      toast.error("Error fetching university users");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const formatUsers = (data: UniversityUser[]) => {
-    return data.map((user, index) => ({
-      id: user.id || index + 1,
-      fullName: user.fullName,
-      email: user.email,
-      role: getRoleBadge(user.role),
-      graduationYear: user.graduationYear,
-      view: (
-        <Button
-          className="border-0 hover:text-primary bg-transparent"
-          variant="outline"
-          onClick={() => handleViewUser(user.id)}
-        >
-          View
-        </Button>
-      ),
-    }));
-  };
-
-  const handleViewUser = (userId: number) => {
-    window.location.href = `/dashboard/users/${userId}`;
-  };
-
-  const getRoleBadge = (role: string) => {
-    switch (role) {
-      case "university_manager":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-blue-100 text-blue-800 border-blue-200"
-          >
-            Manager
-          </Badge>
-        );
-      case "student":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-green-100 text-green-800 border-green-200"
-          >
-            Student
-          </Badge>
-        );
-      case "professor":
-        return (
-          <Badge
-            variant="outline"
-            className="bg-yellow-100 text-yellow-800 border-yellow-200"
-          >
-            Professor
-          </Badge>
-        );
-      default:
-        return (
-          <Badge variant="outline" className="bg-gray-100 text-gray-800">
-            {role}
-          </Badge>
-        );
-    }
-  };
+    fetchUsers();
+  }, [universityId, token]);
 
   const columns = [
     { accessorKey: "fullName", header: "FULL NAME" },
     { accessorKey: "email", header: "EMAIL" },
-    { accessorKey: "role", header: "ROLE" },
+    {
+      accessorKey: "role",
+      header: "ROLE",
+      cell: ({ row }: { row: { original: any } }) => (
+        <Badge variant="outline" className="px-3 py-1">
+          {row.original.role.replace(/_/g, " ")}
+        </Badge>
+      ),
+    },
     { accessorKey: "graduationYear", header: "GRADUATION YEAR" },
-    { accessorKey: "view", header: "VIEW PROFILE" },
   ];
 
-  useEffect(() => {
-    const allParams = getSearchParams(searchParams);
-    setPage(Number(allParams.page) || 0);
-    setSize(Number(allParams.size) || 10);
-    setSearch(allParams.search || "");
-  }, [searchParams]);
-
-  useEffect(() => {
-    fetchUniversityUsers();
-  }, []);
+  const formatUsers = (data: any[]) => {
+    return data.map((user: any, index: number) => ({
+      id: user.id || index + 1,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role,
+      graduationYear: user.graduationYear,
+    }));
+  };
 
   return (
     <div className="w-full h-full flex flex-col gap-4 overflow-auto">
       <div className="w-full">
+        <h1 className="text-2xl font-normal">Users</h1>
         <div className="overflow-x-auto">
-          {loading ? (
-            <div className="flex items-center justify-center min-h-[80vh] w-full">
-              <MoonLoader size={20} color="#200936" />
-            </div>
-          ) : (
-            <Table
-              columns={columns}
-              rows={formatUsers(users)}
-              loading={loading}
-              size={size}
-              page={page}
-              totalRows={users.length}
-            />
-          )}
+          <Table
+            columns={columns}
+            rows={users}
+            loading={loading}
+            size={10}
+            page={0}
+            totalRows={users.length}
+          />
         </div>
       </div>
     </div>

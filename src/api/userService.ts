@@ -75,10 +75,17 @@ export const getUsersFromUniversity = (
   token: string
 ): Promise<ApiResponse<{ users: UniversityUser[] }>> =>
   getRequest<{ users: UniversityUser[] }>(
-    `api/uni/universities/${universityId}/users`,
+    `/api/uni/universities/${universityId}/users`,
     {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     }
   );
+
+  export const getAllUsersFromAllUniversities = (token: string): Promise<ApiResponse<{ universities: any[] }>> =>
+    getRequest<{ universities: any[] }>("/api/users/all", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
