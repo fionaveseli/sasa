@@ -235,20 +235,20 @@ export default function UniversityPage() {
         className="relative w-full h-[200px] flex items-center justify-center overflow-hidden"
         style={{ backgroundColor: university?.banner_color || "#e37339" }}
       >
-        <img
-          src={university?.logo || "/default-banner.jpg"}
-          alt="University Banner"
-          className="absolute w-full h-full object-cover opacity-20"
-        />
-        <div className="relative flex flex-col items-center text-white text-center">
-          <img
-            src={university?.logo || "/default-university-logo.png"}
-            alt="University Logo"
-            className="h-16 mb-2"
-          />
-          <h1 className="text-3xl font-bold">{university?.name}</h1>
+        <div className="flex items-center justify-between bg-[your-banner-color-here] p-4 text-white">
+          {/* Left: Logo */}
+          <div className="flex items-center gap-3">
+            <img
+              src={university?.logo || "/default-university-logo.png"}
+              alt="University Logo"
+              className="h-16 w-16 object-contain"
+            />
+            <h1 className="text-2xl font-bold">{university?.name}</h1>
+          </div>
+
+          {/* Right: Role badge */}
           {userRole === "university_manager" && (
-            <span className="mt-2 bg-white text-gray-800 px-3 py-1 rounded-full text-sm">
+            <span className="bg-white text-gray-800 px-3 py-1 rounded-full text-sm">
               University Manager
             </span>
           )}

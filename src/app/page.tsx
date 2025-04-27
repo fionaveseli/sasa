@@ -1,26 +1,13 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 import Footer from "@/components/footer";
 import Header from "@/components/header";
 import InfoCard from "@/components/info-card";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Star } from "lucide-react";
-import Link from "next/link";
 
 export default function Home() {
-  const router = useRouter();
-
-  useEffect(() => {
-    // Check if user is logged in
-    const token = localStorage.getItem("token");
-    if (token) {
-      router.push("/dashboard");
-    }
-  }, [router]);
-
   return (
     <div>
       <Header />
@@ -37,15 +24,7 @@ export default function Home() {
                 <br /> manage teams, and engage fans—all in one powerful
                 platform.
               </p>
-              <div className="flex gap-4">
-                <Link href="/login">
-                  <Button variant="ghost">Login</Button>
-                </Link>
 
-                <Link href="/signup">
-                  <Button variant="default">Get Started</Button>
-                </Link>
-              </div>  
               <img src="/homepage.svg" alt="Image" className="max-w-full" />
               <img
                 src="/homepage1.svg"
