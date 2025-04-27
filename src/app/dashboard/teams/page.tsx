@@ -18,6 +18,7 @@ interface ExtendedTeam extends Team {
 export default function TeamsPage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [teams, setTeams] = useState<ExtendedTeam[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [userTeam, setUserTeam] = useState<Team | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -110,8 +111,8 @@ export default function TeamsPage() {
 
       <div className="flex justify-between">
         <SearchInput
-          handleSearch={(search) => console.log(search)}
-          placeholder="Search..."
+          handleSearch={(search: string) => setSearchQuery(search)}
+          placeholder="Search teams..."
         />
         {!isUniversityManager && (
           <Button
@@ -154,7 +155,12 @@ export default function TeamsPage() {
           )}
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-            {teams.map((team) => (
+            {teams
+              .filter(
+                (team) =>
+                  team.name.toLowerCase().includes(searchQuery.toLowerCase())
+              )
+              .map((team) => (
               <JoinTeam
                 key={team.id}
                 teamId={team.id}
@@ -174,7 +180,10 @@ export default function TeamsPage() {
               />
             ))}
 
-            {teams.length === 0 && (
+            {teams.filter(
+              (team) =>
+                team.name.toLowerCase().includes(searchQuery.toLowerCase())
+            ).length === 0 && (
               <p className="col-span-full text-center text-gray-500 py-8">
                 No teams found.
               </p>

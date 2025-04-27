@@ -11,6 +11,7 @@ import { Eye, List } from "lucide-react";
 import { AppContext } from "@/context/app-context";
 import CreateTournamentModal from "../modal/create-tournament-modal";
 import { toast } from "sonner";
+import SearchInput from "../search-input";
 
 export default function Tournament() {
   const searchParams = useSearchParams();
@@ -19,9 +20,13 @@ export default function Tournament() {
   const [search, setSearch] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [tournaments, setTournaments] = useState<any[]>([]);
+  const [filteredTournaments, setFilteredTournaments] = useState<any[]>([]);
+  const [teams, setTeams] = useState<any[]>([]);
+  const [filteredTeams, setFilteredTeams] = useState<any[]>([]);
   const { user } = useContext(AppContext);
   const userRole = user?.role;
   const [userHasJoinedTournament, setUserHasJoinedTournament] = useState(false);
+
   useEffect(() => {
     const fetchUserTournamentStatus = async () => {
       const userData = await api.getCurrentUser();
@@ -32,6 +37,7 @@ export default function Tournament() {
 
     fetchUserTournamentStatus();
   }, []);
+
   const columns = [
     { accessorKey: "name", header: "TOURNAMENT NAME" },
     {
@@ -42,7 +48,7 @@ export default function Tournament() {
           variant="secondary"
           onClick={() => handleJoinTournament(row.original.id)}
           disabled={
-            userRole === "university_manager" || userHasJoinedTournament
+            userRole === "university_manager" || userHasJoinedTournament || filteredTeams.length === 0
           }
         >
           {userRole === "university_manager"
@@ -149,6 +155,7 @@ export default function Tournament() {
       setLoading(true);
       const response = await api.getTournaments();
       setTournaments(formatTournaments(response.tournaments));
+      setFilteredTournaments(formatTournaments(response.tournaments));
     } catch (error) {
       console.error("Error fetching tournaments:", error);
     } finally {
@@ -208,13 +215,31 @@ export default function Tournament() {
           <div className="flex justify-end">
             <CreateTournamentModal />
           </div>
+          <SearchInput
+            handleSearch={(search: string) => {
+              const filtered = teams.filter(team =>
+                team.name.toLowerCase().includes(search.toLowerCase())
+              );
+              setFilteredTeams(filtered);
+            }}
+            placeholder="Search teams..."
+          />
+          <SearchInput
+            handleSearch={(search) => {
+              const filtered = tournaments.filter((tournament) =>
+                tournament.name.toLowerCase().includes(search.toLowerCase())
+              );
+              setFilteredTournaments(filtered);
+            }}
+            placeholder="Search tournaments..."
+          />
           <Table
             columns={columns}
-            rows={tournaments}
+            rows={filteredTournaments}
             loading={loading}
             size={size}
             page={page}
-            totalRows={tournaments.length}
+            totalRows={filteredTournaments.length}
           />
         </div>
       </div>
