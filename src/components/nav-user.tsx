@@ -28,6 +28,18 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 
+export const profile = () => {
+  if (typeof window !== "undefined") {
+    window.location.href = "/dashboard/profile";
+  }
+};
+
+export const settings = () => {
+  if (typeof window !== "undefined") {
+    window.location.href = "/dashboard/settings";
+  }
+};
+
 export const logout = () => {
   localStorage.removeItem("token");
   localStorage.removeItem("USER");
@@ -91,17 +103,13 @@ export function NavUser({
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={profile}>
                 <BadgeCheck />
                 Profile
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={settings}>
                 <Settings />
                 Settings
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Bell />
-                Notifications
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
