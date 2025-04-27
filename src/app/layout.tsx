@@ -23,7 +23,7 @@ export default function RootLayout({
 }>) {
   return (
     <html suppressHydrationWarning lang="en">
-      <body className={outfit.className}>
+      <body suppressHydrationWarning className={outfit.className}>
         <main>
           {children}
           <Toaster />
