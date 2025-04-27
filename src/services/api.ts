@@ -404,6 +404,7 @@ export const api = {
       `${API_BASE_URL}/uni/universities-r`,
       universityData
     );
+        console.log(response)
     return response.data;
   },
 
