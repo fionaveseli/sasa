@@ -22,9 +22,10 @@ export default function DashboardPage() {
   const { user } = useContext(AppContext);
   const role = user?.role || "student";
   const formattedRole = role.replace(/_/g, " ");
-  const title = `Hi ${
+  const userName = user?.fullName || "User";
+  const title = `Hi ${userName} (${
     formattedRole.charAt(0).toUpperCase() + formattedRole.slice(1)
-  }`;
+  })`;
   useEffect(() => {
     // Check if user is logged in
     const token = localStorage.getItem("token");
@@ -170,10 +171,12 @@ export default function DashboardPage() {
         </div>
 
         <div className="lg:col-span-1 flex flex-col gap-4">
-          <PerformanceCard stats={{
-            wins: stats?.wins || 0,
-            totalMatches: stats?.totalMatches || 0
-          }} />
+          <PerformanceCard
+            stats={{
+              wins: stats?.wins || 0,
+              totalMatches: stats?.totalMatches || 0,
+            }}
+          />
           {team ? (
             <TeamCard team={team} />
           ) : (

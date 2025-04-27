@@ -64,7 +64,12 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
           <div className="flex items-center gap-4">
             <div className="text-white text-xs font-light">
               <div>Enjoy your game</div>
-              <div>{user?.role?.replace(/_/g, " ")}, {user?.fullName}</div>
+              <div>
+                {user?.role
+                  ?.replace(/_/g, " ")
+                  .replace(/^\w/, (c) => c.toUpperCase())}
+                , {user?.fullName?.replace(/^\w/, (c) => c.toUpperCase())}
+              </div>{" "}
             </div>
             <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>

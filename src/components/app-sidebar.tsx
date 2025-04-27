@@ -44,13 +44,13 @@ export const navItems = [
     title: "University Page",
     url: "/dashboard/university",
     icon: University,
-    roles: ["student", "university_manager", "admin"],
+    roles: ["student", "university_manager"],
   },
   {
     title: "Teams",
     url: "/dashboard/teams",
     icon: Users,
-    roles: ["student", "university_manager", "admin"],
+    roles: ["student", "university_manager"],
   },
   {
     title: "Tournaments",
@@ -65,16 +65,16 @@ export const navItems = [
     roles: ["student", "university_manager", "admin"],
   },
   {
-    title: "Team Page",
-    url: "/dashboard/team-page",
-    icon: Contact,
-    roles: ["admin"],
-  },
-  {
     title: "Users",
     url: "/dashboard/users",
     icon: Users,
-    roles: ["student", "university_manager", "admin"],
+    roles: ["student", "university_manager"],
+  },
+  {
+    title: "Users",
+    url: "/dashboard/all-users",
+    icon: Users,
+    roles: ["admin"],
   },
 ];
 
@@ -89,12 +89,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   });
 
   React.useEffect(() => {
-    // Update sidebar image based on open state
     if (open) {
       setSidebarImage(`/logo1.svg`);
     } else setSidebarImage("/vercel.svg");
 
-    // Get user data from localStorage
     const getUserData = () => {
       try {
         const storedUser = localStorage.getItem("USER");

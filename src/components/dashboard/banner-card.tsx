@@ -28,12 +28,14 @@ export default function BannerCard({
   const finalDescription =
     role === "university_manager"
       ? "It's time to lead your university to victory!"
+      : role === "admin"
+      ? "Oversee, empower - the game is in your hands."
       : description;
 
   const bannerImageSrc =
     {
       university_manager: "/banner-image1.png",
-      admin: "/player-banner.png",
+      admin: "/banner-image2.png",
       default: "/banner-image.png",
     }[role] || "/banner-image.png";
 
@@ -57,12 +59,7 @@ export default function BannerCard({
         </div>
       </Card>
       <div className="absolute right-10 -top-9 w-72 h-72">
-        <Image
-          src={bannerImageSrc}
-          alt="Candy Crush Characters"
-          fill
-          className="object-contain"
-        />
+        <Image src={bannerImageSrc} alt="" fill className="object-contain" />
       </div>
     </div>
   );

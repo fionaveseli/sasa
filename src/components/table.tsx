@@ -1,5 +1,4 @@
 "use client";
-import { useRouter } from "next/navigation";
 import * as React from "react";
 import type { ColumnDef, SortingState } from "@tanstack/react-table";
 import {
@@ -20,7 +19,6 @@ import {
 import Paginations from "./paginations";
 import EmptyState from "./empty-state";
 import { SkeletonLoader } from "./skeleton-loader";
-import { Button } from "@/components/ui/button";
 
 interface Row {
   [key: string]: any;
@@ -47,7 +45,6 @@ export const ShadcnTable = ({
 }: TableProps) => {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const totalPages = Math.ceil(totalRows / size);
-  const router = useRouter();
 
   const enhancedColumns: ColumnDef<any>[] = [...columns];
 
@@ -67,7 +64,7 @@ export const ShadcnTable = ({
       <div
         className={`flex flex-col flex-grow ${!disablePaginations ? "" : ""}`}
       >
-        <Table>
+        <Table className="rounded-md">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id} className="bg-primary/10">
