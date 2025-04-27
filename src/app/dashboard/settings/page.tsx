@@ -1,11 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TabsModel from "@/components/tabs-model";
 import { TabsType } from "@/types/dto/TabsType";
-import { Shield, Eye, EyeOff, Search, RefreshCw } from "lucide-react";
+import { Eye, EyeOff, Search, RefreshCw } from "lucide-react";
 import ShadcnTable from "@/components/table";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
@@ -42,14 +42,30 @@ export default function SettingsPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [students] = useState<Student[]>([
-    {
-      id: 1,
-      fullName: "Jane Doe",
-      email: "jane.doe@example.com",
-      role: "Team Player"
-    }
-  ]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loadingStudents, setLoadingStudents] = useState<boolean>(true);
+  const [universityId, setUniversityId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const user = await api.getCurrentUser();
+        const universityId = user.user.university_id;
+
+        setUniversityId(universityId);
+
+        const response = await api.getUniversityUsers(universityId);
+        setStudents(response.users || []);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+        toast.error("Failed to fetch university users.");
+      } finally {
+        setLoadingStudents(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleChange = (e: { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
@@ -77,17 +93,15 @@ export default function SettingsPage() {
     try {
       await api.changePassword({
         currentPassword: form.currentPassword,
-        newPassword: form.newPassword
+        newPassword: form.newPassword,
       });
-      
-      // Clear form after successful password change
+
       setForm({
         currentPassword: "",
         newPassword: "",
-        confirmPassword: ""
+        confirmPassword: "",
       });
-      
-      // Show success message
+
       toast.success("Password changed successfully");
     } catch (error: any) {
       setError(error.message || "Failed to change password");
@@ -127,7 +141,7 @@ export default function SettingsPage() {
     </div>
   );
 
-  const filteredStudents = students.filter(student => 
+  const filteredStudents = students.filter((student) =>
     student.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
     student.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -135,7 +149,7 @@ export default function SettingsPage() {
   const columns: ColumnDef<Student>[] = [
     { accessorKey: "fullName", header: "NAME" },
     { accessorKey: "email", header: "EMAIL" },
-    { accessorKey: "role", header: "ROLE", cell: () => "Team Player" },
+    { accessorKey: "role", header: "ROLE" },
     {
       id: "roleTransfer",
       header: "ROLE TRANSFER",
@@ -217,7 +231,7 @@ export default function SettingsPage() {
         <div className="bg-white p-4">
           <h2 className="text-2xl font-medium mb-4">Select a New University Manager</h2>
           <p className="text-gray-600 mb-6">Choose a user from your university to transfer the role to.</p>
-          
+
           <div className="relative mb-6">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
             <Input
@@ -229,11 +243,12 @@ export default function SettingsPage() {
             />
           </div>
 
+
           <ShadcnTable
-            columns={columns}
-            rows={filteredStudents}
-            loading={false}
-          />
+  columns={columns}
+  rows={filteredStudents}
+  loading={loadingStudents}
+/>
         </div>
       ),
     },
