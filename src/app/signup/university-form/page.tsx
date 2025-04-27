@@ -59,18 +59,17 @@ export default function AddUniversityForm() {
           localStorage.setItem("USER", JSON.stringify(user));
         }
 
-        toast.success("University created successfully! 🎓"); // <-- SUCCESS TOAST
+        toast.success("University created successfully! 🎓");
 
-        // ✅ Redirect to dashboard
         router.push("/dashboard");
       } else {
         setError("Something went wrong.");
-        toast.error("Failed to create university. Please try again."); // <-- ERROR TOAST
+        toast.error("Failed to create university. Please try again.");
       }
     } catch (err) {
       console.error(err);
       setError("Unexpected error occurred.");
-      toast.error("An unexpected error occurred. Please try again."); // <-- UNEXPECTED ERROR TOAST
+      toast.error("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
