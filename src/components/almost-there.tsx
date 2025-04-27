@@ -8,7 +8,7 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { getUniversities, University } from "@/api/userService";
 import { useRouter } from "next/navigation";
-import axios from "axios";
+import { api } from "@/services/api";
 
 export function AlmostThereCard({
   className,
@@ -48,38 +48,34 @@ export function AlmostThereCard({
 
     setLoading(true);
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setError("Authorization token is missing.");
+      const userData = JSON.parse(localStorage.getItem("USER") || "{}");
+      const email = userData.email;
+
+      if (!email) {
+        setError("User email not found.");
         return;
       }
 
-      // Update the user with the selected university ID
-      const API_BASE_URL =
-        process.env.NEXT_PUBLIC_API_URL ||
-        "https://web-production-3dd4c.up.railway.app/api";
-      await axios.patch(
-        `${API_BASE_URL}/users/me`,
-        { university_id: parseInt(selectedUniversity) },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      // Use the API function to join university
+      await api.joinUniversity({
+        university_id: parseInt(selectedUniversity),
+        email: email,
+      });
 
       // Update user data in localStorage to include university_id
-      const userData = JSON.parse(localStorage.getItem("USER") || "{}");
       userData.university_id = parseInt(selectedUniversity);
       localStorage.setItem("USER", JSON.stringify(userData));
 
-      router.push("/signup/success");
+      // Add a delay before navigating to allow the toast to be visible
+      setTimeout(() => {
+        router.push("/signup/success");
+      }, 1200); // 1.2 seconds delay
     } catch (err: any) {
-      console.error("Failed to update university:", err);
-      setError(err.response?.data?.message || "Failed to update university");
-    } finally {
+      console.error("Failed to join university:", err);
+      setError(err.response?.data?.message || "Failed to join university");
       setLoading(false);
     }
+    // Note: Don't set loading to false if we're going to navigate
   };
 
   return (

@@ -1,6 +1,9 @@
 import axios from "axios";
 import { toast } from "sonner";
 
+// Add a variable to track if the toast has been shown
+let hasShownTeamErrorToast = false;
+
 const API_BASE_URL = "https://web-production-3dd4c.up.railway.app/api";
 
 // Add auth token to all requests
@@ -114,7 +117,10 @@ export const api = {
     graduationYear: string;
     timeZone: string;
   }) => {
-    const response = await axios.post(`${API_BASE_URL}/auth/register`, userData);
+    const response = await axios.post(
+      `${API_BASE_URL}/auth/register`,
+      userData
+    );
     return response.data;
   },
 
@@ -129,44 +135,67 @@ export const api = {
       const userResponse = await api.getCurrentUser();
       const universityId = userResponse.user?.university_id;
       const userRole = userResponse.user?.role;
-  
+
       if (!universityId) {
         return null;
       }
-  
-      const response = await axios.get(`${API_BASE_URL}/university/${universityId}/teams`);
-  
+
+      const response = await axios.get(
+        `${API_BASE_URL}/university/${universityId}/teams`
+      );
+
       if (!response.data.teams || response.data.teams.length === 0) {
         if (userRole === "university_manager") {
           return null;
         } else {
-          throw new Error("No teams found for this university");
+          // Only show the toast if it hasn't been shown before
+          if (!hasShownTeamErrorToast) {
+            toast.error("No teams found for this university");
+            hasShownTeamErrorToast = true;
+          }
+          return null;
         }
       }
-  
+
       const userEmail = userResponse.user.email;
       const userTeam = response.data.teams.find(
         (team: any) =>
           team.players &&
           team.players.some((player: any) => player.email === userEmail)
       );
-  
+
       if (!userTeam) {
         if (userRole === "university_manager") {
           return null;
         } else {
-          throw new Error("User is not a member of any team");
+          // Only show the toast if it hasn't been shown before
+          if (!hasShownTeamErrorToast) {
+            toast.error("User is not a member of any team");
+            hasShownTeamErrorToast = true;
+          }
+          return null;
         }
       }
-  
+
+      // Reset the toast flag when a team is found
+      hasShownTeamErrorToast = false;
       return userTeam;
     } catch (error) {
-      throw error;
+      console.error("Error fetching team:", error);
+      // Only show the toast if it hasn't been shown before
+      if (!hasShownTeamErrorToast) {
+        toast.error("Failed to fetch team information");
+        hasShownTeamErrorToast = true;
+      }
+      return null;
     }
   },
-  
 
-  createTeam: async (teamData: { name: string; bio?: string; logo?: string }): Promise<Team> => {
+  createTeam: async (teamData: {
+    name: string;
+    bio?: string;
+    logo?: string;
+  }): Promise<Team> => {
     try {
       const userResponse = await api.getCurrentUser();
       console.log("User data for team creation:", userResponse);
@@ -175,6 +204,7 @@ export const api = {
       console.log("University ID for team creation:", universityId);
 
       if (!universityId) {
+        toast.error("User is not associated with a university");
         throw new Error("User is not associated with a university");
       }
 
@@ -184,9 +214,11 @@ export const api = {
       });
 
       console.log("Team creation response:", response.data);
+      toast.success("Team created successfully!");
       return response.data;
     } catch (error) {
       console.error("Team creation error details:", error);
+      toast.error("Failed to create team. Please try again.");
       throw error;
     }
   },
@@ -198,7 +230,7 @@ export const api = {
 
       const response = await axios.post(`${API_BASE_URL}/teams/${teamId}/join`);
       console.log("Team join response:", response.data);
-      
+
       toast.success("Successfully joined the team!");
       return response.data;
     } catch (error) {
@@ -210,11 +242,15 @@ export const api = {
 
   leaveTeam: async (teamId: number): Promise<any> => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/teams/${teamId}/leave`);
+      const response = await axios.post(
+        `${API_BASE_URL}/teams/${teamId}/leave`
+      );
       console.log("Team leave response:", response.data);
+      toast.success("Successfully left the team");
       return response.data;
     } catch (error) {
       console.error("Error leaving team:", error);
+      toast.error("Failed to leave team. Please try again.");
       throw error;
     }
   },
@@ -223,9 +259,11 @@ export const api = {
     try {
       const response = await axios.delete(`${API_BASE_URL}/teams/${teamId}`);
       console.log("Team delete response:", response.data);
+      toast.success("Team deleted successfully");
       return response.data;
     } catch (error) {
       console.error("Error deleting team:", error);
+      toast.error("Failed to delete team. Please try again.");
       throw error;
     }
   },
@@ -240,7 +278,9 @@ export const api = {
   },
 
   getTournamentMatches: async (tournamentId: number): Promise<Match[]> => {
-    const response = await axios.get(`${API_BASE_URL}/tournaments/${tournamentId}/matches`);
+    const response = await axios.get(
+      `${API_BASE_URL}/tournaments/${tournamentId}/matches`
+    );
     return response.data.matches || [];
   },
 
@@ -320,30 +360,54 @@ export const api = {
     rules: string;
     time_zone: string;
   }): Promise<any> => {
-    const response = await axios.post(`${API_BASE_URL}/tournaments`, tournamentData);
-    return response.data;
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/tournaments`,
+        tournamentData
+      );
+      toast.success("Tournament created successfully!");
+      return response.data;
+    } catch (error) {
+      console.error("Error creating tournament:", error);
+      toast.error("Failed to create tournament. Please try again.");
+      throw error;
+    }
   },
 
   registerTeamInTournament: async (
     tournamentId: number,
     teamId: number
   ): Promise<any> => {
-    const response = await axios.post(
-      `${API_BASE_URL}/tournaments/${tournamentId}/register`,
-      { team_id: teamId }
-    );
-    return response.data;
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/tournaments/${tournamentId}/register`,
+        { team_id: teamId }
+      );
+      toast.success("Team successfully registered for tournament!");
+      return response.data;
+    } catch (error) {
+      console.error("Error registering team for tournament:", error);
+      toast.error("Failed to register team for tournament. Please try again.");
+      throw error;
+    }
   },
 
   updateTournamentStatus: async (
     tournamentId: number,
     status: string
   ): Promise<any> => {
-    const response = await axios.post(
-      `${API_BASE_URL}/tournaments/${tournamentId}/status`,
-      { status }
-    );
-    return response.data;
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/tournaments/${tournamentId}/status`,
+        { status }
+      );
+      toast.success(`Tournament status updated to: ${status}`);
+      return response.data;
+    } catch (error) {
+      console.error("Error updating tournament status:", error);
+      toast.error("Failed to update tournament status. Please try again.");
+      throw error;
+    }
   },
 
   getTournaments: async (): Promise<any> => {
@@ -358,12 +422,16 @@ export const api = {
   },
 
   getUniversityTeams: async (universityId: number): Promise<Team[]> => {
-    const response = await axios.get(`${API_BASE_URL}/university/${universityId}/teams`);
+    const response = await axios.get(
+      `${API_BASE_URL}/university/${universityId}/teams`
+    );
     return response.data.teams || [];
   },
 
   getUniversityById: async (id: number): Promise<University> => {
-    const response = await axios.get(`${API_BASE_URL}/uni/universities-g/${id}`);
+    const response = await axios.get(
+      `${API_BASE_URL}/uni/universities-g/${id}`
+    );
     return response.data.university;
   },
 
@@ -375,16 +443,27 @@ export const api = {
     bannerColor: string;
     bio: string;
   }): Promise<{ university: University; user: any }> => {
-    const response = await axios.post(
-      `${API_BASE_URL}/uni/universities-r`,
-      universityData
-    );
-        console.log(response)
-    return response.data;
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/uni/universities-r`,
+        universityData
+      );
+      console.log(response);
+      toast.success("University created successfully!");
+      return response.data;
+    } catch (error) {
+      console.error("Error creating university:", error);
+      toast.error("Failed to create university. Please try again.");
+      throw error;
+    }
   },
 
-  joinUniversity: async (data: { university_id: number; email: string; }): Promise<{ message: string; user: any }> => {
+  joinUniversity: async (data: {
+    university_id: number;
+    email: string;
+  }): Promise<{ message: string; user: any }> => {
     const response = await axios.post(`${API_BASE_URL}/uni/join`, data);
+    toast.success("Successfully joined university!");
     return response.data;
   },
 

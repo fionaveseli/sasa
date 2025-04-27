@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TabsModel from "@/components/tabs-model";
@@ -10,6 +10,7 @@ import ShadcnTable from "@/components/table";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { api } from "@/services/api";
+import { AppContext } from "@/context/app-context";
 
 interface FormState {
   currentPassword: string;
@@ -29,9 +30,10 @@ enum Tabs {
   RoleTransfer = "Role Transfer",
 }
 
-const allowedViews = ["Security", "Role Transfer"];
-
 export default function SettingsPage() {
+  const { user } = useContext(AppContext); 
+  const userRole = user?.role; // 🔥 userRole available now
+
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -129,13 +131,11 @@ export default function SettingsPage() {
           className="absolute right-3 top-1/2 -translate-y-1/2"
           onClick={() => setShow(!show)}
         >
-          <span className="text-gray-400">
-            {show ? (
-              <Eye size={18} className="text-gray-400" />
-            ) : (
-              <EyeOff size={18} className="text-gray-400" />
-            )}
-          </span>
+          {show ? (
+            <Eye size={18} className="text-gray-400" />
+          ) : (
+            <EyeOff size={18} className="text-gray-400" />
+          )}
         </button>
       </div>
     </div>
@@ -169,13 +169,14 @@ export default function SettingsPage() {
     },
   ];
 
+  // 🔥 TABS will depend on ROLE
   const tabs: TabsType[] = [
     {
       key: "Security",
       value: Tabs.Security,
       label: "Security",
       component: (
-        <div className="bg-white p-4">
+        <div className="bg-white">
           <h2 className="text-2xl font-medium mb-6">Change Password</h2>
           <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
             <div className="space-y-6">
@@ -223,35 +224,42 @@ export default function SettingsPage() {
         </div>
       ),
     },
-    {
-      key: "Role Transfer",
-      value: Tabs.RoleTransfer,
-      label: "Role Transfer",
-      component: (
-        <div className="bg-white p-4">
-          <h2 className="text-2xl font-medium mb-4">Select a New University Manager</h2>
-          <p className="text-gray-600 mb-6">Choose a user from your university to transfer the role to.</p>
+    ...(userRole !== "student" // 🔥 Only show "Role Transfer" if NOT student
+      ? [
+          {
+            key: "Role Transfer",
+            value: Tabs.RoleTransfer,
+            label: "Role Transfer",
+            component: (
+              <div className="bg-white">
+                <h2 className="text-2xl font-medium mb-4">
+                  Select a New University Manager
+                </h2>
+                <p className="text-gray-600 mb-6">
+                  Choose a user from your university to transfer the role to.
+                </p>
 
-          <div className="relative mb-6">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
-            <Input
-              type="text"
-              placeholder="Search by name..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 h-10"
-            />
-          </div>
+                <div className="relative mb-6">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
+                  <Input
+                    type="text"
+                    placeholder="Search by name..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-10 h-10"
+                  />
+                </div>
 
-
-          <ShadcnTable
-  columns={columns}
-  rows={filteredStudents}
-  loading={loadingStudents}
-/>
-        </div>
-      ),
-    },
+                <ShadcnTable
+                  columns={columns}
+                  rows={filteredStudents}
+                  loading={false}
+                />
+              </div>
+            ),
+          },
+        ]
+      : []), // 🔥 if student, don't add this tab
   ];
 
   return (
@@ -261,7 +269,7 @@ export default function SettingsPage() {
         <TabsModel
           tabs={tabs}
           defaultTab={Tabs.Security}
-          viewPermissions={allowedViews}
+          viewPermissions={tabs.map((tab) => tab.value)}
         />
       </div>
     </div>

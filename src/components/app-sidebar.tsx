@@ -70,6 +70,12 @@ export const navItems = [
     icon: Contact,
     roles: ["admin"],
   },
+  {
+    title: "Users",
+    url: "/dashboard/users",
+    icon: Users,
+    roles: ["student", "university_manager", "admin"],
+  },
 ];
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {

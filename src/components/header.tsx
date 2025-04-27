@@ -19,20 +19,20 @@ export default function Header() {
 
         {/* Navigation */}
         <nav className="flex items-center gap-12 text-sm font-medium ml-12">
-          <Link
+          {/* <Link
             href="/"
             className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
             prefetch={false}
           >
             Home
-          </Link>
-          <Link
+          </Link> */}
+          {/* <Link
             href="/vote"
             className="text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-50"
             prefetch={false}
           >
             Vote!
-          </Link>
+          </Link> */}
         </nav>
 
         {/* Right side elements */}

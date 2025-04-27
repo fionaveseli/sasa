@@ -79,10 +79,8 @@ export default function TeamsPage() {
               isUserTeam: userTeamData ? team.id === userTeamData.id : false,
             }));
           } catch (teamError: any) {
-            console.log("User is not part of a team:", teamError.message);
+            console.log("Error getting user team:", teamError.message);
             setUserTeam(null);
-
-            // ✅ ADD: Remove teamId from localStorage if no team
             localStorage.removeItem("teamId");
           }
         }

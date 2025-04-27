@@ -22,6 +22,7 @@ import { AppContext } from "@/context/app-context";
 import { api } from "@/services/api";
 import { useRouter } from "next/navigation";
 import { useContext, useState } from "react";
+import { toast } from "sonner";
 
 export default function CreateTournamentModal() {
   const [isOpen, setIsOpen] = useState(false);
@@ -55,6 +56,7 @@ export default function CreateTournamentModal() {
       }
     } catch (error) {
       console.error("Error creating tournament:", error);
+      // Toast is already handled in the api function
     } finally {
       setIsLoading(false);
     }
