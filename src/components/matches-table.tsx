@@ -1,103 +1,165 @@
-import { Calendar, Clock } from "lucide-react"
-import ShadcnTable from "@/components/table"
-import type { ColumnDef } from "@tanstack/react-table"
-import Image from "next/image"
-import { Badge } from "@/components/ui/badge"
+"use client";
 
-interface Match {
-  id: string
-  date: string
-  time: string
-  teamA: {
-    name: string
-    avatar: string
-    score: number
-  }
-  teamB: {
-    name: string
-    avatar: string
-    score: number
-  }
-}
+import { getSearchParams } from "@/utils/paginationUtils";
+import { useContext, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { AppContext } from "@/context/app-context";
+import { List } from "lucide-react";
+import { Badge } from "./ui/badge";
+import { Button } from "./ui/button";
+import { getMatches } from "@/api/matchesService";
+import Table from "./table";
 
-interface MatchesTableProps {
-  matches: Match[]
-}
+export default function Matches() {
+  const searchParams = useSearchParams();
+  const [page, setPage] = useState<number>(0);
+  const [size, setSize] = useState<number>(10);
+  const [search, setSearch] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(true);
+  const [matches, setMatches] = useState<any[]>([]);
 
-export default function MatchesTable({ matches }: MatchesTableProps) {
-  const columns: ColumnDef<Match>[] = [
+  const columns = [
+    { accessorKey: "id", header: "MATCH ID" },
+    { accessorKey: "round_number", header: "ROUND" },
+    { accessorKey: "match_number", header: "MATCH #" },
+    { accessorKey: "team1_name", header: "TEAM 1" },
+    { accessorKey: "team2_name", header: "TEAM 2" },
     {
-      accessorKey: "date",
-      header: "Date",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4 text-gray-500" />
-          <span>{row.original.date}</span>
-        </div>
-      ),
+      accessorKey: "status",
+      header: "STATUS",
+      cell: ({ row }: { row: { original: any } }) =>
+        getStatusBadge(row.original.status),
     },
     {
-      accessorKey: "time",
-      header: "Time",
-      cell: ({ row }) => (
-        <div className="flex items-center gap-2">
-          <Clock className="h-4 w-4 text-gray-500" />
-          <span>{row.original.time}</span>
-        </div>
-      ),
+      accessorKey: "winner_name",
+      header: "WINNER",
     },
     {
-      accessorKey: "teams",
-      header: "Teams",
-      cell: ({ row }) => (
-        <div className="flex flex-col space-y-4">
-          {/* Team A */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200">
-                <Image
-                  src={row.original.teamA.avatar || "/placeholder.svg"}
-                  alt={row.original.teamA.name}
-                  width={32}
-                  height={32}
-                  className="object-cover"
-                />
-              </div>
-              <span>{row.original.teamA.name}</span>
-            </div>
-            <Badge variant="outline" className="ml-auto">
-              {row.original.teamA.score}
-            </Badge>
-          </div>
-
-          {/* VS */}
-          <div className="flex justify-center">
-            <span className="text-sm font-medium text-gray-500">VS</span>
-          </div>
-
-          {/* Team B */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="h-8 w-8 rounded-full overflow-hidden bg-gray-200">
-                <Image
-                  src={row.original.teamB.avatar || "/placeholder.svg"}
-                  alt={row.original.teamB.name}
-                  width={32}
-                  height={32}
-                  className="object-cover"
-                />
-              </div>
-              <span>{row.original.teamB.name}</span>
-            </div>
-            <Badge variant="outline" className="ml-auto">
-              {row.original.teamB.score}
-            </Badge>
-          </div>
-        </div>
+      accessorKey: "details",
+      header: "DETAILS",
+      cell: ({ row }: { row: { original: any } }) => (
+        <Button
+          className="border-0 hover:text-primary bg-transparent"
+          variant={"outline"}
+          onClick={() => handleViewMatch(row.original.id)}
+        >
+          <List />
+          <span className="sr-only">View match</span>
+        </Button>
       ),
     },
-  ]
+  ];
 
-  return <ShadcnTable columns={columns} rows={matches} disablePaginations={true} />
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "scheduled":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-yellow-100 text-yellow-800 border-yellow-200"
+          >
+            Scheduled
+          </Badge>
+        );
+      case "in_progress":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-blue-100 text-blue-800 border-blue-200"
+          >
+            In Progress
+          </Badge>
+        );
+      case "pending":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-orange-100 text-orange-800 border-orange-200"
+          >
+            Pending
+          </Badge>
+        );
+      case "completed":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-green-100 text-green-800 border-green-200"
+          >
+            Completed
+          </Badge>
+        );
+      case "disputed":
+        return (
+          <Badge
+            variant="outline"
+            className="bg-red-100 text-red-800 border-red-200"
+          >
+            Disputed
+          </Badge>
+        );
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const formatMatches = (data: any[]) => {
+    return data.map((match: any, index: number) => ({
+      id: match.id || index + 1,
+      round_number: match.round_number,
+      match_number: match.match_number,
+      team1_name: match.team1?.name || `Team ${match.team1_id}`,
+      team2_name: match.team2?.name || `Team ${match.team2_id}`,
+      status: match.status,
+      winner_name: match.winner?.name || "-",
+    }));
+  };
+
+  const fetchMatches = async () => {
+    try {
+      setLoading(true);
+      const tournamentId = 1; // TODO: Replace dynamically if needed
+      const token = localStorage.getItem("token") || "";
+      const response = await getMatches(tournamentId, token);
+      setMatches(formatMatches(response.data?.matches ?? []));
+    } catch (error) {
+      console.error("Error fetching matches:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleViewMatch = (matchId: number) => {
+    window.location.href = `/dashboard/matches/${matchId}`;
+  };
+
+  useEffect(() => {
+    const allParams = getSearchParams(searchParams);
+    setPage(Number(allParams.page) || 0);
+    setSize(Number(allParams.size) || 10);
+    setSearch(allParams.search || "");
+  }, [searchParams]);
+
+  useEffect(() => {
+    fetchMatches();
+  }, []);
+
+  return (
+    <div className="w-full h-full flex flex-col gap-4 overflow-auto">
+      <div className="w-full">
+        <div className="overflow-x-auto">
+          <div className="flex justify-end">
+            {/* You can optionally add Create Match Modal or any header buttons */}
+          </div>
+          <Table
+            columns={columns}
+            rows={matches}
+            loading={loading}
+            size={size}
+            page={page}
+            totalRows={matches.length}
+          />
+        </div>
+      </div>
+    </div>
+  );
 }
-

@@ -120,7 +120,10 @@ export default function JoinTeam({
               variant="destructive"
               size="sm"
               className="w-full flex items-center gap-1"
-              onClick={() => setIsDeleteModalOpen(true)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsDeleteModalOpen(true);
+              }}
             >
               <Trash2 size={16} /> Delete Team
             </Button>

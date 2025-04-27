@@ -51,13 +51,15 @@ export default function TeamPage() {
         if (tournamentData) {
           const matches = await api.getTournamentMatches(tournamentData.id);
           // Filter matches related to this team and scheduled in the future
-          const teamMatches = matches.filter(
-            (match) =>
-              (match.team1_id === teamData.id ||
-                match.team2_id === teamData.id) &&
-              new Date(match.scheduled_time) > new Date() &&
-              match.status === "scheduled"
-          );
+          const teamMatches = teamData
+            ? matches.filter(
+                (match) =>
+                  (match.team1_id === teamData.id ||
+                    match.team2_id === teamData.id) &&
+                  new Date(match.scheduled_time) > new Date() &&
+                  match.status === "scheduled"
+              )
+            : [];
           // Sort by date (closest first)
           teamMatches.sort(
             (a, b) =>

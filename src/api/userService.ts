@@ -51,7 +51,7 @@ export const createUniversity = (
     universityAddress: string;
     contactNumber: string;
     logo?: string;
-    banner_color: string;
+    bannerColor: string;
     bio: string;
   },
   token: string
