@@ -401,4 +401,19 @@ export const api = {
 
     return response.data.file.url;
   },
+
+  changePassword: async (data: {
+    currentPassword: string;
+    newPassword: string;
+  }): Promise<any> => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/auth/change-password`, {
+        currentPassword: data.currentPassword,
+        newPassword: data.newPassword
+      });
+      return response.data;
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Failed to change password');
+    }
+  },
 };

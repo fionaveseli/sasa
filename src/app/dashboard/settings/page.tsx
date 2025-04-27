@@ -8,6 +8,8 @@ import { TabsType } from "@/types/dto/TabsType";
 import { Shield, Eye, EyeOff, Search, RefreshCw } from "lucide-react";
 import ShadcnTable from "@/components/table";
 import type { ColumnDef } from "@tanstack/react-table";
+import { toast } from "sonner";
+import { api } from "@/services/api";
 
 interface FormState {
   currentPassword: string;
@@ -72,8 +74,24 @@ export default function SettingsPage() {
       return;
     }
 
-    // Show message that feature is not available yet
-    setError("Password change feature is not available yet");
+    try {
+      await api.changePassword({
+        currentPassword: form.currentPassword,
+        newPassword: form.newPassword
+      });
+      
+      // Clear form after successful password change
+      setForm({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      });
+      
+      // Show success message
+      toast.success("Password changed successfully");
+    } catch (error: any) {
+      setError(error.message || "Failed to change password");
+    }
   };
 
   const renderPasswordField = (
