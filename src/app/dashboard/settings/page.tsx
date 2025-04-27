@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useContext } from "react"; // import useContext
+import { useState, useEffect, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import TabsModel from "@/components/tabs-model";
 import { TabsType } from "@/types/dto/TabsType";
-import { Shield, Eye, EyeOff, Search, RefreshCw } from "lucide-react";
+import { Eye, EyeOff, Search, RefreshCw } from "lucide-react";
 import ShadcnTable from "@/components/table";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { api } from "@/services/api";
-import { AppContext } from "@/context/app-context"; // 🔥 import your AppContext
+import { AppContext } from "@/context/app-context";
 
 interface FormState {
   currentPassword: string;
@@ -31,7 +31,7 @@ enum Tabs {
 }
 
 export default function SettingsPage() {
-  const { user } = useContext(AppContext); // 🔥 get user from context
+  const { user } = useContext(AppContext); 
   const userRole = user?.role; // 🔥 userRole available now
 
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -44,14 +44,30 @@ export default function SettingsPage() {
   });
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [students] = useState<Student[]>([
-    {
-      id: 1,
-      fullName: "Jane Doe",
-      email: "jane.doe@example.com",
-      role: "Team Player",
-    },
-  ]);
+  const [students, setStudents] = useState<Student[]>([]);
+  const [loadingStudents, setLoadingStudents] = useState<boolean>(true);
+  const [universityId, setUniversityId] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const user = await api.getCurrentUser();
+        const universityId = user.user.university_id;
+
+        setUniversityId(universityId);
+
+        const response = await api.getUniversityUsers(universityId);
+        setStudents(response.users || []);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+        toast.error("Failed to fetch university users.");
+      } finally {
+        setLoadingStudents(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const handleChange = (e: { target: { name: string; value: string } }) => {
     const { name, value } = e.target;
@@ -125,16 +141,15 @@ export default function SettingsPage() {
     </div>
   );
 
-  const filteredStudents = students.filter(
-    (student) =>
-      student.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredStudents = students.filter((student) =>
+    student.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    student.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const columns: ColumnDef<Student>[] = [
     { accessorKey: "fullName", header: "NAME" },
     { accessorKey: "email", header: "EMAIL" },
-    { accessorKey: "role", header: "ROLE", cell: () => "Team Player" },
+    { accessorKey: "role", header: "ROLE" },
     {
       id: "roleTransfer",
       header: "ROLE TRANSFER",

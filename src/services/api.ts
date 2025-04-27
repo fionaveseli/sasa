@@ -495,4 +495,9 @@ export const api = {
       throw new Error(error.response?.data?.message || 'Failed to change password');
     }
   },
+
+  getUniversityUsers: async (universityId: number) => {
+    const response = await axios.get(`${API_BASE_URL}/uni/universities/${universityId}/users`);
+    return response.data;
+  },  
 };
