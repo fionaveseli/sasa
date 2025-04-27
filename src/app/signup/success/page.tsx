@@ -8,7 +8,6 @@ export default function SuccessPage() {
   const router = useRouter();
 
   useEffect(() => {
-    // Check if the user has a token and redirect to dashboard if needed
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");

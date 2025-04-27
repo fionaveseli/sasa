@@ -81,7 +81,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="flex justify-center items-center">
-        <p className="text-sm text-gray-400">Copyright</p>
+        <p className="text-sm text-gray-400">Copyright @ RIT KOSOVO</p>
       </div>
     </footer>
   );

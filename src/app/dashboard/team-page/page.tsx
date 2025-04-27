@@ -18,7 +18,6 @@ export default function TeamPage() {
   const router = useRouter();
 
   const handleTeamLeave = () => {
-    // Redirect to teams page after leaving
     setTeam(null);
     router.push("/dashboard/teams");
   };
@@ -178,10 +177,10 @@ export default function TeamPage() {
     <div>
       <div className="flex items-center justify-between border-b rounded-md">
         <div className="flex items-center gap-3 p-4 rounded-md">
-          <img 
-            src={team.logo || "/teamtigers.svg"} 
-            alt="Team Logo" 
-            className="h-10 w-10 object-cover rounded-full" 
+          <img
+            src={team.logo || "/teamtigers.svg"}
+            alt="Team Logo"
+            className="h-10 w-10 object-cover rounded-full"
             onError={(e) => {
               // Fallback if the team logo URL is invalid
               e.currentTarget.src = "/teamtigers.svg";
@@ -218,9 +217,7 @@ export default function TeamPage() {
 
       <div className="mt-6">
         <h2 className="text-xl font-semibold">TEAM BIO</h2>
-        <p className="text-gray-600 mt-2">
-          {team.bio || `Team ${team.name}`}
-        </p>
+        <p className="text-gray-600 mt-2">{team.bio || `Team ${team.name}`}</p>
       </div>
       <Button
         className="mt-6"
