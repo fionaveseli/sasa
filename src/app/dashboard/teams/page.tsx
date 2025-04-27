@@ -70,11 +70,13 @@ export default function TeamsPage() {
             setUserTeam(userTeamData);
 
             // ✅ ADD: Save teamId to localStorage when user has a team
-            localStorage.setItem("teamId", String(userTeamData.id));
+            if (userTeamData) {
+              localStorage.setItem("teamId", String(userTeamData.id));
+            }
 
             allTeams = allTeams.map((team) => ({
               ...team,
-              isUserTeam: team.id === userTeamData.id,
+              isUserTeam: userTeamData ? team.id === userTeamData.id : false,
             }));
           } catch (teamError: any) {
             console.log("User is not part of a team:", teamError.message);
@@ -113,17 +115,18 @@ export default function TeamsPage() {
           handleSearch={(search) => console.log(search)}
           placeholder="Search..."
         />
-        <Button
-          variant="secondary"
-          onClick={() => setIsModalOpen(true)}
-          disabled={userTeam !== null || isUniversityManager || loading}
-        >
-          {isUniversityManager
-            ? "University Managers cannot join teams"
-            : userTeam
-            ? "Already in a team"
-            : "Create Team"}
-        </Button>
+        {!isUniversityManager && (
+          <Button
+            variant="secondary"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsModalOpen(true);
+            }}
+            disabled={userTeam !== null || loading}
+          >
+            {userTeam ? "Already in a team" : "Create Team"}
+          </Button>
+        )}
       </div>
 
       {loading ? (
@@ -175,7 +178,7 @@ export default function TeamsPage() {
 
             {teams.length === 0 && (
               <p className="col-span-full text-center text-gray-500 py-8">
-                No teams found. Be the first to create a team!
+                No teams found.
               </p>
             )}
           </div>

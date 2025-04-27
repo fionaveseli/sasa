@@ -8,7 +8,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createUniversity } from "@/api/userService";
-import { toast } from "sonner"; // <-- ADD THIS
+import { toast } from "sonner";
+import { api } from "@/services/api"; // for logo upload!
 
 export default function AddUniversityForm() {
   const [step, setStep] = useState(1);
@@ -18,12 +19,13 @@ export default function AddUniversityForm() {
     universityName: "",
     universityAddress: "",
     contactNumber: "",
-    logo: "", // optional for now
-    banner_color: "#E7712E",
+    logo: "",
+    bannerColor: "#E7712E",
     bio: "",
     agreeToTerms: false,
   });
 
+  const [logoFile, setLogoFile] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -38,20 +40,44 @@ export default function AddUniversityForm() {
     }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setLogoFile(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = async () => {
     setError(null);
     setLoading(true);
     try {
       const oldToken = localStorage.getItem("TOKEN");
 
-      const res = (await createUniversity(form, oldToken!)) as {
+      let uploadedLogoUrl = "";
+
+      if (logoFile) {
+        try {
+          uploadedLogoUrl = await api.uploadLogo(logoFile);
+          console.log("Logo uploaded:", uploadedLogoUrl);
+        } catch (uploadError) {
+          console.error("Failed to upload logo:", uploadError);
+          setError("Failed to upload logo. Please try again.");
+          setLoading(false);
+          return;
+        }
+      }
+
+      const finalForm = {
+        ...form,
+        logo: uploadedLogoUrl,
+      };
+
+      const res = (await createUniversity(finalForm, oldToken!)) as {
         data: CreateUniversity;
       };
 
       if (res.data) {
         const { user, token: authToken } = res.data;
 
-        // ✅ Save the NEW token and user info
         if (authToken) {
           localStorage.setItem("TOKEN", authToken);
         }
@@ -60,7 +86,6 @@ export default function AddUniversityForm() {
         }
 
         toast.success("University created successfully! 🎓");
-
         router.push("/dashboard");
       } else {
         setError("Something went wrong.");
@@ -153,8 +178,19 @@ export default function AddUniversityForm() {
               <div className="grid grid-cols-2 gap-2">
                 <div>
                   <Label>Logo</Label>
-                  <div className="border h-20 rounded-md flex items-center justify-center text-sm text-gray-400 ">
-                    Drag & drop files or Browse (skip for now)
+                  <div className="border h-20 rounded-md flex items-center justify-center text-sm text-gray-400 relative">
+                    <input
+                      type="file"
+                      id="fileUpload"
+                      className="opacity-0 absolute w-full h-full cursor-pointer"
+                      onChange={handleFileChange}
+                    />
+                    <label
+                      htmlFor="fileUpload"
+                      className="absolute cursor-pointer text-gray-500"
+                    >
+                      {logoFile ? logoFile.name : "Drag & drop files or Browse"}
+                    </label>
                   </div>
                 </div>
                 <div>

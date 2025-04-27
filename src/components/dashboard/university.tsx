@@ -20,6 +20,17 @@ export default function Users() {
   const [tournaments, setTournaments] = useState<any[]>([]);
   const { user } = useContext(AppContext);
   const userRole = user?.role;
+  const [userHasJoinedTournament, setUserHasJoinedTournament] = useState(false);
+  useEffect(() => {
+    const fetchUserTournamentStatus = async () => {
+      const userData = await api.getCurrentUser();
+      if (userData.user?.tournament_id) {
+        setUserHasJoinedTournament(true);
+      }
+    };
+
+    fetchUserTournamentStatus();
+  }, []);
   const columns = [
     { accessorKey: "name", header: "TOURNAMENT NAME" },
     {
@@ -27,11 +38,17 @@ export default function Users() {
       header: "JOIN",
       cell: ({ row }: { row: { original: any } }) => (
         <Button
-          variant={"secondary"}
+          variant="secondary"
           onClick={() => handleJoinTournament(row.original.id)}
-          disabled={userRole === "university_manager"}
+          disabled={
+            userRole === "university_manager" || userHasJoinedTournament
+          }
         >
-          Join
+          {userRole === "university_manager"
+            ? "Not Allowed"
+            : userHasJoinedTournament
+            ? "Already Joined"
+            : "Join"}
         </Button>
       ),
     },
