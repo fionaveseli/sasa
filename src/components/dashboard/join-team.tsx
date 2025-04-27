@@ -5,6 +5,7 @@ import DeleteTeamModal from "../modal/delete-team-modal";
 import JoinTeamModal from "../modal/join-team-modal";
 import LeaveTeamModal from "../modal/leave-team-modal";
 import { Button } from "../ui/button";
+import { Badge } from "../ui/badge";
 
 interface JoinTeamProps {
   teamId: number;
@@ -18,7 +19,7 @@ interface JoinTeamProps {
   onJoinSuccess?: () => void;
   disableJoin?: boolean;
   name: string;
-  sport?: string;
+  bio?: string;
 }
 
 export default function JoinTeam({
@@ -33,7 +34,7 @@ export default function JoinTeam({
   onJoinSuccess,
   disableJoin = false,
   name,
-  sport,
+  bio,
 }: JoinTeamProps) {
   const [isJoinModalOpen, setIsJoinModalOpen] = useState(false);
   const [isLeaveModalOpen, setIsLeaveModalOpen] = useState(false);
@@ -43,12 +44,31 @@ export default function JoinTeam({
   return (
     <>
       <Card
-        className={`p-3 h-full flex flex-col ${
-          isUserTeam ? "border-secondary border-2" : ""
+        onClick={() => {
+          if (isUserTeam || isUniversityManager) {
+            localStorage.setItem(
+              "selectedTeam",
+              JSON.stringify({ id: teamId })
+            );
+            window.location.href = `/dashboard/teams/${teamId}`;
+          }
+        }}
+        className={`p-2 h-full flex flex-col transition-all duration-200 ${
+          isUserTeam
+            ? "border-secondary border-2 cursor-pointer hover:shadow-lg"
+            : "cursor-pointer"
         }`}
       >
-        <CardContent className="flex p-4 pb-1 flex-col items-center text-center gap-2 flex-grow">
-          <div className="flex gap-2 items-center">
+        <CardContent className="flex p-2 pb-1 flex-col items-start text-center gap-2 flex-grow">
+          {isUserTeam && (
+            <Badge
+              className="h-6 px-3 text-xs border-secondary "
+              variant={"outline"}
+            >
+              Your Team
+            </Badge>
+          )}
+          <div className="flex gap-2 items-start">
             <img
               src={image || "/teamtigers.svg"}
               alt="Team Logo"
@@ -58,24 +78,31 @@ export default function JoinTeam({
                 e.currentTarget.src = "/teamtigers.svg";
               }}
             />
-            <h2 className="text-xl font-semibold">
-              {teamName}
-              {isUserTeam && (
-                <span className="ml-2 text-xs bg-secondary text-black px-2 py-1 rounded-full">
-                  Your Team
-                </span>
-              )}
-            </h2>
           </div>
-          <div className="text-start flex flex-col gap-2 flex-grow">
+
+          <div className="text-start flex flex-col gap-2 text-sm text-gray-500">
             <div className="flex flex-col gap-2">
-              <div className="text-sm text-gray-500">
-                University: {university}
-              </div>
-              <div className="text-sm text-gray-500">Team Name: {name}</div>
-              <div className="text-sm text-gray-500">Sport: {sport}</div>
+              <h2 className="text-xl font-semibold text-gray-800">
+                {teamName}
+              </h2>
+
+              <p>
+                <span className="text-gray-700">University:</span> {university}
+              </p>
+
+              <p>
+                <span className="text-gray-700">Members:</span>{" "}
+                <span className="text-primary">{members.join(", ")}</span>
+              </p>
+
+              <p>
+                <span className="text-gray-700">Team Name:</span> {name}
+              </p>
+
+              <p>
+                <span className="text-gray-700">Bio:</span> {bio}
+              </p>
             </div>
-            <p className="text-gray-600">Members: {members.join(", ")}</p>
             <div
               className={`text-sm font-medium px-3 py-1 rounded-md w-fit ${
                 isFull
@@ -102,7 +129,9 @@ export default function JoinTeam({
               <Button
                 variant="secondary"
                 className="w-full"
-                onClick={() => setIsLeaveModalOpen(true)}
+                onClick={(e) => (
+                  e.stopPropagation(), setIsLeaveModalOpen(true)
+                )}
               >
                 Leave Team
               </Button>

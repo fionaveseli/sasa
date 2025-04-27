@@ -17,6 +17,7 @@ import {
   Trophy,
   University,
   Users,
+  Dices,
 } from "lucide-react";
 
 import { NavUser } from "@/components/nav-user";
@@ -32,31 +33,42 @@ import {
 import { NavMain } from "./nav-main";
 import { cn } from "@/lib/utils";
 
-const navItems = [
+export const navItems = [
   {
     title: "Home",
     url: "/dashboard",
     icon: House,
-  },
-  {
-    title: "Teams",
-    url: "/dashboard/teams",
-    icon: Users,
-  },
-  {
-    title: "Tournaments",
-    url: "/dashboard/tournaments",
-    icon: Trophy,
+    roles: ["student", "university_manager", "admin"],
   },
   {
     title: "University Page",
     url: "/dashboard/university",
     icon: University,
+    roles: ["student", "university_manager", "admin"],
+  },
+  {
+    title: "Teams",
+    url: "/dashboard/teams",
+    icon: Users,
+    roles: ["student", "university_manager", "admin"],
+  },
+  {
+    title: "Tournaments",
+    url: "/dashboard/tournaments",
+    icon: Trophy,
+    roles: ["student", "university_manager", "admin"],
+  },
+  {
+    title: "Matches",
+    url: "/dashboard/matches",
+    icon: Dices,
+    roles: ["student", "university_manager", "admin"],
   },
   {
     title: "Team Page",
     url: "/dashboard/team-page",
     icon: Contact,
+    roles: ["admin"],
   },
 ];
 
@@ -67,6 +79,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     name: "User",
     email: "user@example.com",
     avatar: "/avatars/shadcn.jpg",
+    role: "student",
   });
 
   React.useEffect(() => {
@@ -85,6 +98,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             name: user.fullName || "User",
             email: user.email || "user@example.com",
             avatar: user.avatar || "/avatars/shadcn.jpg",
+            role: user.role || "student",
           });
         }
       } catch (error) {
@@ -94,6 +108,10 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
     getUserData();
   }, [open]);
+
+  const filteredNavItems = navItems.filter((item) =>
+    item.roles.includes(userData.role)
+  );
 
   return (
     <Sidebar collapsible="icon" {...props}>
@@ -105,7 +123,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         />
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navItems} />
+        <NavMain items={filteredNavItems} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={userData} />

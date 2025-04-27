@@ -8,6 +8,7 @@ import { api, Team } from "@/services/api";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { MoonLoader } from "react-spinners";
 
 interface ExtendedTeam extends Team {
   isUserTeam?: boolean;
@@ -115,7 +116,7 @@ export default function TeamsPage() {
         <Button
           variant="secondary"
           onClick={() => setIsModalOpen(true)}
-          disabled={userTeam !== null || isUniversityManager}
+          disabled={userTeam !== null || isUniversityManager || loading}
         >
           {isUniversityManager
             ? "University Managers cannot join teams"
@@ -126,7 +127,9 @@ export default function TeamsPage() {
       </div>
 
       {loading ? (
-        <p>Loading teams...</p>
+        <div className="flex items-center justify-center min-h-[60vh] w-full">
+          <MoonLoader size={20} color="#200936" />
+        </div>
       ) : error ? (
         <p className="text-red-500">{error}</p>
       ) : (
@@ -149,7 +152,7 @@ export default function TeamsPage() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {teams.map((team) => (
               <JoinTeam
                 key={team.id}
@@ -165,6 +168,7 @@ export default function TeamsPage() {
                 isUniversityManager={isUniversityManager}
                 onJoinSuccess={handleTeamChange}
                 disableJoin={userTeam !== null}
+                bio={team.bio}
                 name={team.name}
               />
             ))}

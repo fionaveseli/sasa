@@ -69,14 +69,13 @@ export default function CreateTournamentModal() {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  if (userRole === "student") {
+    return null;
+  }
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="submit"
-          className="bg-primary text-white"
-          disabled={userRole === "student"}
-        >
+        <Button variant="submit" className="bg-primary text-white">
           Create Tournament
         </Button>
       </DialogTrigger>
