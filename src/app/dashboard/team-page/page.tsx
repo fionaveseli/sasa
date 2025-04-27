@@ -44,29 +44,34 @@ export default function TeamPage() {
 
         // Get the team data
         const teamData = await api.getCurrentTeam();
-        setTeam(teamData);
 
-        // Get upcoming matches for the team
-        const tournamentData = await api.getCurrentTournament();
-        if (tournamentData) {
-          const matches = await api.getTournamentMatches(tournamentData.id);
-          // Filter matches related to this team and scheduled in the future
-          const teamMatches = teamData
+        if (teamData) {
+          setTeam(teamData);
+
+          // Get upcoming matches for the team
+          const tournamentData = await api.getCurrentTournament();
+          if (tournamentData) {
+            const matches = await api.getTournamentMatches(tournamentData.id);
+            // Filter matches related to this team and scheduled in the future
+            const teamMatches = teamData
             ? matches.filter(
-                (match) =>
-                  (match.team1_id === teamData.id ||
-                    match.team2_id === teamData.id) &&
-                  new Date(match.scheduled_time) > new Date() &&
-                  match.status === "scheduled"
-              )
+                  (match) =>
+                    (match.team1_id === teamData.id ||
+                      match.team2_id === teamData.id) &&
+                    new Date(match.scheduled_time) > new Date() &&
+                    match.status === "scheduled"
+                )
             : [];
-          // Sort by date (closest first)
-          teamMatches.sort(
-            (a, b) =>
-              new Date(a.scheduled_time).getTime() -
-              new Date(b.scheduled_time).getTime()
-          );
-          setUpcomingMatches(teamMatches);
+            // Sort by date (closest first)
+            teamMatches.sort(
+              (a, b) =>
+                new Date(a.scheduled_time).getTime() -
+                new Date(b.scheduled_time).getTime()
+            );
+            setUpcomingMatches(teamMatches);
+          }
+        } else {
+          setTeam(null);
         }
       } catch (error: any) {
         console.error("Error fetching team data:", error);

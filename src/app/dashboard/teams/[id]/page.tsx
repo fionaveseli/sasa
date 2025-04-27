@@ -4,7 +4,7 @@ import CreateTeamModal from "@/components/modal/create-team-modal";
 import LeaveTeamModal from "@/components/modal/leave-team-modal";
 import { Button } from "@/components/ui/button";
 import { Match, Team } from "@/services/api";
-import { Calendar, Trophy } from "lucide-react";
+import { Calendar, Trophy, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MoonLoader } from "react-spinners";
@@ -168,17 +168,25 @@ export default function TeamPage({ params }: TeamPageProps) {
 
   return (
     <div>
-      <div className="flex items-center justify-between border-b rounded-md">
-        <div className="flex items-center gap-3 p-4 rounded-md">
+      <div className="flex items-center justify-between rounded-full p-2">
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => router.push("/dashboard/teams")}
+            className="mr-2"
+            variant="ghost"
+          >
+            <ChevronLeft className="h-8 w-8 color-primary" />
+          </Button>
+
           <img
             src={team.logo || "/teamtigers.svg"}
             alt="Team Logo"
-            className="h-10 w-10 object-cover rounded-full"
+            className="h-24 w-24 object-cover rounded-full"
             onError={(e) => {
               e.currentTarget.src = "/teamtigers.svg";
             }}
           />
-          <h1 className="text-2xl">{team.name}</h1>
+          <h1 className="text-2xl md:text-4xl">{team.name}</h1>
         </div>
       </div>
 

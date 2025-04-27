@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { registerUser } from "@/api/userService";
 import { RegisterUser } from "@/types/dto/users/RegisterUser";
+import { toast } from "sonner";
 
 export function SignupForm({
   className,
@@ -68,13 +69,18 @@ export function SignupForm({
         localStorage.setItem("token", token);
         localStorage.setItem("USER", JSON.stringify(user));
 
+        toast.success("Account created successfully!");
         router.push("/signup/almost-there");
       } else {
-        setError(res.error?.title || "Registration failed.");
+        const errorMsg = res.error?.title || "Registration failed.";
+        setError(errorMsg);
+        toast.error(errorMsg);
       }
     } catch (err) {
       console.error(err);
-      setError("Something went wrong.");
+      const errorMsg = "Something went wrong.";
+      setError(errorMsg);
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
