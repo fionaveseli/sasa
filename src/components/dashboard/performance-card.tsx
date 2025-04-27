@@ -1,79 +1,88 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { RadialBarChart, RadialBar, PolarAngleAxis } from "recharts";
 import { Card, CardContent } from "@/components/ui/card";
-import { PieChart, Pie, Cell } from "recharts";
 
 interface PerformanceCardProps {
-  wins: number;
-  totalMatches: number;
+  stats: {
+    wins: number;
+    totalMatches: number;
+  };
 }
 
-const COLORS = ["#C7FF33", "#4B0082"]; // 0 → wins (lime), 1 → losses (purple)
-
-export default function PerformanceCard({
-  wins,
-  totalMatches,
-}: PerformanceCardProps) {
+export default function PerformanceCard({ stats }: PerformanceCardProps) {
   const [isClient, setIsClient] = useState(false);
+  const [animatedValue, setAnimatedValue] = useState(0);
+  const [isSpinning, setIsSpinning] = useState(true);
 
-  const winPercentage =
-    totalMatches === 0 ? 0 : Math.round((wins / totalMatches) * 100);
-
-  const data =
-    totalMatches === 0
-      ? [{ name: "No Matches", value: 1 }]
-      : [
-          { name: "Wins", value: wins },
-          { name: "Losses", value: totalMatches - wins },
-        ];
-
+  // Handle animation
   useEffect(() => {
     setIsClient(true);
-  }, []);
+    setIsSpinning(true);
+    setAnimatedValue(0);
+
+    const spinTimer = setTimeout(() => {
+      setIsSpinning(false);
+      if (stats.totalMatches === 0) {
+        setAnimatedValue(100);
+      } else {
+        const percentage = (stats.wins / stats.totalMatches) * 100;
+        setAnimatedValue(percentage);
+      }
+    }, 1000);
+
+    return () => clearTimeout(spinTimer);
+  }, [stats]);
+
+  const chartData = [
+    {
+      name: "Wins",
+      value: animatedValue,
+      fill: stats.wins > 0 ? "#4B0082" : "#C7FF33", // Purple when at least one win, green otherwise
+    },
+  ];
 
   return (
-    <Card className="flex flex-col items-center h-full shadow-lg rounded-xl">
+    <Card className="flex flex-col items-center h-full shadow-md rounded-xl">
       <CardContent className="p-4 w-full flex flex-col items-center">
-        <p className="text-lg font-semibold text-[#353535]">
-          Performance Overview
-        </p>
-
         {isClient && (
-          <div className="relative w-44 h-44 flex items-center justify-center">
-            <PieChart width={120} height={120}>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={35}
-                outerRadius={60}
-                startAngle={90}
-                endAngle={-270}
+          <div className={`relative w-[250px] h-[250px] flex items-center justify-center ${isSpinning ? 'animate-spin' : ''}`}>
+            <RadialBarChart
+              width={250}
+              height={250}
+              innerRadius="80%"
+              outerRadius="100%"
+              data={chartData}
+              startAngle={90}
+              endAngle={-270}
+            >
+              <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
+              <RadialBar
+                background={{ fill: "#C7FF33" }}
                 dataKey="value"
-                stroke="none"
-              >
-                {data.map((_, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    /* purple ring when no matches, else normal palette */
-                    fill={
-                      totalMatches === 0
-                        ? COLORS[1] // purple
-                        : COLORS[index % COLORS.length]
-                    }
-                  />
-                ))}
-              </Pie>
-            </PieChart>
-            <p className="absolute text-2xl text-[#353535]">{winPercentage}%</p>
+                cornerRadius={50}
+                animationDuration={1000}
+              />
+            </RadialBarChart>
+
+            <div className="absolute flex flex-col items-center">
+              <span className="text-4xl font-bold text-[#353535]">
+                {stats.wins}
+              </span>
+              <span className="text-sm text-[#353535]">Wins</span>
+            </div>
           </div>
         )}
 
-        <p className="text-sm mt-2 text-[#353535]">
-          <span className="font-bold">{wins} wins</span> out of {totalMatches}{" "}
-          matches
-        </p>
+        <div className="mt-4 text-sm text-[#353535] text-center">
+          <div className="font-medium">
+            {stats.wins} wins out of {stats.totalMatches} matches
+          </div>
+          <div className="text-muted-foreground mt-1">
+            Showing total wins in current tournament
+          </div>
+        </div>
       </CardContent>
     </Card>
   );

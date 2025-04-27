@@ -170,10 +170,10 @@ export default function DashboardPage() {
         </div>
 
         <div className="lg:col-span-1 flex flex-col gap-4">
-          <PerformanceCard
-            wins={stats?.wins || 0}
-            totalMatches={stats?.totalMatches || 0}
-          />
+          <PerformanceCard stats={{
+            wins: stats?.wins || 0,
+            totalMatches: stats?.totalMatches || 0
+          }} />
           {team ? (
             <TeamCard team={team} />
           ) : (

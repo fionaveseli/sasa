@@ -1,4 +1,5 @@
 import axios from "axios";
+import { toast } from "sonner";
 
 const API_BASE_URL = "https://web-production-3dd4c.up.railway.app/api";
 
@@ -64,7 +65,6 @@ export interface Team {
   university_id: number;
   status: string;
   created_by: number;
-  // Additional properties that might be returned by API
   wins?: number;
   bio?: string;
   logo?: string;
@@ -114,10 +114,7 @@ export const api = {
     graduationYear: string;
     timeZone: string;
   }) => {
-    const response = await axios.post(
-      `${API_BASE_URL}/auth/register`,
-      userData
-    );
+    const response = await axios.post(`${API_BASE_URL}/auth/register`, userData);
     return response.data;
   },
 
@@ -127,58 +124,53 @@ export const api = {
   },
 
   // Team endpoints
-  getCurrentTeam: async (): Promise<Team> => {
-    // First get the current user to get their university_id
+  getCurrentTeam: async (): Promise<Team | null> => {
     try {
       const userResponse = await api.getCurrentUser();
-      console.log("User data for team retrieval:", userResponse);
-
-      // The university_id might be nested in the user object
       const universityId = userResponse.user?.university_id;
-      console.log("University ID for team retrieval:", universityId);
-
+      const userRole = userResponse.user?.role;
+  
       if (!universityId) {
-        throw new Error("User is not associated with a university");
+        return null;
       }
-
-      const response = await axios.get(
-        `${API_BASE_URL}/university/${universityId}/teams`
-      );
-
+  
+      const response = await axios.get(`${API_BASE_URL}/university/${universityId}/teams`);
+  
       if (!response.data.teams || response.data.teams.length === 0) {
-        throw new Error("No teams found for this university");
+        if (userRole === "university_manager") {
+          return null;
+        } else {
+          throw new Error("No teams found for this university");
+        }
       }
-
-      // Find the team that the user is a member of
+  
       const userEmail = userResponse.user.email;
       const userTeam = response.data.teams.find(
         (team: any) =>
           team.players &&
           team.players.some((player: any) => player.email === userEmail)
       );
-
+  
       if (!userTeam) {
-        throw new Error("User is not a member of any team");
+        if (userRole === "university_manager") {
+          return null;
+        } else {
+          throw new Error("User is not a member of any team");
+        }
       }
-
+  
       return userTeam;
     } catch (error) {
-      console.error("Error getting current team:", error);
       throw error;
     }
   },
+  
 
-  createTeam: async (teamData: {
-    name: string;
-    bio?: string;
-    logo?: string;
-  }): Promise<Team> => {
-    // First get the current user to get their university_id
+  createTeam: async (teamData: { name: string; bio?: string; logo?: string }): Promise<Team> => {
     try {
       const userResponse = await api.getCurrentUser();
       console.log("User data for team creation:", userResponse);
 
-      // The university_id might be nested in the user object
       const universityId = userResponse.user?.university_id;
       console.log("University ID for team creation:", universityId);
 
@@ -186,8 +178,6 @@ export const api = {
         throw new Error("User is not associated with a university");
       }
 
-      // Based on error, the correct endpoint might be different
-      // Try the following endpoint format instead
       const response = await axios.post(`${API_BASE_URL}/teams`, {
         ...teamData,
         university_id: universityId,
@@ -206,22 +196,21 @@ export const api = {
       const userResponse = await api.getCurrentUser();
       console.log("User data for team joining:", userResponse);
 
-      // Send request to join team
       const response = await axios.post(`${API_BASE_URL}/teams/${teamId}/join`);
-
       console.log("Team join response:", response.data);
+      
+      toast.success("Successfully joined the team!");
       return response.data;
     } catch (error) {
       console.error("Error joining team:", error);
+      toast.error("Failed to join team. Please try again.");
       throw error;
     }
   },
 
   leaveTeam: async (teamId: number): Promise<any> => {
     try {
-      const response = await axios.post(
-        `${API_BASE_URL}/teams/${teamId}/leave`
-      );
+      const response = await axios.post(`${API_BASE_URL}/teams/${teamId}/leave`);
       console.log("Team leave response:", response.data);
       return response.data;
     } catch (error) {
@@ -247,17 +236,14 @@ export const api = {
     if (!response.data.tournaments || response.data.tournaments.length === 0) {
       return null;
     }
-    return response.data.tournaments[0]; // Get the first tournament for now
+    return response.data.tournaments[0];
   },
 
   getTournamentMatches: async (tournamentId: number): Promise<Match[]> => {
-    const response = await axios.get(
-      `${API_BASE_URL}/tournaments/${tournamentId}/matches`
-    );
+    const response = await axios.get(`${API_BASE_URL}/tournaments/${tournamentId}/matches`);
     return response.data.matches || [];
   },
 
-  // Dashboard specific endpoints
   getDashboardStats: async (): Promise<DashboardStats> => {
     const [userResponse, matchesResponse] = await Promise.all([
       api.getCurrentUser(),
@@ -268,15 +254,12 @@ export const api = {
         ),
     ]);
 
-    const userTeams = await api
-      .getCurrentTeam()
-      .then((team) => [team])
-      .catch(() => []);
+    const userTeam = await api.getCurrentTeam();
+    const userTeams = userTeam ? [userTeam] : [];
 
     const totalMatches = matchesResponse.length;
     const userTeamIds = userTeams.map((team) => team.id);
 
-    // Count matches where the user's team is the winner
     const wins = matchesResponse.filter(
       (match) => match.winner_id && userTeamIds.includes(match.winner_id)
     ).length;
@@ -284,7 +267,7 @@ export const api = {
     return {
       wins,
       totalMatches,
-      tournaments: 1, // For now, we'll just show 1 tournament
+      tournaments: 1,
     };
   },
 
@@ -306,7 +289,6 @@ export const api = {
 
     const matches = await api.getTournamentMatches(tournament.id);
 
-    // Group matches by round
     const rounds = matches.reduce((acc: any, match) => {
       if (!acc[match.round_number]) {
         acc[match.round_number] = {
@@ -338,10 +320,7 @@ export const api = {
     rules: string;
     time_zone: string;
   }): Promise<any> => {
-    const response = await axios.post(
-      `${API_BASE_URL}/tournaments`,
-      tournamentData
-    );
+    const response = await axios.post(`${API_BASE_URL}/tournaments`, tournamentData);
     return response.data;
   },
 
@@ -379,16 +358,12 @@ export const api = {
   },
 
   getUniversityTeams: async (universityId: number): Promise<Team[]> => {
-    const response = await axios.get(
-      `${API_BASE_URL}/university/${universityId}/teams`
-    );
+    const response = await axios.get(`${API_BASE_URL}/university/${universityId}/teams`);
     return response.data.teams || [];
   },
 
   getUniversityById: async (id: number): Promise<University> => {
-    const response = await axios.get(
-      `${API_BASE_URL}/uni/universities-g/${id}`
-    );
+    const response = await axios.get(`${API_BASE_URL}/uni/universities-g/${id}`);
     return response.data.university;
   },
 
@@ -407,10 +382,7 @@ export const api = {
     return response.data;
   },
 
-  joinUniversity: async (data: {
-    university_id: number;
-    email: string;
-  }): Promise<{ message: string; user: any }> => {
+  joinUniversity: async (data: { university_id: number; email: string; }): Promise<{ message: string; user: any }> => {
     const response = await axios.post(`${API_BASE_URL}/uni/join`, data);
     return response.data;
   },

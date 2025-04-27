@@ -18,6 +18,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
@@ -27,7 +28,6 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   const { user } = useContext(AppContext);
   const router = useRouter();
 
-  // Get initials from user's full name
   const getInitials = (name: string) => {
     return name
       .split(" ")
@@ -60,40 +60,31 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          {/* Right Section - Notifications and Profile */}
+          {/* Right Section - Notifications and Welcome Message */}
           <div className="flex items-center gap-4">
-            <button className="relative inline-flex items-center justify-center rounded-full w-8 h-8">
-              <Bell className="h-5 w-5 text-white fill-white" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-destructive rounded-full"></span>
-            </button>
-            <DropdownMenu>
+            <div className="text-white text-xs font-light">
+              <div>Enjoy your game</div>
+              <div>{user?.role?.replace(/_/g, " ")}, {user?.fullName}</div>
+            </div>
+            <DropdownMenu modal={false}>
               <DropdownMenuTrigger asChild>
-                <button className="inline-flex items-center justify-center rounded-full w-8 h-8 bg-white text-primary hover:bg-white/90">
-                  <span className="text-sm font-medium">{userInitials}</span>
+                <button className="inline-flex items-center justify-center w-8 h-8 focus:outline-none data-[state=open]:bg-primary rounded-lg">
+                  <Bell className="h-5 w-5 text-white" />
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[200px]">
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onSelect={() => router.push("/dashboard/profile")}
-                >
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  className="cursor-pointer"
-                  onSelect={() => router.push("/dashboard/settings")}
-                >
-                  Settings
-                </DropdownMenuItem>
+              <DropdownMenuContent
+                className="w-[300px] rounded-lg animate-fade-in"
+                align="end"
+                sideOffset={4}
+              >
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex items-center gap-2 px-1 py-1.5">
+                    <p className="text-sm font-semibold">Notifications</p>
+                  </div>
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <div className="p-2 flex justify-center">
-                  <Button
-                    variant="secondary"
-                    className="w-full justify-center text-center"
-                    onClick={logout}
-                  >
-                    Log out
-                  </Button>
+                <div className="p-2 text-sm text-muted-foreground">
+                  No new notifications
                 </div>
               </DropdownMenuContent>
             </DropdownMenu>
