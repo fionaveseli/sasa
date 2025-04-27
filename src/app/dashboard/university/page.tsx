@@ -232,7 +232,7 @@ export default function UniversityPage() {
     <div>
       {/* Hero Banner */}
       <div
-        className="relative w-full h-[200px] flex items-center justify-center overflow-hidden"
+        className="relative w-full h-[200px] flex items-center justify-center overflow-hidden rounded-md"
         style={{ backgroundColor: university?.banner_color || "#e37339" }}
       >
         <div className="flex items-center justify-between bg-[your-banner-color-here] p-4 text-white">

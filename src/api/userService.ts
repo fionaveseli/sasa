@@ -61,3 +61,24 @@ export const createUniversity = (
       Authorization: `Bearer ${token}`,
     },
   });
+
+export type UniversityUser = {
+  id: number;
+  fullName: string;
+  email: string;
+  role: string;
+  graduationYear: number;
+};
+
+export const getUsersFromUniversity = (
+  universityId: number,
+  token: string
+): Promise<ApiResponse<{ users: UniversityUser[] }>> =>
+  getRequest<{ users: UniversityUser[] }>(
+    `api/uni/universities/${universityId}/users`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
