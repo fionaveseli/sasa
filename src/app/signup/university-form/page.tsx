@@ -197,7 +197,7 @@ export default function AddUniversityForm() {
                   <Label>Banner Color</Label>
                   <Input
                     type="text"
-                    name="banner_color"
+                    name="bannerColor"
                     value={form.bannerColor}
                     onChange={handleChange}
                   />
