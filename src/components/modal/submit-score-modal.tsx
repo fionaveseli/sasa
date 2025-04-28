@@ -1,98 +1,70 @@
-import { useState } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
+"use client";
+
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { X } from "lucide-react";
+import { useState } from "react";
+import { submitScore } from "@/api/matchesService";
 
 interface SubmitScoreModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  match: { teamA: string; teamB: string } | null;
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  matchId: number | null;
+  refreshMatches: () => void;
 }
 
 export default function SubmitScoreModal({
-  isOpen,
-  onClose,
-  match,
+  open,
+  setOpen,
+  matchId,
+  refreshMatches,
 }: SubmitScoreModalProps) {
-  const [selectedResult, setSelectedResult] = useState<"WON" | "LOST" | null>(
-    null
-  );
-  const [imageProof, setImageProof] = useState<File | null>(null);
+  const [scoreInput, setScoreInput] = useState<number | "">("");
+  const [proofImage, setProofImage] = useState<File | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files.length > 0) {
-      setImageProof(event.target.files[0]);
+  const handleSubmitScore = async () => {
+    if (!matchId || scoreInput === "") return;
+
+    try {
+      setLoading(true);
+      const token = localStorage.getItem("token") || "";
+      await submitScore(matchId, Number(scoreInput), proofImage, token);
+
+      alert("Score submitted successfully!");
+      setOpen(false);
+      setScoreInput("");
+      setProofImage(null);
+
+      await refreshMatches();
+    } catch (error) {
+      console.error("Error submitting score:", error);
+      alert("Failed to submit score.");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogContent>
-        <DialogHeader className="flex justify-between">
-          <DialogTitle className="text-lg font-semibold">
-            Submit Score for {match?.teamA} vs {match?.teamB}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="flex flex-col gap-4 mt-4">
-          <p className="text-gray-700 text-sm">
-            Select the outcome for your team:
-          </p>
-          <div className="flex gap-4">
-            <Button
-              variant={selectedResult === "WON" ? "default" : "outline"}
-              onClick={() => setSelectedResult("WON")}
-            >
-              WON 🏆
-            </Button>
-            <Button
-              variant={selectedResult === "LOST" ? "default" : "outline"}
-              onClick={() => setSelectedResult("LOST")}
-            >
-              LOST ❌
-            </Button>
-          </div>
-
-          {/* File Upload */}
-          <div>
-            <label className="block text-gray-700 ">
-              Upload image proof <span className="text-red-500">*</span>
-            </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer">
-              <input
-                type="file"
-                className="hidden"
-                id="fileUpload"
-                onChange={handleFileChange}
-              />
-              <label
-                htmlFor="fileUpload"
-                className="cursor-pointer text-gray-500"
-              >
-                {imageProof ? imageProof.name : "Drag & drop files or Browse"}
-              </label>
-            </div>
-          </div>
-        </div>
-
-        <DialogFooter className="mt-4">
-          <Button
-            className="w-full bg-lime-400 text-black font-semibold hover:bg-lime-500"
-            disabled={!selectedResult || !imageProof}
-            onClick={() => {
-              alert("Score Submitted!");
-              onClose();
-            }}
-          >
-            Submit Score
+        <DialogTitle>Submit Score</DialogTitle>
+        <div className="flex flex-col gap-4">
+          <Input
+            type="number"
+            placeholder="Enter your score"
+            value={scoreInput}
+            onChange={(e) => setScoreInput(Number(e.target.value))}
+          />
+          <Input
+            type="file"
+            accept="image/*"
+            onChange={(e) => setProofImage(e.target.files?.[0] || null)}
+          />
+          <Button onClick={handleSubmitScore} disabled={loading}>
+            {loading ? "Submitting..." : "Submit"}
           </Button>
-        </DialogFooter>
+        </div>
       </DialogContent>
     </Dialog>
   );

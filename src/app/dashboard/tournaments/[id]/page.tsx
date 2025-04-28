@@ -1,11 +1,13 @@
 "use client";
 
-import { use, useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
+import { use, useContext, useEffect, useState } from "react";
 import { getMatches } from "@/api/matchesService";
-import { getTournamentDetails } from "@/api/tournamentService";
+import { AppContext } from "@/context/app-context";
 import Table from "@/components/table";
 import { Button } from "@/components/ui/button";
+import TabsModel from "@/components/tabs-model";
+import SubmitScoreModal from "@/components/modal/submit-score-modal";
+import type { TabsType } from "@/types/dto/TabsType";
 import { List } from "lucide-react";
 
 interface TournamentPageProps {
@@ -16,31 +18,33 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
   const unwrappedParams = use(params);
   const { id } = unwrappedParams;
 
-  const [tournament, setTournament] = useState<any>(null);
+  const { user } = useContext(AppContext);
+  const userRole = user?.role || "";
+
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [submitModalOpen, setSubmitModalOpen] = useState(false);
+  const [selectedMatchId, setSelectedMatchId] = useState<number | null>(null);
+
+  const openSubmitScoreModal = (matchId: number) => {
+    setSelectedMatchId(matchId);
+    setSubmitModalOpen(true);
+  };
+
+  const fetchMatches = async () => {
+    try {
+      const token = localStorage.getItem("token") || "";
+      const matchesResponse = await getMatches(Number(id), token);
+      setMatches(formatMatches(matchesResponse.data?.matches ?? []));
+    } catch (error) {
+      console.error("Error fetching matches", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchTournamentAndMatches = async () => {
-      try {
-        const token = localStorage.getItem("token") || "";
-
-        const tournamentResponse = await getTournamentDetails(
-          Number(id),
-          token
-        );
-        const matchesResponse = await getMatches(Number(id), token);
-
-        setTournament(tournamentResponse.data?.tournament ?? null);
-        setMatches(formatMatches(matchesResponse.data?.matches ?? []));
-      } catch (error) {
-        console.error("Error fetching tournament or matches", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchTournamentAndMatches();
+    fetchMatches();
   }, [id]);
 
   const formatMatches = (data: any[]) => {
@@ -63,51 +67,38 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
     switch (status) {
       case "scheduled":
         return (
-          <Badge
-            variant="outline"
-            className="bg-yellow-100 text-yellow-800 border-yellow-200"
-          >
+          <span className="bg-yellow-100 text-yellow-800 border border-yellow-200 rounded px-2 py-1 text-xs">
             Scheduled
-          </Badge>
+          </span>
         );
       case "in_progress":
         return (
-          <Badge
-            variant="outline"
-            className="bg-blue-100 text-blue-800 border-blue-200"
-          >
+          <span className="bg-blue-100 text-blue-800 border border-blue-200 rounded px-2 py-1 text-xs">
             In Progress
-          </Badge>
+          </span>
         );
       case "pending":
         return (
-          <Badge
-            variant="outline"
-            className="bg-orange-100 text-orange-800 border-orange-200"
-          >
+          <span className="bg-orange-100 text-orange-800 border border-orange-200 rounded px-2 py-1 text-xs">
             Pending
-          </Badge>
+          </span>
         );
       case "completed":
         return (
-          <Badge
-            variant="outline"
-            className="bg-green-100 text-green-800 border-green-200"
-          >
+          <span className="bg-green-100 text-green-800 border border-green-200 rounded px-2 py-1 text-xs">
             Completed
-          </Badge>
+          </span>
         );
       case "disputed":
         return (
-          <Badge
-            variant="outline"
-            className="bg-red-100 text-red-800 border-red-200"
-          >
+          <span className="bg-red-100 text-red-800 border border-red-200 rounded px-2 py-1 text-xs">
             Disputed
-          </Badge>
+          </span>
         );
       default:
-        return <Badge variant="outline">{status}</Badge>;
+        return (
+          <span className="border rounded px-2 py-1 text-xs">{status}</span>
+        );
     }
   };
 
@@ -131,54 +122,71 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
       accessorKey: "details",
       header: "DETAILS",
       cell: ({ row }: { row: { original: any } }) => (
-        <Button
-          className="border-0 hover:text-primary bg-transparent"
-          variant="outline"
-          onClick={() => handleViewMatch(row.original.id)}
-        >
-          <List />
-          <span className="sr-only">View match</span>
-        </Button>
+        <div className="flex items-center gap-2">
+          {row.original.status === "in_progress" &&
+            userRole !== "university_manager" && (
+              <Button
+                size="sm"
+                onClick={() => openSubmitScoreModal(row.original.id)}
+              >
+                Submit Score
+              </Button>
+            )}
+        </div>
       ),
     },
   ];
 
+  const tabs: TabsType[] = [
+    {
+      key: "Matches",
+      value: "Matches",
+      label: "Matches",
+      component: (
+        <div className="w-full">
+          <Table
+            columns={columns}
+            rows={matches}
+            loading={loading}
+            size={10}
+            page={0}
+            totalRows={matches.length}
+          />
+        </div>
+      ),
+    },
+    {
+      key: "Bracket",
+      value: "Bracket",
+      label: "Bracket",
+      component: (
+        <div className="w-full flex items-center justify-center p-10">
+          Bracket view coming soon...
+        </div>
+      ),
+    },
+  ];
+
+  const allowedViews = ["Matches", "Bracket"];
+
   if (loading) return <p>Loading...</p>;
-  if (!tournament) return <p>No tournament found.</p>;
 
   return (
     <div className="w-full flex flex-col gap-6 p-4">
-      {/* Tournament Info */}
-      <div className="flex items-center gap-4">
-        <h1 className="text-2xl font-bold">{tournament.name}</h1>
-        <Badge
-          variant="outline"
-          className={
-            tournament.type === "university"
-              ? "bg-green-100 text-green-800 border-green-300"
-              : "bg-blue-100 text-blue-800 border-blue-300"
-          }
-        >
-          {tournament.type === "university" ? "University" : "International"}
-        </Badge>
-      </div>
+      <TabsModel
+        tabs={tabs}
+        defaultTab={"Matches"}
+        viewPermissions={allowedViews}
+      />
 
-      <p>Start Date: {new Date(tournament.start_date).toLocaleDateString()}</p>
-      <p>End Date: {new Date(tournament.end_date).toLocaleDateString()}</p>
-      <p>Status: {tournament.status}</p>
-
-      {/* Matches Section */}
-      <div className="w-full mt-6">
-        <h2 className="text-xl font-semibold mb-4">Matches</h2>
-        <Table
-          columns={columns}
-          rows={matches}
-          loading={loading}
-          size={10}
-          page={0}
-          totalRows={matches.length}
+      {userRole !== "university_manager" && (
+        <SubmitScoreModal
+          open={submitModalOpen}
+          setOpen={setSubmitModalOpen}
+          matchId={selectedMatchId}
+          refreshMatches={fetchMatches}
         />
-      </div>
+      )}
     </div>
   );
 }
