@@ -281,9 +281,10 @@ export const api = {
     const response = await axios.get(
       `${API_BASE_URL}/tournaments/${tournamentId}/matches`
     );
-    return response.data.matches || [];
+    
+    console.log("[getTournamentMatches] response.data:", response.data); 
+    return response.data;
   },
-
   getDashboardStats: async (): Promise<DashboardStats> => {
     const [userResponse, matchesResponse] = await Promise.all([
       api.getCurrentUser(),

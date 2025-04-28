@@ -128,7 +128,7 @@ export default function Tournament() {
       start_date: new Date(tournament.start_date).toLocaleDateString(),
       end_date: new Date(tournament.end_date).toLocaleDateString(),
       status: tournament.status,
-      teams_count: tournament.teams_count || 0,
+      teams_count: tournament.teams?.length || 0,
       details: (
         <div className="flex gap-2">
           {tournament.status === "draft" && (

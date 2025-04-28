@@ -1,13 +1,12 @@
 "use client";
 
 import { getSearchParams } from "@/utils/paginationUtils";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
-import { AppContext } from "@/context/app-context";
 import { List } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { getMatches } from "@/api/matchesService";
+import { getMatches } from "@/api/matchesService"; // ✅ using getMatches
 import Table from "./table";
 
 export default function Matches() {
@@ -117,9 +116,26 @@ export default function Matches() {
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      const tournamentId = 1; // TODO: Replace dynamically if needed
+
+      const tournamentIdParam = searchParams.get("tournamentId");
+      if (!tournamentIdParam) {
+        console.error("Tournament ID is missing from the URL.");
+        return;
+      }
+
+      const tournamentId = parseInt(tournamentIdParam, 10);
+      if (isNaN(tournamentId)) {
+        console.error("Invalid tournament ID.");
+        return;
+      }
+
       const token = localStorage.getItem("token") || "";
-      const response = await getMatches(tournamentId, token);
+      const response = await getMatches(tournamentId, token); // ✅ fetch matches
+      console.log(
+        "[Matches Page] Matches fetched:",
+        response.data?.matches ?? []
+      ); // ✅ print matches
+
       setMatches(formatMatches(response.data?.matches ?? []));
     } catch (error) {
       console.error("Error fetching matches:", error);
@@ -141,14 +157,14 @@ export default function Matches() {
 
   useEffect(() => {
     fetchMatches();
-  }, []);
+  }, [searchParams]); // ✅ refetch if URL changes
 
   return (
     <div className="w-full h-full flex flex-col gap-4 overflow-auto">
       <div className="w-full">
         <div className="overflow-x-auto">
           <div className="flex justify-end">
-            {/* You can optionally add Create Match Modal or any header buttons */}
+            {/* Optional buttons or actions */}
           </div>
           <Table
             columns={columns}
