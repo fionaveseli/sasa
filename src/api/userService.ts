@@ -1,6 +1,4 @@
 import { ApiResponse } from "@/types/dto/Axios";
-import { Token } from "@/types/dto/users/AuthToken";
-
 import { Login } from "@/types/dto/users/Login";
 import { RegisterUser } from "@/types/dto/users/RegisterUser";
 import { Users } from "@/types/dto/users/Users";
@@ -83,9 +81,11 @@ export const getUsersFromUniversity = (
     }
   );
 
-  export const getAllUsersFromAllUniversities = (token: string): Promise<ApiResponse<{ universities: any[] }>> =>
-    getRequest<{ universities: any[] }>("/api/users/all", {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+export const getAllUsersFromAllUniversities = (
+  token: string
+): Promise<ApiResponse<{ universities: any[] }>> =>
+  getRequest<{ universities: any[] }>("/api/users/all", {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });

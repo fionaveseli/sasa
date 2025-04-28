@@ -114,7 +114,7 @@ export const api = {
     fullName: string;
     email: string;
     password: string;
-    graduationYear: string;
+    graduationYear: number;
     timeZone: string;
   }) => {
     const response = await axios.post(
@@ -461,9 +461,8 @@ export const api = {
 
   joinUniversity: async (data: {
     university_id: number;
-    email: string;
   }): Promise<{ message: string; user: any }> => {
-    const response = await axios.post(`${API_BASE_URL}/uni/join`, data);
+    const response = await axios.patch(`${API_BASE_URL}/users/me`, data);
     toast.success("Successfully joined university!");
     return response.data;
   },
@@ -487,18 +486,47 @@ export const api = {
     newPassword: string;
   }): Promise<any> => {
     try {
-      const response = await axios.post(`${API_BASE_URL}/auth/change-password`, {
-        currentPassword: data.currentPassword,
-        newPassword: data.newPassword
-      });
+      const response = await axios.post(
+        `${API_BASE_URL}/auth/change-password`,
+        {
+          currentPassword: data.currentPassword,
+          newPassword: data.newPassword,
+        }
+      );
       return response.data;
     } catch (error: any) {
-      throw new Error(error.response?.data?.message || 'Failed to change password');
+      throw new Error(
+        error.response?.data?.message || "Failed to change password"
+      );
     }
   },
 
   getUniversityUsers: async (universityId: number) => {
-    const response = await axios.get(`${API_BASE_URL}/uni/universities/${universityId}/users`);
+    const response = await axios.get(
+      `${API_BASE_URL}/uni/universities/${universityId}/users`
+    );
     return response.data;
-  },  
+  },
+
+  // Get Manager Candidates
+  getManagerCandidates: async (universityId: number) => {
+    const response = await axios.get(
+      `${API_BASE_URL}/uni/universities/${universityId}/manager-candidates`
+    );
+    return response.data?.users || [];
+  },
+
+  // Transfer University Manager Role
+  transferUniversityManagerRole: async (
+    universityId: number,
+    newManagerId: number
+  ) => {
+    const response = await axios.post(
+      `${API_BASE_URL}/uni/universities/${universityId}/transfer-manager`,
+      {
+        new_manager_user_id: newManagerId,
+      }
+    );
+    return response.data;
+  },
 };
