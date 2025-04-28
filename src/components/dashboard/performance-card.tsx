@@ -39,7 +39,7 @@ export default function PerformanceCard({ stats }: PerformanceCardProps) {
     {
       name: "Wins",
       value: animatedValue,
-      fill: stats.wins > 0 ? "#4B0082" : "#C7FF33", // Purple when at least one win, green otherwise
+      fill: stats.wins > 0 ? "#C7FF33" : "#4B0082" 
     },
   ];
 
@@ -51,7 +51,7 @@ export default function PerformanceCard({ stats }: PerformanceCardProps) {
             <RadialBarChart
               width={250}
               height={250}
-              innerRadius="80%"
+              innerRadius="70%"
               outerRadius="100%"
               data={chartData}
               startAngle={90}
@@ -59,7 +59,7 @@ export default function PerformanceCard({ stats }: PerformanceCardProps) {
             >
               <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
               <RadialBar
-                background={{ fill: "#C7FF33" }}
+                background={{ fill: "#4B0082" }}
                 dataKey="value"
                 cornerRadius={50}
                 animationDuration={1000}

@@ -11,6 +11,7 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
 import { api } from "@/services/api";
 import { AppContext } from "@/context/app-context";
+import TransferRoleModal from "@/components/modal/transfer-role-modal"; // <-- Added
 
 interface FormState {
   currentPassword: string;
@@ -31,8 +32,8 @@ enum Tabs {
 }
 
 export default function SettingsPage() {
-  const { user } = useContext(AppContext); 
-  const userRole = user?.role; // 🔥 userRole available now
+  const { user } = useContext(AppContext);
+  const userRole = user?.role;
 
   const [showCurrentPassword, setShowCurrentPassword] = useState(false);
   const [showNewPassword, setShowNewPassword] = useState(false);
@@ -47,6 +48,8 @@ export default function SettingsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loadingStudents, setLoadingStudents] = useState<boolean>(true);
   const [universityId, setUniversityId] = useState<number | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null); // <-- Added
+  const [isTransferModalOpen, setIsTransferModalOpen] = useState(false); // <-- Added
 
   useEffect(() => {
     const fetchData = async () => {
@@ -141,9 +144,10 @@ export default function SettingsPage() {
     </div>
   );
 
-  const filteredStudents = students.filter((student) =>
-    student.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    student.email.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredStudents = students.filter(
+    (student) =>
+      student.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      student.email.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const columns: ColumnDef<Student>[] = [
@@ -153,23 +157,29 @@ export default function SettingsPage() {
     {
       id: "roleTransfer",
       header: "ROLE TRANSFER",
-      cell: () => (
-        <div className="flex justify-center">
-          <Button
-            variant="secondary"
-            className="px-4 py-1 rounded-full text-sm flex items-center justify-center group"
-          >
-            <RefreshCw
-              size={18}
-              className="transition-transform duration-300 group-hover:rotate-180"
-            />
-          </Button>
-        </div>
-      ),
+      cell: ({ row }) => {
+        const student = row.original;
+        return (
+          <div className="flex justify-center">
+            <Button
+              variant="secondary"
+              className="px-4 py-1 rounded-full text-sm flex items-center justify-center group"
+              onClick={() => {
+                setSelectedStudent(student);
+                setIsTransferModalOpen(true);
+              }}
+            >
+              <RefreshCw
+                size={18}
+                className="transition-transform duration-300 group-hover:rotate-180"
+              />
+            </Button>
+          </div>
+        );
+      },
     },
   ];
 
-  // 🔥 TABS will depend on ROLE
   const tabs: TabsType[] = [
     {
       key: "Security",
@@ -224,7 +234,7 @@ export default function SettingsPage() {
         </div>
       ),
     },
-    ...(userRole !== "student" // 🔥 Only show "Role Transfer" if NOT student
+    ...(userRole !== "student"
       ? [
           {
             key: "Role Transfer",
@@ -253,13 +263,13 @@ export default function SettingsPage() {
                 <ShadcnTable
                   columns={columns}
                   rows={filteredStudents}
-                  loading={false}
+                  loading={loadingStudents}
                 />
               </div>
             ),
           },
         ]
-      : []), // 🔥 if student, don't add this tab
+      : []),
   ];
 
   return (
@@ -272,6 +282,22 @@ export default function SettingsPage() {
           viewPermissions={tabs.map((tab) => tab.value)}
         />
       </div>
+
+      {selectedStudent && universityId && (
+        <TransferRoleModal
+          isOpen={isTransferModalOpen}
+          onClose={() => setIsTransferModalOpen(false)}
+          candidate={{
+            id: selectedStudent.id.toString(),
+            name: selectedStudent.fullName,
+            email: selectedStudent.email,
+          }}
+          onTransferSuccess={() => {
+            setIsTransferModalOpen(false);
+          }}
+          universityId={universityId} // <-- ADD THIS LINE
+        />
+      )}
     </div>
   );
 }
