@@ -30,7 +30,7 @@ export function AppContextProvider({ children }: SettingsProps) {
 
   const publicRoutes = ["/login", "/register"];
 
-  useEffect(() => {
+  const updateUserData = () => {
     const token = getToken(TokenType.USER);
     const userToken: Users | null = token ? (JSON.parse(token) as Users) : null;
 
@@ -46,6 +46,20 @@ export function AppContextProvider({ children }: SettingsProps) {
 
     setUser(userToken);
     setLoading(false);
+  };
+
+  useEffect(() => {
+    updateUserData();
+
+    // Listen for changes to both user data and token in localStorage
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === "USER" || e.key === "token") {
+        updateUserData();
+      }
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, [pathname, router]);
 
   const value: AppContextData = {
