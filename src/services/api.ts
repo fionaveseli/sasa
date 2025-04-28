@@ -528,4 +528,19 @@ export const api = {
     );
     return response.data;
   },
+
+  search: async (query: string, type?: string) => {
+    try {
+      const response = await axios.get(`${API_BASE_URL}/search`, {
+        params: {
+          query,
+          ...(type && { type }),
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Search error:", error);
+      throw error;
+    }
+  },
 };
