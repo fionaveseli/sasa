@@ -114,7 +114,7 @@ export const api = {
     fullName: string;
     email: string;
     password: string;
-    graduationYear: string;
+    graduationYear: number;
     timeZone: string;
   }) => {
     const response = await axios.post(
@@ -460,9 +460,8 @@ export const api = {
 
   joinUniversity: async (data: {
     university_id: number;
-    email: string;
   }): Promise<{ message: string; user: any }> => {
-    const response = await axios.post(`${API_BASE_URL}/uni/join`, data);
+    const response = await axios.patch(`${API_BASE_URL}/users/me`, data);
     toast.success("Successfully joined university!");
     return response.data;
   },
