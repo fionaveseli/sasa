@@ -79,6 +79,7 @@ export default function AdminUsers() {
             size={10}
             page={0}
             totalRows={users.length}
+            disablePaginations={users.length <= 10}
           />
         </div>
       </div>

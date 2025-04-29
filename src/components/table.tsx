@@ -19,6 +19,7 @@ import {
 import Paginations from "./paginations";
 import EmptyState from "./empty-state";
 import { SkeletonLoader } from "./skeleton-loader";
+import { getPaginationNumbers } from "@/utils/paginationUtils";
 
 interface Row {
   [key: string]: any;
@@ -32,6 +33,7 @@ interface TableProps {
   size?: number;
   totalRows?: number;
   disablePaginations?: boolean;
+  onPageChange?: (page: number) => void;
 }
 
 export const ShadcnTable = ({
@@ -42,9 +44,11 @@ export const ShadcnTable = ({
   size = 10,
   totalRows = 0,
   disablePaginations = false,
+  onPageChange,
 }: TableProps) => {
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const totalPages = Math.ceil(totalRows / size);
+  const numbers = getPaginationNumbers(page, totalPages);
 
   const enhancedColumns: ColumnDef<any>[] = [...columns];
 
@@ -60,10 +64,8 @@ export const ShadcnTable = ({
   });
 
   return (
-    <div className="relative min-h-[600px] flex flex-col pt-4">
-      <div
-        className={`flex flex-col flex-grow ${!disablePaginations ? "" : ""}`}
-      >
+    <div className="relative flex flex-col h-full">
+      <div className="flex-1 overflow-auto">
         <Table className="rounded-md">
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
@@ -94,18 +96,21 @@ export const ShadcnTable = ({
           {!loading && (
             <TableBody>
               {rows.length > 0 ? (
-                table.getRowModel().rows.map((row) => (
-                  <TableRow key={row.id} className="hover:bg-gray-50">
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
-                    ))}
-                  </TableRow>
-                ))
+                table
+                  .getRowModel()
+                  .rows.slice(page * size, (page + 1) * size)
+                  .map((row) => (
+                    <TableRow key={row.id} className="hover:bg-gray-50">
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell key={cell.id}>
+                          {flexRender(
+                            cell.column.columnDef.cell,
+                            cell.getContext()
+                          )}
+                        </TableCell>
+                      ))}
+                    </TableRow>
+                  ))
               ) : (
                 <TableRow>
                   <TableCell
@@ -121,14 +126,16 @@ export const ShadcnTable = ({
         </Table>
       </div>
 
-      {!disablePaginations && totalRows > 0 && (
-        <div className="w-full absolute bottom-0 bg-white flex justify-center p-2 pb-0">
-          <Paginations
-            totalPages={totalPages}
-            page={page}
-            handlePage={() => {}}
-            numbers={[]}
-          />
+      {!disablePaginations && totalPages > 0 && (
+        <div className="sticky bottom-0 left-0 right-0 bg-white border-t z-10">
+          <div className="flex justify-center p-2">
+            <Paginations
+              totalPages={totalPages}
+              page={page}
+              handlePage={onPageChange}
+              numbers={numbers}
+            />
+          </div>
         </div>
       )}
     </div>

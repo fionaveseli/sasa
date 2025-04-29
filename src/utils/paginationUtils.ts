@@ -45,12 +45,53 @@ export const getPaginationNumbers = (
   currentPage: number,
   totalPages: number
 ) => {
-  const pageNumbers = [];
-  const startPage = Math.max(1, currentPage);
-  const endPage = Math.min(totalPages, currentPage + 2);
-  for (let i = startPage; i <= endPage; i++) {
-    pageNumbers.push(i);
+  // If there are 10 or fewer items, only show page 1
+  if (totalPages <= 1) {
+    return [1];
   }
+
+  const pageNumbers = [];
+  const maxVisiblePages = 5;
+  
+  if (totalPages <= maxVisiblePages) {
+    // If total pages is less than or equal to max visible pages, show all pages
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+  } else {
+    // Always show first page
+    pageNumbers.push(1);
+    
+    // Calculate start and end of visible pages
+    let startPage = Math.max(2, currentPage - 1);
+    let endPage = Math.min(totalPages - 1, currentPage + 1);
+    
+    // Adjust if we're near the start or end
+    if (currentPage <= 2) {
+      endPage = 4;
+    } else if (currentPage >= totalPages - 1) {
+      startPage = totalPages - 3;
+    }
+    
+    // Add ellipsis if needed
+    if (startPage > 2) {
+      pageNumbers.push(-1); // -1 represents ellipsis
+    }
+    
+    // Add visible pages
+    for (let i = startPage; i <= endPage; i++) {
+      pageNumbers.push(i);
+    }
+    
+    // Add ellipsis if needed
+    if (endPage < totalPages - 1) {
+      pageNumbers.push(-1);
+    }
+    
+    // Always show last page
+    pageNumbers.push(totalPages);
+  }
+  
   return pageNumbers;
 };
 
