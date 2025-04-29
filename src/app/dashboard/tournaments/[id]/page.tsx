@@ -10,6 +10,7 @@ import SubmitScoreModal from "@/components/modal/submit-score-modal";
 import type { TabsType } from "@/types/dto/TabsType";
 // import { Bracket, IRoundProps } from "react-brackets";
 import { MoonLoader } from "react-spinners";
+import { api } from "@/services/api";
 
 interface TournamentPageProps {
   params: Promise<{ id: string }>;
@@ -22,6 +23,7 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
   const { user } = useContext(AppContext);
   const userRole = user?.role || "";
   const userTeamId = user?.id;
+  const [userTeam, setUserTeam] = useState<any>(null);
 
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,6 +51,21 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
   useEffect(() => {
     fetchMatches();
   }, [id]);
+
+  useEffect(() => {
+    const fetchUserTeam = async () => {
+      try {
+        const teamData = await api.getCurrentTeam();
+        if (teamData) {
+          setUserTeam(teamData);
+        }
+      } catch (error) {
+        console.error("Error fetching user's team:", error);
+      }
+    };
+
+    fetchUserTeam();
+  }, []);
 
   const formatMatches = (data: any[]) => {
     return data.map((match, index) => ({
@@ -99,13 +116,24 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
       cell: ({ row }: { row: { original: any } }) => {
         const match = row.original;
         const isTeamInMatch =
-          match.team1_id === userTeamId || match.team2_id === userTeamId;
+          userTeam &&
+          (match.team1_id === userTeam.id || match.team2_id === userTeam.id);
+        const hasSubmittedScore = match.status === "completed";
 
         return (
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={() => openSubmitScoreModal(match.id)}>
-              Submit Score
-            </Button>
+            {isTeamInMatch && !hasSubmittedScore && (
+              <Button
+                size="sm"
+                onClick={() => openSubmitScoreModal(match.id)}
+                className="bg-primary text-white hover:bg-primary/90"
+              >
+                Submit Score
+              </Button>
+            )}
+            {isTeamInMatch && hasSubmittedScore && (
+              <span className="text-sm text-gray-500">Score Submitted</span>
+            )}
           </div>
         );
       },
@@ -185,6 +213,8 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
         setOpen={setSubmitModalOpen}
         matchId={selectedMatchId}
         refreshMatches={fetchMatches}
+        teamName={userTeam?.name || "Your Team"}
+        tournamentName={matches[0]?.tournament?.name || "Tournament"}
       />
     </div>
   );

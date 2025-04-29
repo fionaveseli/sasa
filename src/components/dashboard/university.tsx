@@ -25,17 +25,21 @@ export default function Tournament() {
   const [filteredTeams, setFilteredTeams] = useState<any[]>([]);
   const { user } = useContext(AppContext);
   const userRole = user?.role;
-  const [userHasJoinedTournament, setUserHasJoinedTournament] = useState(false);
+  const [userTeamId, setUserTeamId] = useState<number | null>(null);
 
   useEffect(() => {
-    const fetchUserTournamentStatus = async () => {
-      const userData = await api.getCurrentUser();
-      if (userData.user?.tournament_id) {
-        setUserHasJoinedTournament(true);
+    const fetchUserTeam = async () => {
+      try {
+        const teamData = await api.getCurrentTeam();
+        if (teamData) {
+          setUserTeamId(teamData.id);
+        }
+      } catch (error) {
+        console.error("Error fetching user's team:", error);
       }
     };
 
-    fetchUserTournamentStatus();
+    fetchUserTeam();
   }, []);
 
   const columns = [
@@ -77,25 +81,49 @@ export default function Tournament() {
     {
       accessorKey: "join",
       header: () => <div className="text-center">JOIN</div>,
-      cell: ({ row }: { row: { original: any } }) => (
-        <div className="text-center">
-          <Button
-            variant="secondary"
-            onClick={() => handleJoinTournament(row.original.id)}
-            disabled={
-              userRole === "university_manager" ||
-              userHasJoinedTournament ||
-              filteredTeams.length === 0
-            }
-          >
-            {userRole === "university_manager"
-              ? "Not Allowed"
-              : userHasJoinedTournament
-              ? "Already Joined"
-              : "Join"}
-          </Button>
-        </div>
-      ),
+      cell: ({ row }: { row: { original: any } }) => {
+        const tournament = row.original;
+        const isTeamInTournament = tournament.teams?.some(
+          (team: any) => team.id === userTeamId
+        );
+        const canRegister =
+          tournament.status === "draft" || tournament.status === "registering";
+
+        return (
+          <div className="text-center">
+            <Button
+              variant="secondary"
+              onClick={() => handleJoinTournament(tournament.id)}
+              disabled={
+                userRole === "university_manager" ||
+                isTeamInTournament ||
+                filteredTeams.length === 0 ||
+                !canRegister
+              }
+              className={`
+                ${
+                  userRole === "university_manager" ||
+                  isTeamInTournament ||
+                  filteredTeams.length === 0 ||
+                  !canRegister
+                    ? "opacity-50 cursor-not-allowed bg-gray-300 hover:bg-gray-300"
+                    : ""
+                }
+              `}
+            >
+              {userRole === "university_manager"
+                ? "Not Allowed"
+                : isTeamInTournament
+                ? "Already Joined"
+                : filteredTeams.length === 0
+                ? "No Teams Available"
+                : !canRegister
+                ? "Registration Closed"
+                : "Join"}
+            </Button>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "details",
@@ -190,11 +218,7 @@ export default function Tournament() {
         return;
       }
       const response = await api.getTournaments(universityId);
-      setTournaments(formatTournaments(response.tournaments));
-      setFilteredTournaments(formatTournaments(response.tournaments));
-      console.log("Raw tournaments from API:", response.tournaments);
       const formattedTournaments = formatTournaments(response.tournaments);
-      console.log("Formatted tournaments:", formattedTournaments);
       setTournaments(formattedTournaments);
       setFilteredTournaments(formattedTournaments);
     } catch (error) {
@@ -227,14 +251,9 @@ export default function Tournament() {
       await api.registerTeamInTournament(tournamentId, teamId);
 
       // ✅ Immediately mark that user has joined a tournament
-      setUserHasJoinedTournament(true);
+      fetchTournaments();
 
       toast.success("You have successfully joined the tournament!");
-
-      // Optional: Refresh tournaments after a small delay if you want to update list
-      setTimeout(() => {
-        fetchTournaments();
-      }, 1000);
     } catch (error) {
       console.error("Error joining tournament:", error);
       toast.error("Failed to join the tournament.");
