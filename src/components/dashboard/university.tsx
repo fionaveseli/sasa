@@ -226,11 +226,18 @@ export default function Tournament() {
 
       await api.registerTeamInTournament(tournamentId, teamId);
 
+      // ✅ Immediately mark that user has joined a tournament
+      setUserHasJoinedTournament(true);
+
+      toast.success("You have successfully joined the tournament!");
+
+      // Optional: Refresh tournaments after a small delay if you want to update list
       setTimeout(() => {
         fetchTournaments();
       }, 1000);
     } catch (error) {
       console.error("Error joining tournament:", error);
+      toast.error("Failed to join the tournament.");
     }
   };
 
@@ -253,6 +260,29 @@ export default function Tournament() {
     fetchTournaments();
   }, []);
 
+  useEffect(() => {
+    const fetchTeams = async () => {
+      try {
+        if (!user?.university_id) {
+          console.error("University ID not found for user.");
+          return;
+        }
+
+        const token = localStorage.getItem("token") || "";
+        const teamsResponse = await api.getUniversityTeams(user.university_id);
+
+        console.log("Fetched university teams:", teamsResponse);
+
+        setTeams(teamsResponse || []);
+        setFilteredTeams(teamsResponse || []);
+      } catch (error) {
+        console.error("Error fetching university teams:", error);
+      }
+    };
+
+    fetchTeams();
+  }, [user]);
+
   return (
     <div className="w-full h-full flex flex-col gap-4 overflow-auto">
       <div className="w-full">
@@ -260,44 +290,47 @@ export default function Tournament() {
           <div className="flex justify-end">
             <CreateTournamentModal />
           </div>
-          <SearchInput
-            handleSearch={(search: string) => {
-              const searchTerm = search.toLowerCase().trim();
-              const filtered = teams.filter((team) =>
-                team.name.toLowerCase().includes(searchTerm)
-              );
-              setFilteredTeams(filtered);
-            }}
-            placeholder="Search teams by exact name..."
-          />
-          <SearchInput
-            handleSearch={(search: string) => {
-              const searchTerm = search.toLowerCase().trim();
-              if (searchTerm === "") {
-                setFilteredTournaments(tournaments);
-                return;
-              }
-
-              // Only show tournaments that contain the exact search term
-              const filtered = tournaments.filter((tournament) => {
-                const tournamentName = tournament.name.toLowerCase();
-                // Split the tournament name into words and check if any word matches exactly
-                const tournamentWords = tournamentName.split(/\s+/);
-                const searchWords = searchTerm.split(/\s+/);
-
-                // Check if all search words are found in the tournament name
-                return searchWords.every((searchWord: string) =>
-                  tournamentWords.some((word: string) =>
-                    word.includes(searchWord)
-                  )
+          <div className="flex gap-2 pb-2">
+            <SearchInput
+              handleSearch={(search: string) => {
+                const searchTerm = search.toLowerCase().trim();
+                const filtered = teams.filter((team) =>
+                  team.name.toLowerCase().includes(searchTerm)
                 );
-              });
+                setFilteredTeams(filtered);
+              }}
+              placeholder="Search teams by exact name..."
+            />
+            <SearchInput
+              handleSearch={(search: string) => {
+                const searchTerm = search.toLowerCase().trim();
+                if (searchTerm === "") {
+                  setFilteredTournaments(tournaments);
+                  return;
+                }
 
-              setFilteredTournaments(filtered);
-              setPage(0);
-            }}
-            placeholder="Search tournaments by name..."
-          />
+                // Only show tournaments that contain the exact search term
+                const filtered = tournaments.filter((tournament) => {
+                  const tournamentName = tournament.name.toLowerCase();
+                  // Split the tournament name into words and check if any word matches exactly
+                  const tournamentWords = tournamentName.split(/\s+/);
+                  const searchWords = searchTerm.split(/\s+/);
+
+                  // Check if all search words are found in the tournament name
+                  return searchWords.every((searchWord: string) =>
+                    tournamentWords.some((word: string) =>
+                      word.includes(searchWord)
+                    )
+                  );
+                });
+
+                setFilteredTournaments(filtered);
+                setPage(0);
+              }}
+              placeholder="Search tournaments by name..."
+            />
+          </div>
+
           <Table
             columns={columns}
             rows={filteredTournaments}

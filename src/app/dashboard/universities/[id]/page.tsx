@@ -30,7 +30,7 @@ export default function UniversityDetailPage() {
         const universityData = universitiesResponse.find(
           (uni) => uni.id === universityId
         );
-        
+
         if (!universityData) {
           setError("University not found");
           setLoading(false);
@@ -42,31 +42,31 @@ export default function UniversityDetailPage() {
         const teamsResponse = await api.getUniversityTeams(universityId);
         setTeams(teamsResponse);
 
-        const tournament = await api.getCurrentTournament();
-        if (tournament) {
-          const matches = await api.getTournamentMatches(tournament.id);
-          const universityTeamIds = teamsResponse.map((team) => team.id);
-          const universityMatches = matches.filter(
-            (match) =>
-              universityTeamIds.includes(match.team1_id) ||
-              universityTeamIds.includes(match.team2_id)
-          );
-          setUpcomingMatches(
-            universityMatches.filter((match) => match.status === "scheduled")
-          );
+        // const tournament = await api.getCurrentTournament();
+        // if (tournament) {
+        //   const matches = await api.getTournamentMatches(tournament.id);
+        //   const universityTeamIds = teamsResponse.map((team) => team.id);
+        //   // const universityMatches = matches.filter(
+        //   //   (match) =>
+        //   //     universityTeamIds.includes(match.team1_id) ||
+        //   //     universityTeamIds.includes(match.team2_id)
+        //   // );
+        //   // setUpcomingMatches(
+        //   //   universityMatches.filter((match) => match.status === "scheduled")
+        //   // );
 
-          const completedMatches = matches.filter(
-            (match) => match.status === "completed"
-          );
-          const wins = completedMatches.filter((match) => {
-            const winningTeamId = match.winner_id;
-            return (
-              winningTeamId !== null &&
-              universityTeamIds.includes(winningTeamId)
-            );
-          }).length;
-          setTournamentWins(wins);
-        }
+        //   const completedMatches = matches.filter(
+        //     (match) => match.status === "completed"
+        //   );
+        //   const wins = completedMatches.filter((match) => {
+        //     const winningTeamId = match.winner_id;
+        //     return (
+        //       winningTeamId !== null &&
+        //       universityTeamIds.includes(winningTeamId)
+        //     );
+        //   }).length;
+        //   setTournamentWins(wins);
+        // }
 
         setLoading(false);
       } catch (err) {
@@ -197,4 +197,4 @@ export default function UniversityDetailPage() {
       </div>
     </div>
   );
-} 
+}
