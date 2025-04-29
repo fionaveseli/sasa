@@ -80,47 +80,42 @@ export default function Tournament() {
     },
     {
       accessorKey: "join",
-      header: () => <div className="text-center">JOIN</div>,
+      header: () => <div className="text-center">ACTION</div>,
       cell: ({ row }: { row: { original: any } }) => {
         const tournament = row.original;
         const isTeamInTournament = tournament.teams?.some(
           (team: any) => team.id === userTeamId
         );
-        const canRegister =
-          tournament.status === "draft" || tournament.status === "registering";
 
         return (
           <div className="text-center">
-            <Button
-              variant="secondary"
-              onClick={() => handleJoinTournament(tournament.id)}
-              disabled={
-                userRole === "university_manager" ||
-                isTeamInTournament ||
-                filteredTeams.length === 0 ||
-                !canRegister
-              }
-              className={`
-                ${
-                  userRole === "university_manager" ||
+            {userRole === "university_manager" || userRole === "admin" ? (
+              <Button
+                variant="secondary"
+                onClick={() => handleStartTournament(tournament.id)}
+                disabled={tournament.status !== "registering"}
+              >
+                {tournament.status === "active" ? "Tournament Started" : "Start Tournament"}
+              </Button>
+            ) : (
+              <Button
+                variant="secondary"
+                onClick={() => handleJoinTournament(tournament.id)}
+                disabled={
                   isTeamInTournament ||
                   filteredTeams.length === 0 ||
-                  !canRegister
-                    ? "opacity-50 cursor-not-allowed bg-gray-300 hover:bg-gray-300"
-                    : ""
+                  tournament.status !== "registering"
                 }
-              `}
-            >
-              {userRole === "university_manager"
-                ? "Not Allowed"
-                : isTeamInTournament
-                ? "Already Joined"
-                : filteredTeams.length === 0
-                ? "No Teams Available"
-                : !canRegister
-                ? "Registration Closed"
-                : "Join"}
-            </Button>
+              >
+                {tournament.status === "active"
+                  ? "Tournament Started"
+                  : isTeamInTournament
+                  ? "Already Joined"
+                  : filteredTeams.length === 0
+                  ? "No Teams Available"
+                  : "Join"}
+              </Button>
+            )}
           </div>
         );
       },
@@ -301,6 +296,17 @@ export default function Tournament() {
 
     fetchTeams();
   }, [user]);
+
+  const handleStartTournament = async (tournamentId: number) => {
+    try {
+      await api.updateTournamentStatus(tournamentId, "active");
+      toast.success("Tournament started successfully!");
+      fetchTournaments();
+    } catch (error) {
+      console.error("Error starting tournament:", error);
+      toast.error("Failed to start tournament. Please try again.");
+    }
+  };
 
   return (
     <div className="w-full h-full flex flex-col gap-4 overflow-auto">

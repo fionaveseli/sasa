@@ -405,7 +405,7 @@ export const api = {
     status: string
   ): Promise<any> => {
     try {
-      const response = await axios.post(
+      const response = await axios.patch(
         `${API_BASE_URL}/tournaments/${tournamentId}/status`,
         { status }
       );
