@@ -1,8 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { RadialBarChart, RadialBar, PolarAngleAxis } from "recharts";
-import { Card, CardContent } from "@/components/ui/card";
+import { TrendingUp } from "lucide-react";
+import {
+  Label,
+  PolarGrid,
+  PolarRadiusAxis,
+  RadialBar,
+  RadialBarChart,
+} from "recharts";
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { ChartConfig, ChartContainer } from "../ui/chart";
 
 interface PerformanceCardProps {
   stats: {
@@ -11,79 +26,97 @@ interface PerformanceCardProps {
   };
 }
 
-export default function PerformanceCard({ stats }: PerformanceCardProps) {
-  const [isClient, setIsClient] = useState(false);
-  const [animatedValue, setAnimatedValue] = useState(0);
-  const [isSpinning, setIsSpinning] = useState(true);
-
-  // Handle animation
-  useEffect(() => {
-    setIsClient(true);
-    setIsSpinning(true);
-    setAnimatedValue(0);
-
-    const spinTimer = setTimeout(() => {
-      setIsSpinning(false);
-      if (stats.totalMatches === 0) {
-        setAnimatedValue(100);
-      } else {
-        const percentage = (stats.wins / stats.totalMatches) * 100;
-        setAnimatedValue(percentage);
-      }
-    }, 1000);
-
-    return () => clearTimeout(spinTimer);
-  }, [stats]);
+export function PerformanceCard({ stats }: PerformanceCardProps) {
+  const percentage =
+    stats.totalMatches === 0 ? 0 : (stats.wins / stats.totalMatches) * 100;
 
   const chartData = [
     {
-      name: "Wins",
-      value: animatedValue,
-      fill: stats.wins > 0 ? "#C7FF33" : "#4B0082" 
+      browser: "wins",
+      visitors: percentage,
+      fill: stats.wins > 0 ? "#C7FF33" : "#4B0082",
     },
   ];
 
+  const chartConfig = {
+    visitors: {
+      label: "Wins",
+    },
+    wins: {
+      label: "Wins",
+      color: stats.wins > 0 ? "#C7FF33" : "#4B0082",
+    },
+  } satisfies ChartConfig;
+
   return (
-    <Card className="flex flex-col items-center h-full shadow-md rounded-xl">
-      <CardContent className="p-4 w-full flex flex-col items-center">
-        {isClient && (
-          <div className={`relative w-[250px] h-[250px] flex items-center justify-center ${isSpinning ? 'animate-spin' : ''}`}>
-            <RadialBarChart
-              width={250}
-              height={250}
-              innerRadius="70%"
-              outerRadius="100%"
-              data={chartData}
-              startAngle={90}
-              endAngle={-270}
-            >
-              <PolarAngleAxis type="number" domain={[0, 100]} tick={false} />
-              <RadialBar
-                background={{ fill: "#4B0082" }}
-                dataKey="value"
-                cornerRadius={50}
-                animationDuration={1000}
+    <Card className="flex flex-col">
+      <CardHeader className="items-center pb-0">
+        <CardTitle>Performance</CardTitle>
+        <CardDescription>Current Tournament</CardDescription>
+      </CardHeader>
+      <CardContent className="flex-1 pb-0">
+        <ChartContainer
+          config={chartConfig}
+          className="mx-auto aspect-square max-h-[250px]"
+        >
+          <RadialBarChart
+            data={chartData}
+            startAngle={0}
+            endAngle={250}
+            innerRadius={80}
+            outerRadius={110}
+          >
+            <PolarGrid
+              gridType="circle"
+              radialLines={false}
+              stroke="none"
+              className="first:fill-muted last:fill-background"
+              polarRadius={[86, 74]}
+            />
+            <RadialBar dataKey="visitors" background cornerRadius={10} />
+            <PolarRadiusAxis tick={false} tickLine={false} axisLine={false}>
+              <Label
+                content={({ viewBox }) => {
+                  if (viewBox && "cx" in viewBox && "cy" in viewBox) {
+                    return (
+                      <text
+                        x={viewBox.cx}
+                        y={viewBox.cy}
+                        textAnchor="middle"
+                        dominantBaseline="middle"
+                      >
+                        <tspan
+                          x={viewBox.cx}
+                          y={viewBox.cy}
+                          className="fill-foreground text-4xl font-bold"
+                        >
+                          {stats.wins}
+                        </tspan>
+                        <tspan
+                          x={viewBox.cx}
+                          y={(viewBox.cy || 0) + 24}
+                          className="fill-muted-foreground"
+                        >
+                          Wins
+                        </tspan>
+                      </text>
+                    );
+                  }
+                }}
               />
-            </RadialBarChart>
-
-            <div className="absolute flex flex-col items-center">
-              <span className="text-4xl font-bold text-[#353535]">
-                {stats.wins}
-              </span>
-              <span className="text-sm text-[#353535]">Wins</span>
-            </div>
-          </div>
-        )}
-
-        <div className="mt-4 text-sm text-[#353535] text-center">
-          <div className="font-medium">
-            {stats.wins} wins out of {stats.totalMatches} matches
-          </div>
-          <div className="text-muted-foreground mt-1">
-            Showing total wins in current tournament
-          </div>
-        </div>
+            </PolarRadiusAxis>
+          </RadialBarChart>
+        </ChartContainer>
       </CardContent>
+      <CardFooter className="flex-col gap-2 text-sm">
+        <div className="flex items-center gap-2 font-medium leading-none">
+          Trending up by {percentage.toFixed(1)}%{" "}
+          <TrendingUp className="h-4 w-4" />
+        </div>
+        <div className="leading-none text-muted-foreground">
+          {stats.wins} wins out of {stats.totalMatches} matches
+        </div>
+      </CardFooter>
     </Card>
   );
 }

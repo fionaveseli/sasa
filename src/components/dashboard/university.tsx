@@ -165,7 +165,7 @@ export default function Tournament() {
       start_date: new Date(tournament.start_date).toLocaleDateString(),
       end_date: new Date(tournament.end_date).toLocaleDateString(),
       status: tournament.status,
-      teams_count: tournament.teams_count || 0,
+      teams_count: tournament.teams?.length || 0,
       details: (
         <div className="flex gap-2">
           {tournament.status === "draft" && (
@@ -184,10 +184,17 @@ export default function Tournament() {
   const fetchTournaments = async () => {
     try {
       setLoading(true);
-      const response = await api.getTournaments();
-      console.log('Raw tournaments from API:', response.tournaments);
+      const universityId = user?.university_id;
+      if (!universityId) {
+        console.error("University ID not found for user.");
+        return;
+      }
+      const response = await api.getTournaments(universityId);
+      setTournaments(formatTournaments(response.tournaments));
+      setFilteredTournaments(formatTournaments(response.tournaments));
+      console.log("Raw tournaments from API:", response.tournaments);
       const formattedTournaments = formatTournaments(response.tournaments);
-      console.log('Formatted tournaments:', formattedTournaments);
+      console.log("Formatted tournaments:", formattedTournaments);
       setTournaments(formattedTournaments);
       setFilteredTournaments(formattedTournaments);
     } catch (error) {
@@ -249,7 +256,7 @@ export default function Tournament() {
   return (
     <div className="w-full h-full flex flex-col gap-4 overflow-auto">
       <div className="w-full">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto flex-col">
           <div className="flex justify-end">
             <CreateTournamentModal />
           </div>
@@ -266,24 +273,26 @@ export default function Tournament() {
           <SearchInput
             handleSearch={(search: string) => {
               const searchTerm = search.toLowerCase().trim();
-              if (searchTerm === '') {
+              if (searchTerm === "") {
                 setFilteredTournaments(tournaments);
                 return;
               }
-              
+
               // Only show tournaments that contain the exact search term
               const filtered = tournaments.filter((tournament) => {
                 const tournamentName = tournament.name.toLowerCase();
                 // Split the tournament name into words and check if any word matches exactly
                 const tournamentWords = tournamentName.split(/\s+/);
                 const searchWords = searchTerm.split(/\s+/);
-                
+
                 // Check if all search words are found in the tournament name
-                return searchWords.every((searchWord: string) => 
-                  tournamentWords.some((word: string) => word.includes(searchWord))
+                return searchWords.every((searchWord: string) =>
+                  tournamentWords.some((word: string) =>
+                    word.includes(searchWord)
+                  )
                 );
               });
-              
+
               setFilteredTournaments(filtered);
               setPage(0);
             }}

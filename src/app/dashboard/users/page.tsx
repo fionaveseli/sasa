@@ -62,7 +62,7 @@ export default function UniversityUsers() {
   return (
     <div className="w-full h-full flex flex-col gap-4 overflow-auto">
       <div className="w-full">
-        <h1 className="text-2xl font-normal">Users</h1>
+        <h1 className="text-2xl font-normal pb-3">Users</h1>
         <div className="overflow-x-auto">
           <Table
             columns={columns}

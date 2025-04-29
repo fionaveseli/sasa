@@ -4,12 +4,14 @@ import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import BracketCard from "@/components/dashboard/bracket-placeholder";
 import MatchCard from "@/components/dashboard/match-card";
-import PerformanceCard from "@/components/dashboard/performance-card";
+
 import TeamCard from "@/components/dashboard/team-card";
 import { api, DashboardStats, Match, Team, BracketRound } from "@/services/api";
 import { MoonLoader } from "react-spinners";
 import BannerCard from "@/components/dashboard/banner-card";
 import { AppContext } from "@/context/app-context";
+import StatsCard from "@/components/dashboard/stats-card";
+import { PerformanceCard } from "@/components/dashboard/performance-card";
 
 export default function DashboardPage() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -136,7 +138,7 @@ export default function DashboardPage() {
               role={role}
             />
           </div>
-          {/* <StatsCard
+          <StatsCard
             title="No. of Wins"
             value={stats?.wins.toString() || "0"}
           />
@@ -147,7 +149,7 @@ export default function DashboardPage() {
           <StatsCard
             title="Tournaments"
             value={stats?.tournaments.toString() || "0"}
-          /> */}
+          />
 
           <div className="col-span-1 sm:col-span-2 md:col-span-3">
             {upcomingMatch ? (

@@ -30,69 +30,6 @@ enum Tabs {
 }
 
 export default function MatchesPage() {
-  const [matches] = useState<Match[]>([
-    {
-      id: "1",
-      date: "01/12/2024",
-      time: "17:00",
-      teamA: {
-        name: "Team A",
-        avatar: "/placeholder.svg",
-        score: 56,
-      },
-      teamB: {
-        name: "Team B",
-        avatar: "/placeholder.svg",
-        score: 12,
-      },
-    },
-    {
-      id: "2",
-      date: "01/12/2024",
-      time: "17:00",
-      teamA: {
-        name: "Team A",
-        avatar: "/placeholder.svg",
-        score: 56,
-      },
-      teamB: {
-        name: "Team B",
-        avatar: "/placeholder.svg",
-        score: 12,
-      },
-    },
-    {
-      id: "3",
-      date: "01/12/2024",
-      time: "17:00",
-      teamA: {
-        name: "Team A",
-        avatar: "/placeholder.svg",
-        score: 56,
-      },
-      teamB: {
-        name: "Team B",
-        avatar: "/placeholder.svg",
-        score: 12,
-      },
-    },
-    {
-      id: "4",
-      date: "01/12/2024",
-      time: "17:00",
-      teamA: {
-        name: "Team A",
-        avatar: "/placeholder.svg",
-        score: 56,
-      },
-      teamB: {
-        name: "Team B",
-        avatar: "/placeholder.svg",
-        score: 12,
-      },
-    },
-  ]);
-
   const tabs: TabsType[] = [
     {
       key: "Matches",
