@@ -9,6 +9,7 @@ import TabsModel from "@/components/tabs-model";
 import SubmitScoreModal from "@/components/modal/submit-score-modal";
 import type { TabsType } from "@/types/dto/TabsType";
 import { List } from "lucide-react";
+import { Bracket, IRoundProps } from "react-brackets";
 
 interface TournamentPageProps {
   params: Promise<{ id: string }>;
@@ -35,7 +36,7 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
     try {
       const token = localStorage.getItem("token") || "";
       const matchesResponse = await getMatches(Number(id), token);
-      setMatches(formatMatches(matchesResponse.data?.matches ?? []));
+      setMatches(matchesResponse.data?.matches ?? []);
     } catch (error) {
       console.error("Error fetching matches", error);
     } finally {
@@ -137,6 +138,28 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
     },
   ];
 
+  const groupedMatchesByRound = matches.reduce((acc: any, match: any) => {
+    if (!acc[match.round_number]) {
+      acc[match.round_number] = [];
+    }
+    acc[match.round_number].push({
+      id: match.id,
+      date: new Date().toISOString(),
+      teams: [
+        { name: match.team1?.name || `Team ${match.team1_id}` },
+        { name: match.team2?.name || `Team ${match.team2_id}` },
+      ],
+    });
+    return acc;
+  }, {});
+
+  const rounds: IRoundProps[] = Object.keys(groupedMatchesByRound)
+    .sort((a, b) => Number(a) - Number(b))
+    .map((roundNumber) => ({
+      title: `Round ${roundNumber}`,
+      seeds: groupedMatchesByRound[roundNumber],
+    }));
+
   const tabs: TabsType[] = [
     {
       key: "Matches",
@@ -146,7 +169,7 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
         <div className="w-full">
           <Table
             columns={columns}
-            rows={matches}
+            rows={formatMatches(matches)}
             loading={loading}
             size={10}
             page={0}
@@ -160,8 +183,8 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
       value: "Bracket",
       label: "Bracket",
       component: (
-        <div className="w-full flex items-center justify-center p-10">
-          Bracket view coming soon...
+        <div className="w-full overflow-x-auto pt-4">
+          <Bracket rounds={rounds} />
         </div>
       ),
     },
