@@ -197,6 +197,10 @@ export default function Tournament() {
     window.location.href = `/dashboard/tournaments/${tournamentId}`;
   };
 
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
   useEffect(() => {
     const allParams = getSearchParams(searchParams);
     setPage(Number(allParams.page) || 0);
@@ -230,6 +234,7 @@ export default function Tournament() {
                 tournament.name.toLowerCase().includes(search.toLowerCase())
               );
               setFilteredTournaments(filtered);
+              setPage(0); // Reset to first page when searching
             }}
             placeholder="Search tournaments..."
           />
@@ -240,6 +245,8 @@ export default function Tournament() {
             size={size}
             page={page}
             totalRows={filteredTournaments.length}
+            onPageChange={handlePageChange}
+            disablePaginations={filteredTournaments.length <= 10}
           />
         </div>
       </div>
