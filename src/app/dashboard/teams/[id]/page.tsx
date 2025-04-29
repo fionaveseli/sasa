@@ -21,6 +21,7 @@ export default function TeamPage({ params }: TeamPageProps) {
   const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isTeamMember, setIsTeamMember] = useState(false);
   const router = useRouter();
 
   const handleTeamLeave = () => {
@@ -43,9 +44,9 @@ export default function TeamPage({ params }: TeamPageProps) {
           process.env.NEXT_PUBLIC_API_URL ||
           "https://web-production-3dd4c.up.railway.app/api";
 
-        // Fetch ALL university teams
-        const teamsResponse = await fetch(
-          `${API_BASE_URL}/university/1/teams`,
+        // Fetch current user to check team membership
+        const userResponse = await fetch(
+          `${API_BASE_URL}/users/me`,
           {
             method: "GET",
             headers: {
@@ -55,20 +56,66 @@ export default function TeamPage({ params }: TeamPageProps) {
           }
         );
 
-        if (!teamsResponse.ok) {
-          throw new Error("Failed to fetch teams");
+        if (!userResponse.ok) {
+          throw new Error("Failed to fetch user data");
         }
 
-        const teamsJson = await teamsResponse.json();
-        const foundTeam = teamsJson.teams.find(
-          (team: Team) => team.id === Number(id)
+        const userData = await userResponse.json();
+
+        // Fetch all universities
+        const universitiesResponse = await fetch(
+          `${API_BASE_URL}/uni/universities-g`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
         );
+
+        if (!universitiesResponse.ok) {
+          throw new Error("Failed to fetch universities");
+        }
+
+        const universities = await universitiesResponse.json();
+        
+        // Try to find the team in each university
+        let foundTeam = null;
+        for (const university of universities.universities) {
+          const teamsResponse = await fetch(
+            `${API_BASE_URL}/university/${university.id}/teams`,
+            {
+              method: "GET",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}`,
+              },
+            }
+          );
+
+          if (teamsResponse.ok) {
+            const teamsJson = await teamsResponse.json();
+            const team = teamsJson.teams.find(
+              (team: Team) => team.id === Number(id)
+            );
+            if (team) {
+              foundTeam = team;
+              break;
+            }
+          }
+        }
 
         if (!foundTeam) {
           throw new Error("Team not found");
         }
 
         setTeam(foundTeam);
+
+        // Check if current user is a team member
+        const isMember = foundTeam.players.some(
+          (player) => player.email === userData.user.email
+        );
+        setIsTeamMember(isMember);
 
         // Fetch tournament matches
         const tournamentResponse = await fetch(
@@ -215,21 +262,25 @@ export default function TeamPage({ params }: TeamPageProps) {
         <p className="text-gray-600 mt-2">{team.bio || `Team ${team.name}`}</p>
       </div>
 
-      <Button
-        className="mt-6"
-        variant={"secondary"}
-        onClick={() => setIsModalOpen(true)}
-      >
-        Leave Team
-      </Button>
+      {isTeamMember && (
+        <>
+          <Button
+            className="mt-6"
+            variant={"secondary"}
+            onClick={() => setIsModalOpen(true)}
+          >
+            Leave Team
+          </Button>
 
-      <LeaveTeamModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        teamName={team.name}
-        teamId={team.id}
-        onSuccess={handleTeamLeave}
-      />
+          <LeaveTeamModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            teamName={team.name}
+            teamId={team.id}
+            onSuccess={handleTeamLeave}
+          />
+        </>
+      )}
     </div>
   );
 }

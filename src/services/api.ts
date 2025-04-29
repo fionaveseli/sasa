@@ -268,6 +268,13 @@ export const api = {
     }
   },
 
+  getUniversityTeams: async (universityId: number): Promise<Team[]> => {
+    const response = await axios.get(
+      `${API_BASE_URL}/university/${universityId}/teams`
+    );
+    return response.data.teams || [];
+  },
+
   // Tournament endpoints
   getCurrentTournament: async () => {
     const response = await axios.get(`${API_BASE_URL}/tournaments`);
@@ -425,13 +432,6 @@ export const api = {
   getUniversities: async (): Promise<University[]> => {
     const response = await axios.get(`${API_BASE_URL}/uni/universities-g`);
     return response.data.universities;
-  },
-
-  getUniversityTeams: async (universityId: number): Promise<Team[]> => {
-    const response = await axios.get(
-      `${API_BASE_URL}/university/${universityId}/teams`
-    );
-    return response.data.teams || [];
   },
 
   getUniversityById: async (id: number): Promise<University> => {
