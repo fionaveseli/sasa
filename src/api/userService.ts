@@ -43,7 +43,7 @@ export const checkIfUniversitiesExist = async (
   }
 };
 
-export const createUniversity = (
+export const createUniversity = async (
   data: {
     universityName: string;
     universityAddress: string;
@@ -53,12 +53,33 @@ export const createUniversity = (
     bio: string;
   },
   token: string
-) =>
-  postRequest("api/uni/universities-r", data, {
+) => {
+  const response = await postRequest<
+    {
+      university: University;
+      user: {
+        id: number;
+        fullName: string;
+        email: string;
+        role: string;
+        university_id: number;
+      };
+      token: string;
+    },
+    typeof data
+  >("api/uni/universities-r", data, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
+
+  if (response.data?.user && response.data?.token) {
+    localStorage.setItem("USER", JSON.stringify(response.data.user));
+    localStorage.setItem("token", response.data.token);
+  }
+
+  return response;
+};
 
 export type UniversityUser = {
   id: number;

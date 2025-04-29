@@ -16,6 +16,7 @@ export default function Matches() {
   const [search, setSearch] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [matches, setMatches] = useState<any[]>([]);
+  const [totalRows, setTotalRows] = useState<number>(0);
 
   const columns = [
     { accessorKey: "id", header: "MATCH ID" },
@@ -130,13 +131,11 @@ export default function Matches() {
       }
 
       const token = localStorage.getItem("token") || "";
-      const response = await getMatches(tournamentId, token); // ✅ fetch matches
-      console.log(
-        "[Matches Page] Matches fetched:",
-        response.data?.matches ?? []
-      ); // ✅ print matches
-
+      const response = await getMatches(tournamentId, token);
       setMatches(formatMatches(response.data?.matches ?? []));
+      const formattedMatches = formatMatches(response.data?.matches ?? []);
+      setMatches(formattedMatches);
+      setTotalRows(formattedMatches.length);
     } catch (error) {
       console.error("Error fetching matches:", error);
     } finally {
@@ -146,6 +145,10 @@ export default function Matches() {
 
   const handleViewMatch = (matchId: number) => {
     window.location.href = `/dashboard/matches/${matchId}`;
+  };
+
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
   };
 
   useEffect(() => {
@@ -172,7 +175,8 @@ export default function Matches() {
             loading={loading}
             size={size}
             page={page}
-            totalRows={matches.length}
+            totalRows={totalRows}
+            onPageChange={handlePageChange}
           />
         </div>
       </div>

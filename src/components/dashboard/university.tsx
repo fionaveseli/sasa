@@ -39,47 +39,78 @@ export default function Tournament() {
   }, []);
 
   const columns = [
-    { accessorKey: "name", header: "TOURNAMENT NAME" },
     {
-      accessorKey: "join",
-      header: "JOIN",
+      accessorKey: "name",
+      header: () => <div className="text-center">TOURNAMENT NAME</div>,
       cell: ({ row }: { row: { original: any } }) => (
-        <Button
-          variant="secondary"
-          onClick={() => handleJoinTournament(row.original.id)}
-          disabled={
-            userRole === "university_manager" || userHasJoinedTournament || filteredTeams.length === 0
-          }
-        >
-          {userRole === "university_manager"
-            ? "Not Allowed"
-            : userHasJoinedTournament
-            ? "Already Joined"
-            : "Join"}
-        </Button>
+        <div className="text-left">{row.original.name}</div>
       ),
     },
-    { accessorKey: "start_date", header: "START DATE" },
-    { accessorKey: "end_date", header: "END DATE" },
+    {
+      accessorKey: "start_date",
+      header: () => <div className="text-center">START DATE</div>,
+      cell: ({ row }: { row: { original: any } }) => (
+        <div className="text-center">{row.original.start_date}</div>
+      ),
+    },
+    {
+      accessorKey: "end_date",
+      header: () => <div className="text-center">END DATE</div>,
+      cell: ({ row }: { row: { original: any } }) => (
+        <div className="text-center">{row.original.end_date}</div>
+      ),
+    },
     {
       accessorKey: "status",
-      header: "STATUS",
-      cell: ({ row }: { row: { original: any } }) =>
-        getStatusBadge(row.original.status),
+      header: () => <div className="text-center">STATUS</div>,
+      cell: ({ row }: { row: { original: any } }) => (
+        <div className="text-center">{getStatusBadge(row.original.status)}</div>
+      ),
     },
-    { accessorKey: "teams_count", header: "TEAMS PARTICIPATING" },
+    {
+      accessorKey: "teams_count",
+      header: () => <div className="text-center">TEAMS PARTICIPATING</div>,
+      cell: ({ row }: { row: { original: any } }) => (
+        <div className="text-center">{row.original.teams_count}</div>
+      ),
+    },
+    {
+      accessorKey: "join",
+      header: () => <div className="text-center">JOIN</div>,
+      cell: ({ row }: { row: { original: any } }) => (
+        <div className="text-center">
+          <Button
+            variant="secondary"
+            onClick={() => handleJoinTournament(row.original.id)}
+            disabled={
+              userRole === "university_manager" ||
+              userHasJoinedTournament ||
+              filteredTeams.length === 0
+            }
+          >
+            {userRole === "university_manager"
+              ? "Not Allowed"
+              : userHasJoinedTournament
+              ? "Already Joined"
+              : "Join"}
+          </Button>
+        </div>
+      ),
+    },
     {
       accessorKey: "details",
-      header: "Details",
+      header: () => <div className="text-center">Details</div>,
       cell: ({ row }: { row: { original: any } }) => (
-        <Button
-          className="border-0 hover:text-primary bg-transparent"
-          variant={"outline"}
-          onClick={() => handleViewTournament(row.original.id)}
-        >
-          <List />
-          <span className="sr-only">View tournament</span>
-        </Button>
+        <div className="text-center">
+          <Button
+            className="border-0 hover:text-primary bg-transparent"
+            variant={"outline"}
+            onClick={() => handleViewTournament(row.original.id)}
+          >
+            <List />
+            <span className="sr-only">View tournament</span>
+          </Button>
+        </div>
       ),
     },
   ];
@@ -197,6 +228,10 @@ export default function Tournament() {
     window.location.href = `/dashboard/tournaments/${tournamentId}`;
   };
 
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
   useEffect(() => {
     const allParams = getSearchParams(searchParams);
     setPage(Number(allParams.page) || 0);
@@ -217,7 +252,7 @@ export default function Tournament() {
           </div>
           <SearchInput
             handleSearch={(search: string) => {
-              const filtered = teams.filter(team =>
+              const filtered = teams.filter((team) =>
                 team.name.toLowerCase().includes(search.toLowerCase())
               );
               setFilteredTeams(filtered);
@@ -230,6 +265,7 @@ export default function Tournament() {
                 tournament.name.toLowerCase().includes(search.toLowerCase())
               );
               setFilteredTournaments(filtered);
+              setPage(0); // Reset to first page when searching
             }}
             placeholder="Search tournaments..."
           />
@@ -240,6 +276,8 @@ export default function Tournament() {
             size={size}
             page={page}
             totalRows={filteredTournaments.length}
+            onPageChange={handlePageChange}
+            disablePaginations={filteredTournaments.length <= 10}
           />
         </div>
       </div>
