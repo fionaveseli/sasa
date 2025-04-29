@@ -411,8 +411,13 @@ export const api = {
     }
   },
 
-  getTournaments: async (): Promise<any> => {
-    const response = await axios.get(`${API_BASE_URL}/tournaments`);
+  // getTournaments: async (): Promise<any> => {
+  //   const response = await axios.get(`${API_BASE_URL}/tournaments`);
+  //   return response.data;
+  // },
+
+  getTournaments: async (universityId: number): Promise<any> => {
+    const response = await axios.get(`${API_BASE_URL}/universities/${universityId}/tournaments`);
     return response.data;
   },
 

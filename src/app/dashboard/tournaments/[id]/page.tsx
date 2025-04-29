@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import TabsModel from "@/components/tabs-model";
 import SubmitScoreModal from "@/components/modal/submit-score-modal";
 import type { TabsType } from "@/types/dto/TabsType";
-import { List } from "lucide-react";
-import { Bracket, IRoundProps } from "react-brackets";
+// import { Bracket, IRoundProps } from "react-brackets";
+import { MoonLoader } from "react-spinners";
 
 interface TournamentPageProps {
   params: Promise<{ id: string }>;
@@ -21,9 +21,10 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
 
   const { user } = useContext(AppContext);
   const userRole = user?.role || "";
+  const userTeamId = user?.id;
 
   const [matches, setMatches] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [selectedMatchId, setSelectedMatchId] = useState<number | null>(null);
 
@@ -34,11 +35,12 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
 
   const fetchMatches = async () => {
     try {
+      setLoading(true);
       const token = localStorage.getItem("token") || "";
-      const matchesResponse = await getMatches(Number(id), token);
-      setMatches(matchesResponse.data?.matches ?? []);
+      const response = await getMatches(Number(id), token);
+      setMatches(response.data?.matches ?? []);
     } catch (error) {
-      console.error("Error fetching matches", error);
+      console.error("Error fetching matches:", error);
     } finally {
       setLoading(false);
     }
@@ -49,10 +51,12 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
   }, [id]);
 
   const formatMatches = (data: any[]) => {
-    return data.map((match: any, index: number) => ({
+    return data.map((match, index) => ({
       id: match.id || index + 1,
       round_number: match.round_number,
       match_number: match.match_number,
+      team1_id: match.team1_id,
+      team2_id: match.team2_id,
       team1_name: match.team1?.name || `Team ${match.team1_id}`,
       team2_name: match.team2?.name || `Team ${match.team2_id}`,
       status: match.status,
@@ -60,47 +64,20 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
     }));
   };
 
-  const handleViewMatch = (matchId: number) => {
-    window.location.href = `/dashboard/matches/${matchId}`;
-  };
-
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "scheduled":
-        return (
-          <span className="bg-yellow-100 text-yellow-800 border border-yellow-200 rounded px-2 py-1 text-xs">
-            Scheduled
-          </span>
-        );
-      case "in_progress":
-        return (
-          <span className="bg-blue-100 text-blue-800 border border-blue-200 rounded px-2 py-1 text-xs">
-            In Progress
-          </span>
-        );
-      case "pending":
-        return (
-          <span className="bg-orange-100 text-orange-800 border border-orange-200 rounded px-2 py-1 text-xs">
-            Pending
-          </span>
-        );
-      case "completed":
-        return (
-          <span className="bg-green-100 text-green-800 border border-green-200 rounded px-2 py-1 text-xs">
-            Completed
-          </span>
-        );
-      case "disputed":
-        return (
-          <span className="bg-red-100 text-red-800 border border-red-200 rounded px-2 py-1 text-xs">
-            Disputed
-          </span>
-        );
-      default:
-        return (
-          <span className="border rounded px-2 py-1 text-xs">{status}</span>
-        );
-    }
+    const base = "border rounded px-2 py-1 text-xs";
+    const statusStyles: Record<string, string> = {
+      scheduled: "bg-yellow-100 text-yellow-800 border-yellow-200",
+      in_progress: "bg-blue-100 text-blue-800 border-blue-200",
+      pending: "bg-orange-100 text-orange-800 border-orange-200",
+      completed: "bg-green-100 text-green-800 border-green-200",
+      disputed: "bg-red-100 text-red-800 border-red-200",
+    };
+    return (
+      <span className={`${base} ${statusStyles[status] || ""}`}>
+        {status.replace("_", " ")}
+      </span>
+    );
   };
 
   const columns = [
@@ -115,26 +92,23 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
       cell: ({ row }: { row: { original: any } }) =>
         getStatusBadge(row.original.status),
     },
-    {
-      accessorKey: "winner_name",
-      header: "WINNER",
-    },
+    { accessorKey: "winner_name", header: "WINNER" },
     {
       accessorKey: "details",
-      header: "DETAILS",
-      cell: ({ row }: { row: { original: any } }) => (
-        <div className="flex items-center gap-2">
-          {row.original.status === "in_progress" &&
-            userRole !== "university_manager" && (
-              <Button
-                size="sm"
-                onClick={() => openSubmitScoreModal(row.original.id)}
-              >
-                Submit Score
-              </Button>
-            )}
-        </div>
-      ),
+      header: "ACTIONS",
+      cell: ({ row }: { row: { original: any } }) => {
+        const match = row.original;
+        const isTeamInMatch =
+          match.team1_id === userTeamId || match.team2_id === userTeamId;
+
+        return (
+          <div className="flex items-center gap-2">
+            <Button size="sm" onClick={() => openSubmitScoreModal(match.id)}>
+              Submit Score
+            </Button>
+          </div>
+        );
+      },
     },
   ];
 
@@ -153,12 +127,12 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
     return acc;
   }, {});
 
-  const rounds: IRoundProps[] = Object.keys(groupedMatchesByRound)
-    .sort((a, b) => Number(a) - Number(b))
-    .map((roundNumber) => ({
-      title: `Round ${roundNumber}`,
-      seeds: groupedMatchesByRound[roundNumber],
-    }));
+  // const rounds: IRoundProps[] = Object.keys(groupedMatchesByRound)
+  //   .sort((a, b) => Number(a) - Number(b))
+  //   .map((roundNumber) => ({
+  //     title: `Round ${roundNumber}`,
+  //     seeds: groupedMatchesByRound[roundNumber],
+  //   }));
 
   const tabs: TabsType[] = [
     {
@@ -171,7 +145,7 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
             columns={columns}
             rows={formatMatches(matches)}
             loading={loading}
-            size={10}
+            size={1000}
             page={0}
             totalRows={matches.length}
           />
@@ -184,32 +158,34 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
       label: "Bracket",
       component: (
         <div className="w-full overflow-x-auto pt-4">
-          <Bracket rounds={rounds} />
+          {/* <Bracket rounds={rounds} /> */}
         </div>
       ),
     },
   ];
 
-  const allowedViews = ["Matches", "Bracket"];
-
-  if (loading) return <p>Loading...</p>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[80vh] w-full">
+        <MoonLoader size={20} color="#200936" />
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full flex flex-col gap-6 p-4">
+    <div className="w-full flex flex-col gap-6">
       <TabsModel
         tabs={tabs}
-        defaultTab={"Matches"}
-        viewPermissions={allowedViews}
+        defaultTab="Matches"
+        viewPermissions={["Matches", "Bracket"]}
       />
 
-      {userRole !== "university_manager" && (
-        <SubmitScoreModal
-          open={submitModalOpen}
-          setOpen={setSubmitModalOpen}
-          matchId={selectedMatchId}
-          refreshMatches={fetchMatches}
-        />
-      )}
+      <SubmitScoreModal
+        open={submitModalOpen}
+        setOpen={setSubmitModalOpen}
+        matchId={selectedMatchId}
+        refreshMatches={fetchMatches}
+      />
     </div>
   );
 }

@@ -8,6 +8,7 @@ import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { getMatches } from "@/api/matchesService"; // ✅ using getMatches
 import Table from "./table";
+import SubmitScoreModal from "./modal/submit-score-modal";
 
 export default function Matches() {
   const searchParams = useSearchParams();
@@ -17,6 +18,8 @@ export default function Matches() {
   const [loading, setLoading] = useState<boolean>(true);
   const [matches, setMatches] = useState<any[]>([]);
   const [totalRows, setTotalRows] = useState<number>(0);
+  const [scoreModalOpen, setScoreModalOpen] = useState(false);
+  const [selectedMatchId, setSelectedMatchId] = useState<number | null>(null);
 
   const columns = [
     { accessorKey: "id", header: "MATCH ID" },
@@ -38,14 +41,26 @@ export default function Matches() {
       accessorKey: "details",
       header: "DETAILS",
       cell: ({ row }: { row: { original: any } }) => (
-        <Button
-          className="border-0 hover:text-primary bg-transparent"
-          variant={"outline"}
-          onClick={() => handleViewMatch(row.original.id)}
-        >
-          <List />
-          <span className="sr-only">View match</span>
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            className="border-0 hover:text-primary bg-transparent"
+            variant={"outline"}
+            onClick={() => handleViewMatch(row.original.id)}
+          >
+            <List />
+            <span className="sr-only">View match</span>
+          </Button>
+          <Button
+            className="text-xs"
+            variant="outline"
+            onClick={() => {
+              setSelectedMatchId(row.original.id);
+              setScoreModalOpen(true);
+            }}
+          >
+            Submit Score
+          </Button>
+        </div>
       ),
     },
   ];
@@ -179,6 +194,12 @@ export default function Matches() {
             onPageChange={handlePageChange}
           />
         </div>
+        <SubmitScoreModal
+          open={scoreModalOpen}
+          setOpen={setScoreModalOpen}
+          matchId={selectedMatchId}
+          refreshMatches={fetchMatches}
+        />
       </div>
     </div>
   );

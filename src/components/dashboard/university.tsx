@@ -184,7 +184,12 @@ export default function Tournament() {
   const fetchTournaments = async () => {
     try {
       setLoading(true);
-      const response = await api.getTournaments();
+      const universityId = user?.university_id;
+      if (!universityId) {
+        console.error("University ID not found for user.");
+        return;
+      }
+      const response = await api.getTournaments(universityId);
       setTournaments(formatTournaments(response.tournaments));
       setFilteredTournaments(formatTournaments(response.tournaments));
     } catch (error) {
@@ -246,29 +251,32 @@ export default function Tournament() {
   return (
     <div className="w-full h-full flex flex-col gap-4 overflow-auto">
       <div className="w-full">
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto flex-col">
           <div className="flex justify-end">
             <CreateTournamentModal />
           </div>
-          <SearchInput
-            handleSearch={(search: string) => {
-              const filtered = teams.filter((team) =>
-                team.name.toLowerCase().includes(search.toLowerCase())
-              );
-              setFilteredTeams(filtered);
-            }}
-            placeholder="Search teams..."
-          />
-          <SearchInput
-            handleSearch={(search) => {
-              const filtered = tournaments.filter((tournament) =>
-                tournament.name.toLowerCase().includes(search.toLowerCase())
-              );
-              setFilteredTournaments(filtered);
-              setPage(0); // Reset to first page when searching
-            }}
-            placeholder="Search tournaments..."
-          />
+          <div className="flex gap-2 pb-2">
+            <SearchInput
+              handleSearch={(search: string) => {
+                const filtered = teams.filter((team) =>
+                  team.name.toLowerCase().includes(search.toLowerCase())
+                );
+                setFilteredTeams(filtered);
+              }}
+              placeholder="Search teams..."
+            />
+            <SearchInput
+              handleSearch={(search) => {
+                const filtered = tournaments.filter((tournament) =>
+                  tournament.name.toLowerCase().includes(search.toLowerCase())
+                );
+                setFilteredTournaments(filtered);
+                setPage(0); // Reset to first page when searching
+              }}
+              placeholder="Search tournaments..."
+            />
+          </div>
+
           <Table
             columns={columns}
             rows={filteredTournaments}

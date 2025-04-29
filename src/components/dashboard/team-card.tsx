@@ -24,7 +24,7 @@ export default function TeamCard({ team }: TeamCardProps) {
         <span className="font-semibold">Members:</span>{" "}
         {team.players.map((player) => player.fullName).join(", ")}
       </p>
-      <Link href="/dashboard/team-page" className="w-full">
+      <Link href="/dashboard/teams" className="w-full">
         <button className="w-full bg-[#C7FF33] text-black font-semibold px-4 py-2 rounded-lg shadow-md hover:bg-[#B6F233] transition">
           View Team Page
         </button>

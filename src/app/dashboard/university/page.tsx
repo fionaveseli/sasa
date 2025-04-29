@@ -50,32 +50,6 @@ export default function UniversityPage() {
         const teamsResponse = await api.getUniversityTeams(universityId);
         setTeams(teamsResponse);
 
-        const tournament = await api.getCurrentTournament();
-        if (tournament) {
-          const matches = await api.getTournamentMatches(tournament.id);
-          const universityTeamIds = teamsResponse.map((team) => team.id);
-          const universityMatches = matches.filter(
-            (match) =>
-              universityTeamIds.includes(match.team1_id) ||
-              universityTeamIds.includes(match.team2_id)
-          );
-          setUpcomingMatches(
-            universityMatches.filter((match) => match.status === "scheduled")
-          );
-
-          const completedMatches = matches.filter(
-            (match) => match.status === "completed"
-          );
-          const wins = completedMatches.filter((match) => {
-            const winningTeamId = match.winner_id;
-            return (
-              winningTeamId !== null &&
-              universityTeamIds.includes(winningTeamId)
-            );
-          }).length;
-          setTournamentWins(wins);
-        }
-
         setLoading(false);
       } catch (err) {
         console.error("Error fetching university data:", err);
@@ -255,7 +229,6 @@ export default function UniversityPage() {
             className="h-16 mb-2"
           />
           <h1 className="text-3xl font-bold">{university?.name}</h1>
-          
         </div>
       </div>
 
@@ -295,7 +268,7 @@ export default function UniversityPage() {
       {/* University Bio + Teams Panel */}
       <div className="flex gap-8 mt-6">
         {/* Left side - Bio + Tabs (vertical) */}
-        <div className="flex-1 flex flex-col gap-8">
+        <div className="flex-1 flex flex-col">
           {/* University Bio */}
           <div>
             <h2 className="text-lg font-semibold uppercase">UNIVERSITY BIO</h2>

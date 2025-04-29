@@ -55,12 +55,6 @@ export const navItems = [
   {
     title: "Tournaments",
     url: "/dashboard/tournaments",
-    icon: Trophy,
-    roles: ["student", "university_manager", "admin"],
-  },
-  {
-    title: "Matches",
-    url: "/dashboard/matches",
     icon: Dices,
     roles: ["student", "university_manager", "admin"],
   },
