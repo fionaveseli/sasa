@@ -69,7 +69,15 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   };
 
   const handleResultClick = (type: string, id: number) => {
-    router.push(`/dashboard/${type}/${id}`);
+    if (type === "universities") {
+      if (id === user?.university_id) {
+        router.push("/dashboard/university");
+      } else {
+        router.push(`/dashboard/universities/${id}`);
+      }
+    } else {
+      router.push(`/dashboard/${type}/${id}`);
+    }
     setSearchResults(null);
   };
 
@@ -144,24 +152,30 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             </div>
             {searchResults && (
               <div className="absolute top-full left-0 right-0 mt-1 rounded-lg shadow-lg border bg-white border-gray-200 max-h-96 overflow-y-auto z-50">
-                {Object.entries(searchResults).map(
-                  ([type, items]: [string, any]) =>
-                    items.length > 0 && (
-                      <div key={type} className="p-2">
-                        <h3 className="text-sm font-semibold text-gray-700 mb-1">
-                          {type.charAt(0).toUpperCase() + type.slice(1)}
-                        </h3>
-                        {items.map((item: any) => (
-                          <button
-                            key={item.id}
-                            className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md text-sm"
-                            onClick={() => handleResultClick(type, item.id)}
-                          >
-                            {item.name}
-                          </button>
-                        ))}
-                      </div>
-                    )
+                {Object.entries(searchResults)
+                  .filter(([_, items]) => Array.isArray(items) && items.length > 0)
+                  .map(([type, items]: [string, any]) => (
+                    <div key={type} className="p-2">
+                      <h3 className="text-sm font-semibold text-gray-700 mb-1">
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </h3>
+                      {items.map((item: any) => (
+                        <button
+                          key={item.id}
+                          className="w-full text-left px-3 py-2 hover:bg-gray-100 rounded-md text-sm"
+                          onClick={() => handleResultClick(type, item.id)}
+                        >
+                          {item.name}
+                        </button>
+                      ))}
+                    </div>
+                  ))}
+                {Object.values(searchResults).every(
+                  (items) => !Array.isArray(items) || items.length === 0
+                ) && (
+                  <div className="p-4 text-sm text-gray-500">
+                    No results found
+                  </div>
                 )}
               </div>
             )}
