@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -9,29 +9,63 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Users } from "@/types/dto/users/Users";
+import { api } from "@/services/api";
+import { toast } from "sonner";
 
 interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: Users | null;
+  onSuccess?: () => void;
 }
 
 export default function EditProfileModal({
   isOpen,
   onClose,
   user,
+  onSuccess,
 }: EditProfileModalProps) {
   const [formData, setFormData] = useState({
     fullName: "",
-    email: "",
-    contactNumber: ""
+    graduationYear: new Date().getFullYear().toString(),
   });
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFormData({
+        fullName: user.fullName || "",
+        graduationYear: user.graduationYear?.toString() || new Date().getFullYear().toString(),
+      });
+    }
+  }, [user, isOpen]);
+
 
   const handleChange = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData(prev => ({
       ...prev,
       [field]: e.target.value
     }));
+  };
+
+  const handleSubmit = async () => {
+    setIsLoading(true);
+    try {
+      await api.updateProfile({
+        fullName: formData.fullName,
+        graduationYear: formData.graduationYear,
+      });
+      toast.success("Profile updated successfully");
+      if (onSuccess) {
+        onSuccess();
+      }
+      onClose();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -52,13 +86,6 @@ export default function EditProfileModal({
                   {user?.fullName?.charAt(0)}
                 </span>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="h-8 text-xs font-normal rounded-full border-[#6C2E9C] text-[#6C2E9C] hover:bg-[#6C2E9C] hover:text-white"
-              >
-                Upload Image
-              </Button>
             </div>
           </div>
 
@@ -75,26 +102,17 @@ export default function EditProfileModal({
               />
             </div>
 
-            {/* Email */}
+            {/* Graduation Year */}
             <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">Email</label>
+              <label className="text-sm text-muted-foreground">Graduation Year</label>
               <Input 
-                value={formData.email} 
-                onChange={handleChange('email')}
-                type="email"
+                value={formData.graduationYear}
+                onChange={handleChange('graduationYear')}
+                type="number"
+                min={new Date().getFullYear()}
+                max={new Date().getFullYear() + 10}
                 className="h-9"
-                placeholder="Email"
-              />
-            </div>
-
-            {/* Contact Number */}
-            <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">Contact Number</label>
-              <Input 
-                value={formData.contactNumber}
-                onChange={handleChange('contactNumber')}
-              
-                className="h-9"
+                placeholder="Graduation Year"
               />
             </div>
           </div>
@@ -103,9 +121,10 @@ export default function EditProfileModal({
         {/* Save Button */}
         <Button 
           variant="secondary"
-          onClick={onClose}
+          onClick={handleSubmit}
+          disabled={isLoading}
         >
-          Save
+          {isLoading ? "Saving..." : "Save"}
         </Button>
       </DialogContent>
     </Dialog>

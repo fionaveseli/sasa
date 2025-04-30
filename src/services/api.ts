@@ -129,6 +129,11 @@ export const api = {
     return response.data;
   },
 
+  updateProfile: async (data: { fullName: string; graduationYear: string }) => {
+    const response = await axios.patch(`${API_BASE_URL}/users/profile`, data);
+    return response.data;
+  },
+
   // Team endpoints
   getCurrentTeam: async (): Promise<Team | null> => {
     try {
