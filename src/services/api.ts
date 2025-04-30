@@ -405,7 +405,7 @@ export const api = {
     status: string
   ): Promise<any> => {
     try {
-      const response = await axios.post(
+      const response = await axios.patch(
         `${API_BASE_URL}/tournaments/${tournamentId}/status`,
         { status }
       );
@@ -417,6 +417,7 @@ export const api = {
       throw error;
     }
   },
+  
 
   // getTournaments: async (): Promise<any> => {
   //   const response = await axios.get(`${API_BASE_URL}/tournaments`);

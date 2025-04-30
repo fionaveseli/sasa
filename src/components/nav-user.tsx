@@ -42,6 +42,7 @@ export const settings = () => {
 
 export const logout = () => {
   localStorage.removeItem("token");
+  localStorage.removeItem("teamid");
   localStorage.removeItem("USER");
   if (typeof window !== "undefined") {
     window.location.href = "/login";
