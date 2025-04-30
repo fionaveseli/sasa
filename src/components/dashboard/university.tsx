@@ -7,7 +7,7 @@ import { useContext, useEffect, useState } from "react";
 import Table from "../table";
 import { Badge } from "../ui/badge";
 import { Button } from "../ui/button";
-import { Eye, List } from "lucide-react";
+import { List } from "lucide-react";
 import { AppContext } from "@/context/app-context";
 import CreateTournamentModal from "../modal/create-tournament-modal";
 import { toast } from "sonner";
@@ -25,18 +25,15 @@ export default function Tournament() {
   const [filteredTeams, setFilteredTeams] = useState<any[]>([]);
   const { user } = useContext(AppContext);
   const userRole = user?.role;
-  const [userHasJoinedTournament, setUserHasJoinedTournament] = useState(false);
 
-  useEffect(() => {
-    const fetchUserTournamentStatus = async () => {
-      const userData = await api.getCurrentUser();
-      if (userData.user?.tournament_id) {
-        setUserHasJoinedTournament(true);
-      }
-    };
-
-    fetchUserTournamentStatus();
-  }, []);
+  const handleActivateTournament = async (tournamentId: number) => {
+    try {
+      await api.updateTournamentStatus(tournamentId, "active");
+      fetchTournaments();
+    } catch (error) {
+      console.error("Error activating tournament:", error);
+    }
+  };
 
   const columns = [
     {
@@ -77,25 +74,61 @@ export default function Tournament() {
     {
       accessorKey: "join",
       header: () => <div className="text-center">JOIN</div>,
-      cell: ({ row }: { row: { original: any } }) => (
-        <div className="text-center">
-          <Button
-            variant="secondary"
-            onClick={() => handleJoinTournament(row.original.id)}
-            disabled={
-              userRole === "university_manager" ||
-              userHasJoinedTournament ||
-              filteredTeams.length === 0
-            }
-          >
-            {userRole === "university_manager"
-              ? "Not Allowed"
-              : userHasJoinedTournament
-              ? "Already Joined"
-              : "Join"}
-          </Button>
-        </div>
-      ),
+      cell: ({ row }: { row: { original: any } }) => {
+        const tournament = row.original;
+
+        const isStudent = userRole === "student";
+        const isSameUniversity =
+          user?.university_id === tournament.university?.id;
+
+        const teamIdString =
+          typeof window !== "undefined" ? localStorage.getItem("teamId") : null;
+        const teamId = teamIdString ? parseInt(teamIdString, 10) : null;
+        const alreadyJoined = tournament.teams?.some(
+          (team: any) => team.id === teamId
+        );
+
+        const canJoin = isStudent && isSameUniversity && !alreadyJoined;
+
+        let label = "Join";
+        if (!isStudent) label = "Not Allowed";
+        else if (!isSameUniversity) label = "Different University";
+        else if (alreadyJoined) label = "Already Joined";
+
+        return (
+          <div className="text-center">
+            <Button
+              variant="secondary"
+              onClick={() => handleJoinTournament(tournament.id)}
+              disabled={!canJoin}
+            >
+              {label}
+            </Button>
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "activate",
+      header: () => <div className="text-center">ACTIVATE</div>,
+      cell: ({ row }: { row: { original: any } }) => {
+        const tournament = row.original;
+        const isUniversityManager = userRole === "university_manager";
+        const isRegistering = tournament.status === "registering";
+
+        if (!isUniversityManager || !isRegistering) return null;
+
+        return (
+          <div className="text-center">
+            <Button
+              variant="outline"
+              onClick={() => handleActivateTournament(tournament.id)}
+            >
+              Activate
+            </Button>
+          </div>
+        );
+      },
     },
     {
       accessorKey: "details",
@@ -166,18 +199,8 @@ export default function Tournament() {
       end_date: new Date(tournament.end_date).toLocaleDateString(),
       status: tournament.status,
       teams_count: tournament.teams?.length || 0,
-      details: (
-        <div className="flex gap-2">
-          {tournament.status === "draft" && (
-            <Button onClick={() => handleJoinTournament(tournament.id)}>
-              Join
-            </Button>
-          )}
-          <Button onClick={() => handleViewTournament(tournament.id)}>
-            View
-          </Button>
-        </div>
-      ),
+      teams: tournament.teams || [],
+      university: tournament.University,
     }));
   };
 
@@ -226,12 +249,8 @@ export default function Tournament() {
 
       await api.registerTeamInTournament(tournamentId, teamId);
 
-      // ✅ Immediately mark that user has joined a tournament
-      setUserHasJoinedTournament(true);
-
       toast.success("You have successfully joined the tournament!");
 
-      // Optional: Refresh tournaments after a small delay if you want to update list
       setTimeout(() => {
         fetchTournaments();
       }, 1000);

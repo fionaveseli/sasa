@@ -1,4 +1,5 @@
 "use client";
+
 import type {
   ApiResponse,
   ErrorResponse,
@@ -119,6 +120,22 @@ const getRequest = async <T>(
   }
 };
 
+const patchRequest = async <T, U>(
+  url: string,
+  payload: U,
+  config: AxiosRequestConfig = {}
+): Promise<ApiResponse<T>> => {
+  try {
+    const { data } = await axiosInstance.patch<T>(url, payload, config);
+    return { data };
+  } catch (err) {
+    const error = err as AxiosError;
+    return {
+      error: error.response?.data || { title: error.message },
+    };
+  }
+};
+
 const postRequest = async <T, U>(
   url: string,
   payload: U,
@@ -194,6 +211,7 @@ const getRequestSwr = <T>(url: string): ApiResponseSwr<T> => {
 
 export {
   getRequest,
+  patchRequest,
   postRequest,
   putRequest,
   deleteRequest,

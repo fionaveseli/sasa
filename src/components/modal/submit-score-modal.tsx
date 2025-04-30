@@ -3,11 +3,9 @@
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -26,9 +24,8 @@ export default function SubmitScoreModal({
   matchId,
   refreshMatches,
 }: SubmitScoreModalProps) {
-  const [scoreInput, setScoreInput] = useState<number | "">("");
-  const [proofImage, setProofImage] = useState<File | null>(null);
   const [loading, setLoading] = useState(false);
+  const [proofImage, setProofImage] = useState<File | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,10 +34,10 @@ export default function SubmitScoreModal({
     }
   };
 
-  const handleSubmitScore = async () => {
-    if (!matchId || scoreInput === "") {
-      setError("Score is required.");
-      toast.error("Score is required.");
+  const handleSubmit = async (scoreValue: number) => {
+    if (!matchId || !proofImage) {
+      setError("Please upload proof image.");
+      toast.error("Proof image is required.");
       return;
     }
 
@@ -48,19 +45,35 @@ export default function SubmitScoreModal({
     setError(null);
 
     try {
-      const token = localStorage.getItem("token") || "";
+      const formData = new FormData();
+      formData.append("image", proofImage);
 
-      await submitScore(matchId, Number(scoreInput), proofImage, token);
+      const imgbbApiKey = "1e100bc14599aee8536fc2510b09f5dc";
+
+      const uploadRes = await fetch(
+        `https://api.imgbb.com/1/upload?key=${imgbbApiKey}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const uploadData = await uploadRes.json();
+      const imageUrl = uploadData.data?.url;
+
+      if (!imageUrl) {
+        throw new Error("Image upload failed");
+      }
+
+      const token = localStorage.getItem("token") || "";
+      await submitScore(matchId, scoreValue, imageUrl, token);
 
       toast.success("Score submitted successfully!");
       setOpen(false);
-      setScoreInput("");
       setProofImage(null);
-
       await refreshMatches();
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error submitting score:", err);
-      setError("Failed to submit score.");
       toast.error("Failed to submit score.");
     } finally {
       setLoading(false);
@@ -69,61 +82,46 @@ export default function SubmitScoreModal({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle className="text-center font-extralight">
-            Submit Your Score
+      <DialogContent className="max-w-md px-6 py-5 rounded-2xl shadow-lg">
+        <DialogHeader className="text-center">
+          <DialogTitle className="text-lg font-medium text-gray-900">
+            Submit Match Result
           </DialogTitle>
         </DialogHeader>
 
-        {/* Form */}
         <div className="flex flex-col gap-4 mt-4">
           {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
-          <div>
-            <label className="block text-gray-700 mb-1">
-              Your Team’s Score <span className="text-red-500">*</span>
+          <div className="flex flex-col gap-2">
+            <label className="block text-sm font-medium text-gray-700">
+              Upload Proof Image <span className="text-red-500">*</span>
             </label>
-            <Input
-              type="number"
-              placeholder="Enter score"
-              value={scoreInput}
-              onChange={(e) => setScoreInput(Number(e.target.value))}
-              required
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="border border-gray-300 rounded-lg px-4 py-2"
             />
           </div>
 
-          <div>
-            <label className="block text-gray-700 mb-1">
-              Proof Image <span className="text-red-500">*</span>
-            </label>
-            <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer">
-              <input
-                type="file"
-                className="hidden"
-                id="fileUpload"
-                accept="image/*"
-                onChange={handleFileChange}
-              />
-              <label
-                htmlFor="fileUpload"
-                className="cursor-pointer text-gray-500"
-              >
-                {proofImage ? proofImage.name : "Drag & drop files or Browse"}
-              </label>
-            </div>
+          <div className="flex gap-4">
+            <Button
+              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded-xl transition"
+              onClick={() => handleSubmit(1)}
+              disabled={loading}
+            >
+              {loading ? "Submitting..." : "Declare Win"}
+            </Button>
+
+            <Button
+              className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 rounded-xl transition"
+              onClick={() => handleSubmit(0)}
+              disabled={loading}
+            >
+              {loading ? "Submitting..." : "Declare Loss"}
+            </Button>
           </div>
         </div>
-
-        <DialogFooter className="mt-4">
-          <Button
-            className="w-full bg-lime-400 text-black font-semibold hover:bg-lime-500"
-            onClick={handleSubmitScore}
-            disabled={loading}
-          >
-            {loading ? "Submitting..." : "Submit Score"}
-          </Button>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );

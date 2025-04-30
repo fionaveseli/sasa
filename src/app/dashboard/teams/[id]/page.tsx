@@ -45,16 +45,13 @@ export default function TeamPage({ params }: TeamPageProps) {
           "https://web-production-3dd4c.up.railway.app/api";
 
         // Fetch current user to check team membership
-        const userResponse = await fetch(
-          `${API_BASE_URL}/users/me`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
+        const userResponse = await fetch(`${API_BASE_URL}/users/me`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
         if (!userResponse.ok) {
           throw new Error("Failed to fetch user data");
@@ -78,7 +75,7 @@ export default function TeamPage({ params }: TeamPageProps) {
         }
 
         const universities = await universitiesResponse.json();
-        
+
         // Try to find the team in each university
         let foundTeam = null;
         for (const university of universities.universities) {
@@ -113,7 +110,7 @@ export default function TeamPage({ params }: TeamPageProps) {
 
         // Check if current user is a team member
         const isMember = foundTeam.players.some(
-          (player) => player.email === userData.user.email
+          (player: { email: any }) => player.email === userData.user.email
         );
         setIsTeamMember(isMember);
 

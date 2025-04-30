@@ -1,15 +1,17 @@
 "use client";
 
 import { use, useContext, useEffect, useState } from "react";
-import { getMatches } from "@/api/matchesService";
+import { getMatches, updateMatchStatus } from "@/api/matchesService";
 import { AppContext } from "@/context/app-context";
 import Table from "@/components/table";
 import { Button } from "@/components/ui/button";
 import TabsModel from "@/components/tabs-model";
 import SubmitScoreModal from "@/components/modal/submit-score-modal";
+import ScoreDisputeModal from "@/components/modal/score-dispute-modal";
 import type { TabsType } from "@/types/dto/TabsType";
-// import { Bracket, IRoundProps } from "react-brackets";
+import { Bracket, IRoundProps } from "@sportsgram/brackets";
 import { MoonLoader } from "react-spinners";
+import { toast } from "sonner";
 
 interface TournamentPageProps {
   params: Promise<{ id: string }>;
@@ -20,17 +22,30 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
   const { id } = unwrappedParams;
 
   const { user } = useContext(AppContext);
-  const userRole = user?.role || "";
-  const userTeamId = user?.id;
+  const userTeamId = Number(localStorage.getItem("teamId"));
 
   const [matches, setMatches] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitModalOpen, setSubmitModalOpen] = useState(false);
   const [selectedMatchId, setSelectedMatchId] = useState<number | null>(null);
+  const [disputeModalOpen, setDisputeModalOpen] = useState(false);
+  const [disputeMatch, setDisputeMatch] = useState<any | null>(null);
 
   const openSubmitScoreModal = (matchId: number) => {
     setSelectedMatchId(matchId);
     setSubmitModalOpen(true);
+  };
+
+  const startMatch = async (matchId: number) => {
+    try {
+      const token = localStorage.getItem("token") || "";
+      await updateMatchStatus(matchId, "in_progress", token);
+      toast.success("Match started successfully!");
+      await fetchMatches();
+    } catch (err) {
+      console.error("Error starting match:", err);
+      toast.error("Could not start the match.");
+    }
   };
 
   const fetchMatches = async () => {
@@ -61,6 +76,7 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
       team2_name: match.team2?.name || `Team ${match.team2_id}`,
       status: match.status,
       winner_name: match.winner?.name || "-",
+      scores: match.scores || [],
     }));
   };
 
@@ -101,11 +117,49 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
         const isTeamInMatch =
           match.team1_id === userTeamId || match.team2_id === userTeamId;
 
+        const isManager = user?.role === "university_manager";
+        const isPending = match.status === "pending";
+        const isInProgress = match.status === "in_progress";
+
+        const conflicting =
+          match.status === "disputed" &&
+          match.scores?.length === 2 &&
+          match.scores[0].score_value === match.scores[1].score_value;
+
         return (
           <div className="flex items-center gap-2">
-            <Button size="sm" onClick={() => openSubmitScoreModal(match.id)}>
-              Submit Score
-            </Button>
+            {isTeamInMatch && isInProgress && !isManager && (
+              <Button
+                size="sm"
+                variant="default"
+                onClick={() => openSubmitScoreModal(match.id)}
+              >
+                Submit Score
+              </Button>
+            )}
+
+            {isManager && isPending && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => startMatch(match.id)}
+              >
+                Start Match
+              </Button>
+            )}
+
+            {isManager && conflicting && (
+              <Button
+                size="sm"
+                variant="destructive"
+                onClick={() => {
+                  setDisputeMatch(match);
+                  setDisputeModalOpen(true);
+                }}
+              >
+                Resolve Dispute
+              </Button>
+            )}
           </div>
         );
       },
@@ -127,12 +181,12 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
     return acc;
   }, {});
 
-  // const rounds: IRoundProps[] = Object.keys(groupedMatchesByRound)
-  //   .sort((a, b) => Number(a) - Number(b))
-  //   .map((roundNumber) => ({
-  //     title: `Round ${roundNumber}`,
-  //     seeds: groupedMatchesByRound[roundNumber],
-  //   }));
+  const rounds: IRoundProps[] = Object.keys(groupedMatchesByRound)
+    .sort((a, b) => Number(a) - Number(b))
+    .map((roundNumber) => ({
+      title: `Round ${roundNumber}`,
+      seeds: groupedMatchesByRound[roundNumber],
+    }));
 
   const tabs: TabsType[] = [
     {
@@ -158,7 +212,7 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
       label: "Bracket",
       component: (
         <div className="w-full overflow-x-auto pt-4">
-          {/* <Bracket rounds={rounds} /> */}
+          <Bracket rounds={rounds} />
         </div>
       ),
     },
@@ -186,6 +240,19 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
         matchId={selectedMatchId}
         refreshMatches={fetchMatches}
       />
+
+      {disputeModalOpen && disputeMatch && (
+        <ScoreDisputeModal
+          open={disputeModalOpen}
+          setOpen={setDisputeModalOpen}
+          matchId={disputeMatch.id}
+          team1Name={disputeMatch.team1_name}
+          team2Name={disputeMatch.team2_name}
+          team1Id={disputeMatch.team1_id}
+          team2Id={disputeMatch.team2_id}
+          refreshMatches={fetchMatches}
+        />
+      )}
     </div>
   );
 }
