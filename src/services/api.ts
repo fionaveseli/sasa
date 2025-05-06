@@ -527,13 +527,33 @@ export const api = {
     universityId: number,
     newManagerId: number
   ) => {
-    const response = await axios.post(
-      `${API_BASE_URL}/uni/universities/${universityId}/transfer-manager`,
-      {
-        new_manager_user_id: newManagerId,
-      }
-    );
-    return response.data;
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/uni/universities/${universityId}/transfer-manager`,
+        {
+          new_manager_user_id: newManagerId,
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error transferring manager role:", error);
+      toast.error("Failed to transfer manager role. Please try again.");
+      throw error;
+    }
+  },
+
+  // Add new function to handle role changes
+  handleRoleChange: async (userId: number, newRole: string) => {
+    try {
+      const response = await axios.patch(
+        `${API_BASE_URL}/users/${userId}/role`,
+        { role: newRole }
+      );
+      return response.data;
+    } catch (error) {
+      console.error("Error updating user role:", error);
+      throw error;
+    }
   },
 
   search: async (query: string, type?: string) => {
@@ -549,5 +569,10 @@ export const api = {
       console.error("Search error:", error);
       throw error;
     }
+  },
+
+  updateProfile: async (data: { fullName: string; graduationYear: string }) => {
+    const response = await axios.patch(`${API_BASE_URL}/users/profile`, data);
+    return response.data;
   },
 };

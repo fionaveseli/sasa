@@ -35,6 +35,15 @@ export function SignupForm({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
+    
+    // Handle graduation year validation
+    if (name === 'graduationYear') {
+      // Only allow numbers while typing
+      if (!/^\d*$/.test(value)) {
+        return;
+      }
+    }
+    
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -135,6 +144,9 @@ export function SignupForm({
             name="graduationYear"
             value={form.graduationYear}
             onChange={handleChange}
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
             required
           />
         </div>

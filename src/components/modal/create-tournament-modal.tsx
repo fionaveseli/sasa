@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { AppContext } from "@/context/app-context";
 import { api } from "@/services/api";
 import { useRouter } from "next/navigation";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
 
 export default function CreateTournamentModal() {
@@ -30,7 +30,9 @@ export default function CreateTournamentModal() {
   const router = useRouter();
   const { user } = useContext(AppContext);
   const userRole = user?.role;
-  console.log(userRole);
+
+  const isDisabled = userRole !== "university_manager";
+
   const [formData, setFormData] = useState({
     name: "",
     type: "university",
@@ -44,8 +46,20 @@ export default function CreateTournamentModal() {
     time_zone: "UTC",
   });
 
+  // Update form data when user changes
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      university_id: user?.university_id || 0
+    }));
+  }, [user]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isDisabled) {
+      toast.error("You don't have permission to create tournaments");
+      return;
+    }
     setIsLoading(true);
 
     try {
@@ -56,7 +70,6 @@ export default function CreateTournamentModal() {
       }
     } catch (error) {
       console.error("Error creating tournament:", error);
-      // Toast is already handled in the api function
     } finally {
       setIsLoading(false);
     }
@@ -77,7 +90,7 @@ export default function CreateTournamentModal() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button variant="submit" className="bg-primary text-white">
+        <Button disabled={isDisabled}>
           Create Tournament
         </Button>
       </DialogTrigger>
