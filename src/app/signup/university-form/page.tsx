@@ -33,6 +33,15 @@ export default function AddUniversityForm() {
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value, type } = e.target;
+    
+    // Handle contact number validation
+    if (name === 'contactNumber') {
+      // Allow only numbers, +, (, )
+      if (!/^[\d+()]*$/.test(value)) {
+        return;
+      }
+    }
+
     setForm((prev) => ({
       ...prev,
       [name]:
@@ -147,6 +156,11 @@ export default function AddUniversityForm() {
                   name="contactNumber"
                   value={form.contactNumber}
                   onChange={handleChange}
+                  type="tel"
+                  pattern="[0-9+()]*"
+                  inputMode="tel"
+                  placeholder="Enter phone number"
+                  required
                 />
               </div>
               <div className="flex items-center gap-2">

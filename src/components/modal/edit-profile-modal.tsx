@@ -1,5 +1,4 @@
-import { useState } from "react";
-import { X } from "lucide-react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -9,29 +8,101 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Users } from "@/types/dto/users/Users";
+import { api } from "@/services/api";
+import { toast } from "sonner";
 
 interface EditProfileModalProps {
   isOpen: boolean;
   onClose: () => void;
   user: Users | null;
+  onSuccess?: () => void;
 }
 
 export default function EditProfileModal({
   isOpen,
   onClose,
   user,
+  onSuccess,
 }: EditProfileModalProps) {
   const [formData, setFormData] = useState({
     fullName: "",
-    email: "",
-    contactNumber: ""
+    graduationYear: new Date().getFullYear().toString(),
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch user data when modal opens
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const response = await api.getCurrentUser();
+        if (response.user) {
+          setFormData({
+            fullName: response.user.fullName || "",
+            graduationYear: response.user.graduationYear?.toString() || new Date().getFullYear().toString(),
+          });
+        }
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        toast.error("Failed to load profile data");
+      }
+    };
+
+    if (isOpen) {
+      fetchUserData();
+    }
+  }, [isOpen]);
 
   const handleChange = (field: keyof typeof formData) => (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setError(null);
+    
+    if (field === 'graduationYear') {
+      if (!/^\d*$/.test(value)) {
+        return;
+      }
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [field]: e.target.value
+      [field]: value
     }));
+  };
+
+  const handleSubmit = async () => {
+    setError(null);
+    setIsLoading(true);
+    
+    try {
+      // Validate form data
+      if (!formData.fullName.trim()) {
+        setError("Name is required");
+        return;
+      }
+
+      // Update profile
+      await api.updateProfile({
+        fullName: formData.fullName.trim(),
+        graduationYear: formData.graduationYear,
+      });
+
+      // Update local storage with new user data
+      const updatedUser = await api.getCurrentUser();
+      if (updatedUser.user) {
+        localStorage.setItem("USER", JSON.stringify(updatedUser.user));
+      }
+
+      toast.success("Profile updated successfully");
+      if (onSuccess) {
+        onSuccess();
+      }
+      onClose();
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      toast.error("Failed to update profile");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -44,7 +115,6 @@ export default function EditProfileModal({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Profile Picture */}
           <div className="space-y-2">
             <div className="flex flex-col items-center gap-3">
               <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
@@ -52,18 +122,15 @@ export default function EditProfileModal({
                   {user?.fullName?.charAt(0)}
                 </span>
               </div>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="h-8 text-xs font-normal rounded-full border-[#6C2E9C] text-[#6C2E9C] hover:bg-[#6C2E9C] hover:text-white"
-              >
-                Upload Image
-              </Button>
             </div>
           </div>
 
           {/* Form Fields */}
           <div className="space-y-4">
+            {error && (
+              <div className="text-sm text-red-500 text-center">{error}</div>
+            )}
+
             {/* Name */}
             <div className="space-y-2">
               <label className="text-sm text-muted-foreground">Name</label>
@@ -71,30 +138,22 @@ export default function EditProfileModal({
                 value={formData.fullName} 
                 onChange={handleChange('fullName')} 
                 className="h-9"
-                placeholder="Name"
+                placeholder="Enter your name"
+                required
               />
             </div>
 
-            {/* Email */}
+            {/* Graduation Year */}
             <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">Email</label>
+              <label className="text-sm text-muted-foreground">Graduation Year</label>
               <Input 
-                value={formData.email} 
-                onChange={handleChange('email')}
-                type="email"
+                value={formData.graduationYear}
+                onChange={handleChange('graduationYear')}
+                type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 className="h-9"
-                placeholder="Email"
-              />
-            </div>
-
-            {/* Contact Number */}
-            <div className="space-y-2">
-              <label className="text-sm text-muted-foreground">Contact Number</label>
-              <Input 
-                value={formData.contactNumber}
-                onChange={handleChange('contactNumber')}
-              
-                className="h-9"
+                required
               />
             </div>
           </div>
@@ -103,9 +162,11 @@ export default function EditProfileModal({
         {/* Save Button */}
         <Button 
           variant="secondary"
-          onClick={onClose}
+          onClick={handleSubmit}
+          disabled={isLoading}
+          className="w-full"
         >
-          Save
+          {isLoading ? "Saving..." : "Save Changes"}
         </Button>
       </DialogContent>
     </Dialog>

@@ -3,15 +3,54 @@
 import { Button } from "@/components/ui/button";
 import { AppContext } from "@/context/app-context";
 import { Pencil } from "lucide-react";
-import { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import { RoleLabels } from "@/types/enums/AppRole";
 import EditProfileModal from "@/components/modal/edit-profile-modal";
+import { api } from "@/services/api";
 
 export default function ProfilePage() {
-  const { user } = useContext(AppContext);
+  const { user, setUser } = useContext(AppContext);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [universityName, setUniversityName] = useState<string>("");
 
   const roleLabel = user?.role ? RoleLabels[user.role] : '';
+
+  useEffect(() => {
+    const fetchUniversityName = async () => {
+      if (user?.university_id) {
+        try {
+          const universities = await api.getUniversities();
+          const university = universities.find(u => u.id === user.university_id);
+          if (university) {
+            setUniversityName(university.name);
+          }
+        } catch (error) {
+          console.error('Error fetching university:', error);
+        }
+      }
+    };
+
+    fetchUniversityName();
+  }, [user?.university_id]);
+
+  const handleProfileUpdate = async () => {
+    try {
+      const response = await api.getCurrentUser();
+      const updatedUser = response.user;
+      
+      // Ensure graduationYear is a number
+      if (updatedUser && updatedUser.graduationYear) {
+        updatedUser.graduationYear = Number(updatedUser.graduationYear);
+      }
+
+      localStorage.setItem('USER', JSON.stringify(updatedUser));
+      setUser(updatedUser);
+      
+      setIsEditModalOpen(false);
+    } catch (error) {
+      console.error('Error refreshing user data:', error);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -21,7 +60,6 @@ export default function ProfilePage() {
 
       <div className="flex items-start gap-4 pb-6">
         <div className="h-24 w-24 rounded-full bg-muted flex items-center justify-center">
-          {/* Placeholder for profile image */}
           <span className="text-2xl text-muted-foreground">
             {user?.fullName?.charAt(0)}
           </span>
@@ -29,8 +67,8 @@ export default function ProfilePage() {
         <div className="space-y-1">
           <h2 className="text-xl font-medium">{user?.fullName}</h2>
           <p className="text-muted-foreground">{roleLabel}</p>
-          {user?.university_id && (
-            <p className="text-sm text-muted-foreground">RIT Kosovo</p>
+          {universityName && (
+            <p className="text-sm text-muted-foreground">{universityName}</p>
           )}
         </div>
         <Button 
@@ -60,22 +98,16 @@ export default function ProfilePage() {
               <p className="text-sm text-muted-foreground">Email</p>
               <p>{user?.email}</p>
             </div>
-            {user?.graduationYear && (
+            {universityName && (
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">Graduation Year</p>
-                <p>{user.graduationYear}</p>
+                <p className="text-sm text-muted-foreground">University</p>
+                <p>{universityName}</p>
               </div>
             )}
             <div className="space-y-2">
-              <p className="text-sm text-muted-foreground">Time Zone</p>
-              <p>{user?.timeZone}</p>
+              <p className="text-sm text-muted-foreground">Graduation Year</p>
+              <p>{user?.graduationYear ? String(user.graduationYear) : 'Not set'}</p>
             </div>
-            {user?.university_id && (
-              <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">University</p>
-                <p>RIT Kosovo</p>
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -84,6 +116,7 @@ export default function ProfilePage() {
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         user={user}
+        onSuccess={handleProfileUpdate}
       />
     </div>
   );
