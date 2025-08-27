@@ -26,12 +26,11 @@ The backend is not yet implemented.
 
 ## Screens & Designs
 
-- **Figma Design:** [Add your Figma link here](https://www.figma.com/)  
+- **Figma Design:** 
 - **Screenshots:**  
   - ![Homepage](public/screenshots/homepage.png)  
-  - ![Tournament Page](public/screenshots/tournament.png)  
-
-*(Place screenshots inside `public/screenshots/` and update paths above.)*
+  - ![Tournament Dashboard Page](public/screenshots/dashboard.png)
+  - ![Tournament Login Page](public/screenshots/login.png)
 
 ---
 
@@ -41,26 +40,30 @@ The backend is not yet implemented.
 ```bash
 git clone https://github.com/fionaveseli/sasa.git
 cd sasa
-
+```
 2. Install dependencies
+```
 pnpm install
 # or
 npm install
-
+```
 3. Run the development server
+```
 npm run dev
 Open http://localhost:3000
  with your browser.
 
 ```
 
-API Endpoints
+## API Endpoints
 
 See endpoint.md
  for a list of planned endpoints.
 Currently, these endpoints are not connected to a backend service.
 
-License
+---
+
+## License
 
 This project is licensed under the terms of the MIT License.
 See the LICENSE
