@@ -59,7 +59,7 @@ export default function TeamPage({ params }: TeamPageProps) {
 
         // Fetch all universities
         const universitiesResponse = await fetch(
-          `${API_BASE_URL}/uni/universities-g`,
+          `${API_BASE_URL}/universities`,
           {
             headers: {
               "Content-Type": "application/json",

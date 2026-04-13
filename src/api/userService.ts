@@ -16,7 +16,7 @@ type RegisterResponse = {
 export const registerUser = (
   data: RegisterUser
 ): Promise<ApiResponse<RegisterResponse>> =>
-  postRequest<RegisterResponse, RegisterUser>("api/auth/register", data);
+  postRequest<RegisterResponse, RegisterUser>("auth/register", data);
 
 export type University = {
   id: number;
@@ -25,7 +25,7 @@ export type University = {
 export const getUniversities = (
   token: string
 ): Promise<ApiResponse<{ universities: University[] }>> =>
-  getRequest<{ universities: University[] }>("api/uni/universities-g", {
+  getRequest<{ universities: University[] }>("universities", {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -67,7 +67,7 @@ export const createUniversity = async (
       token: string;
     },
     typeof data
-  >("api/uni/universities-r", data, {
+  >("universities", data, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -94,7 +94,7 @@ export const getUsersFromUniversity = (
   token: string
 ): Promise<ApiResponse<{ users: UniversityUser[] }>> =>
   getRequest<{ users: UniversityUser[] }>(
-    `/api/uni/universities/${universityId}/users`,
+    `universities/${universityId}/users`,
     {
       headers: {
         Authorization: `Bearer ${token}`,

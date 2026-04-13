@@ -432,13 +432,13 @@ export const api = {
 
   // University endpoints
   getUniversities: async (): Promise<University[]> => {
-    const response = await axios.get(`${API_BASE_URL}/uni/universities-g`);
+    const response = await axios.get(`${API_BASE_URL}/uni/universities`);
     return response.data.universities;
   },
 
   getUniversityById: async (id: number): Promise<University> => {
     const response = await axios.get(
-      `${API_BASE_URL}/uni/universities-g/${id}`
+      `${API_BASE_URL}/uni/universities/${id}`
     );
     return response.data.university;
   },
@@ -453,7 +453,7 @@ export const api = {
   }): Promise<{ university: University; user: any }> => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/uni/universities-r`,
+        `${API_BASE_URL}/uni/universities`,
         universityData
       );
       console.log(response);
