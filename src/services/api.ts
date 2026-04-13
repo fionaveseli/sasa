@@ -4,7 +4,8 @@ import { toast } from "sonner";
 // Add a variable to track if the toast has been shown
 let hasShownTeamErrorToast = false;
 
-const API_BASE_URL = "https://web-production-3dd4c.up.railway.app/api";
+        const API_BASE_URL =
+          process.env.NEXT_PUBLIC_API_URL;
 
 // Add auth token to all requests
 axios.interceptors.request.use((config) => {

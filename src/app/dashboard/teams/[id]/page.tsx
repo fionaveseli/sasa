@@ -40,9 +40,7 @@ export default function TeamPage({ params }: TeamPageProps) {
       try {
         if (!id) return;
 
-        const API_BASE_URL =
-          process.env.NEXT_PUBLIC_API_URL ||
-          "https://web-production-3dd4c.up.railway.app/api";
+        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
         // Fetch current user to check team membership
         const userResponse = await fetch(`${API_BASE_URL}/users/me`, {
@@ -67,7 +65,7 @@ export default function TeamPage({ params }: TeamPageProps) {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (!universitiesResponse.ok) {
@@ -87,13 +85,13 @@ export default function TeamPage({ params }: TeamPageProps) {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
               },
-            }
+            },
           );
 
           if (teamsResponse.ok) {
             const teamsJson = await teamsResponse.json();
             const team = teamsJson.teams.find(
-              (team: Team) => team.id === Number(id)
+              (team: Team) => team.id === Number(id),
             );
             if (team) {
               foundTeam = team;
@@ -110,7 +108,7 @@ export default function TeamPage({ params }: TeamPageProps) {
 
         // Check if current user is a team member
         const isMember = foundTeam.players.some(
-          (player: { email: any }) => player.email === userData.user.email
+          (player: { email: any }) => player.email === userData.user.email,
         );
         setIsTeamMember(isMember);
 
@@ -123,7 +121,7 @@ export default function TeamPage({ params }: TeamPageProps) {
               "Content-Type": "application/json",
               Authorization: `Bearer ${token}`,
             },
-          }
+          },
         );
 
         if (tournamentResponse.ok) {
@@ -137,7 +135,7 @@ export default function TeamPage({ params }: TeamPageProps) {
                 "Content-Type": "application/json",
                 Authorization: `Bearer ${token}`,
               },
-            }
+            },
           );
 
           if (matchesResponse.ok) {
@@ -147,12 +145,12 @@ export default function TeamPage({ params }: TeamPageProps) {
                 (match.team1_id === Number(id) ||
                   match.team2_id === Number(id)) &&
                 new Date(match.scheduled_time) > new Date() &&
-                match.status === "scheduled"
+                match.status === "scheduled",
             );
             teamMatches.sort(
               (a: Match, b: Match) =>
                 new Date(a.scheduled_time).getTime() -
-                new Date(b.scheduled_time).getTime()
+                new Date(b.scheduled_time).getTime(),
             );
             setUpcomingMatches(teamMatches);
           }

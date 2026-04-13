@@ -17,7 +17,7 @@ import axios from "axios";
 import swr from "swr";
 import { deleteToken, getToken } from "./services";
 
-const baseURL = process.env.NEXT_PUBLIC_API;
+const baseURL = process.env.NEXT_PUBLIC_API_URL;
 
 const TOKEN_KEY = "token";
 const USER_KEY = "USER";

@@ -71,7 +71,7 @@ export const updateMatchStatus = (
 ): Promise<any> => {
   const token = localStorage.getItem("token") || "";
   const response = await fetch(
-    `${process.env.NEXT_PUBLIC_API}/matches/${matchId}/resolve`,
+    `${process.env.NEXT_PUBLIC_API_URL}/matches/${matchId}/resolve`,
     {
       method: "PATCH",
       headers: {
