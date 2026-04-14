@@ -35,7 +35,7 @@ export default function TeamsPage() {
     const fetchTeams = async () => {
       try {
         const userData = await api.getCurrentUser();
-        const universityId = userData.user.university_id;
+        const universityId = userData.user.universityId;
         const userRole = userData.user.role;
 
         setIsUniversityManager(userRole === "university_manager");
@@ -54,7 +54,7 @@ export default function TeamsPage() {
 
         const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
         const response = await axios.get(
-          `${API_BASE_URL}/university/${universityId}/teams`,
+          `${API_BASE_URL}/universities/${universityId}/teams`,
         );
         let allTeams: ExtendedTeam[] = response.data.teams || [];
 
@@ -87,7 +87,7 @@ export default function TeamsPage() {
         setTeams(allTeams);
       } catch (err) {
         console.error("Error fetching teams:", err);
-        setError("Failed to load teams. Please try again later.");
+        setError("No teams found for your university. Create the first team!");
       } finally {
         setLoading(false);
       }

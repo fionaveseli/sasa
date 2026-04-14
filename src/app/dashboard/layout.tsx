@@ -45,7 +45,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
       setLoading(true);
       const response = await api.search(
         value,
-        searchType === "all" ? undefined : searchType
+        searchType === "all" ? undefined : searchType,
       );
       setSearchResults(response);
     } catch (error) {
@@ -70,7 +70,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
   const handleResultClick = (type: string, id: number) => {
     if (type === "universities") {
-      if (id === user?.university_id) {
+      if (id === user?.universityId) {
         router.push("/dashboard/university");
       } else {
         router.push(`/dashboard/universities/${id}`);
@@ -153,7 +153,9 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
             {searchResults && (
               <div className="absolute top-full left-0 right-0 mt-1 rounded-lg shadow-lg border bg-white border-gray-200 max-h-96 overflow-y-auto z-50">
                 {Object.entries(searchResults)
-                  .filter(([_, items]) => Array.isArray(items) && items.length > 0)
+                  .filter(
+                    ([_, items]) => Array.isArray(items) && items.length > 0,
+                  )
                   .map(([type, items]: [string, any]) => (
                     <div key={type} className="p-2">
                       <h3 className="text-sm font-semibold text-gray-700 mb-1">
@@ -171,7 +173,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
                     </div>
                   ))}
                 {Object.values(searchResults).every(
-                  (items) => !Array.isArray(items) || items.length === 0
+                  (items) => !Array.isArray(items) || items.length === 0,
                 ) && (
                   <div className="p-4 text-sm text-gray-500">
                     No results found

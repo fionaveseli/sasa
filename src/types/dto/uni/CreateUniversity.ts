@@ -19,7 +19,7 @@ type CreateUniversity = {
       fullName: string;
       email: string;
       role: string;
-      university_id: number;
+      universityId: number;
     };
   };
   

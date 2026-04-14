@@ -62,7 +62,7 @@ export const createUniversity = async (
         fullName: string;
         email: string;
         role: string;
-        university_id: number;
+        universityId: number;
       };
       token: string;
     },

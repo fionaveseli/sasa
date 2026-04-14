@@ -79,13 +79,13 @@ export default function Tournament() {
 
         const isStudent = userRole === "student";
         const isSameUniversity =
-          user?.university_id === tournament.university?.id;
+          user?.universityId === tournament.university?.id;
 
         const teamIdString =
           typeof window !== "undefined" ? localStorage.getItem("teamId") : null;
         const teamId = teamIdString ? parseInt(teamIdString, 10) : null;
         const alreadyJoined = tournament.teams?.some(
-          (team: any) => team.id === teamId
+          (team: any) => team.id === teamId,
         );
 
         const canJoin = isStudent && isSameUniversity && !alreadyJoined;
@@ -207,7 +207,7 @@ export default function Tournament() {
   const fetchTournaments = async () => {
     try {
       setLoading(true);
-      const universityId = user?.university_id;
+      const universityId = user?.universityId;
       if (!universityId) {
         console.error("University ID not found for user.");
         return;
@@ -234,7 +234,7 @@ export default function Tournament() {
       if (!teamIdString) {
         console.error("No teamId found in localStorage.");
         toast.error(
-          "You need to be part of a team before joining a tournament."
+          "You need to be part of a team before joining a tournament.",
         );
         return;
       }
@@ -282,13 +282,13 @@ export default function Tournament() {
   useEffect(() => {
     const fetchTeams = async () => {
       try {
-        if (!user?.university_id) {
+        if (!user?.universityId) {
           console.error("University ID not found for user.");
           return;
         }
 
         const token = localStorage.getItem("token") || "";
-        const teamsResponse = await api.getUniversityTeams(user.university_id);
+        const teamsResponse = await api.getUniversityTeams(user.universityId);
 
         console.log("Fetched university teams:", teamsResponse);
 
@@ -314,7 +314,7 @@ export default function Tournament() {
               handleSearch={(search: string) => {
                 const searchTerm = search.toLowerCase().trim();
                 const filtered = teams.filter((team) =>
-                  team.name.toLowerCase().includes(searchTerm)
+                  team.name.toLowerCase().includes(searchTerm),
                 );
                 setFilteredTeams(filtered);
               }}
@@ -338,8 +338,8 @@ export default function Tournament() {
                   // Check if all search words are found in the tournament name
                   return searchWords.every((searchWord: string) =>
                     tournamentWords.some((word: string) =>
-                      word.includes(searchWord)
-                    )
+                      word.includes(searchWord),
+                    ),
                   );
                 });
 

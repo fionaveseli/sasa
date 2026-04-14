@@ -13,42 +13,44 @@ export default function ProfilePage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [universityName, setUniversityName] = useState<string>("");
 
-  const roleLabel = user?.role ? RoleLabels[user.role] : '';
+  const roleLabel = user?.role ? RoleLabels[user.role] : "";
 
   useEffect(() => {
     const fetchUniversityName = async () => {
-      if (user?.university_id) {
+      if (user?.universityId) {
         try {
           const universities = await api.getUniversities();
-          const university = universities.find(u => u.id === user.university_id);
+          const university = universities.find(
+            (u) => u.id === user.universityId,
+          );
           if (university) {
             setUniversityName(university.name);
           }
         } catch (error) {
-          console.error('Error fetching university:', error);
+          console.error("Error fetching university:", error);
         }
       }
     };
 
     fetchUniversityName();
-  }, [user?.university_id]);
+  }, [user?.universityId]);
 
   const handleProfileUpdate = async () => {
     try {
       const response = await api.getCurrentUser();
       const updatedUser = response.user;
-      
+
       // Ensure graduationYear is a number
       if (updatedUser && updatedUser.graduationYear) {
         updatedUser.graduationYear = Number(updatedUser.graduationYear);
       }
 
-      localStorage.setItem('USER', JSON.stringify(updatedUser));
+      localStorage.setItem("USER", JSON.stringify(updatedUser));
       setUser(updatedUser);
-      
+
       setIsEditModalOpen(false);
     } catch (error) {
-      console.error('Error refreshing user data:', error);
+      console.error("Error refreshing user data:", error);
     }
   };
 
@@ -71,9 +73,9 @@ export default function ProfilePage() {
             <p className="text-sm text-muted-foreground">{universityName}</p>
           )}
         </div>
-        <Button 
-          size="sm" 
-          variant="secondary" 
+        <Button
+          size="sm"
+          variant="secondary"
           className="ml-auto gap-2"
           onClick={() => setIsEditModalOpen(true)}
         >
@@ -106,13 +108,15 @@ export default function ProfilePage() {
             )}
             <div className="space-y-2">
               <p className="text-sm text-muted-foreground">Graduation Year</p>
-              <p>{user?.graduationYear ? String(user.graduationYear) : 'Not set'}</p>
+              <p>
+                {user?.graduationYear ? String(user.graduationYear) : "Not set"}
+              </p>
             </div>
           </div>
         </div>
       </div>
 
-      <EditProfileModal 
+      <EditProfileModal
         isOpen={isEditModalOpen}
         onClose={() => setIsEditModalOpen(false)}
         user={user}

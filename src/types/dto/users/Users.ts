@@ -7,7 +7,7 @@ export interface Users {
   role: AppRole;
   graduationYear: number;
   timeZone: string;
-  university_id?: number;
+  universityId?: number;
   createdAt: string;
   updatedAt: string;
 }

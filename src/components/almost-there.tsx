@@ -47,35 +47,30 @@ export function AlmostThereCard({
     }
 
     setLoading(true);
+    setError(null);
+
     try {
-      const userData = JSON.parse(localStorage.getItem("USER") || "{}");
-      const email = userData.email;
-
-      if (!email) {
-        setError("User email not found.");
-        return;
-      }
-
-      // Use the API function to join university
-      await api.joinUniversity({
-        university_id: parseInt(selectedUniversity),
-        email: email,
+      const response = await api.joinUniversity({
+        universityId: selectedUniversity,
       });
 
-      // Update user data in localStorage to include university_id
-      userData.university_id = parseInt(selectedUniversity);
-      localStorage.setItem("USER", JSON.stringify(userData));
+      const userData = JSON.parse(localStorage.getItem("USER") || "{}");
+      localStorage.setItem(
+        "USER",
+        JSON.stringify({
+          ...userData,
+          ...response.user,
+        }),
+      );
 
-      // Add a delay before navigating to allow the toast to be visible
       setTimeout(() => {
         router.push("/signup/success");
-      }, 1200); // 1.2 seconds delay
+      }, 1200);
     } catch (err: any) {
       console.error("Failed to join university:", err);
       setError(err.response?.data?.message || "Failed to join university");
       setLoading(false);
     }
-    // Note: Don't set loading to false if we're going to navigate
   };
 
   return (
@@ -83,7 +78,7 @@ export function AlmostThereCard({
       <div
         className={cn(
           "flex flex-col gap-6 items-center text-center p-10",
-          className
+          className,
         )}
         {...props}
       >

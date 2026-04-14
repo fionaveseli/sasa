@@ -4,8 +4,7 @@ import { toast } from "sonner";
 // Add a variable to track if the toast has been shown
 let hasShownTeamErrorToast = false;
 
-        const API_BASE_URL =
-          process.env.NEXT_PUBLIC_API_URL;
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
 // Add auth token to all requests
 axios.interceptors.request.use((config) => {
@@ -36,21 +35,21 @@ export interface Match {
   team1: {
     id: number;
     name: string;
-    university_id: number;
+    universityId: number;
     status: string;
     created_by: number;
   };
   team2: {
     id: number;
     name: string;
-    university_id: number;
+    universityId: number;
     status: string;
     created_by: number;
   };
   winner: {
     id: number;
     name: string;
-    university_id: number;
+    universityId: number;
     status: string;
     created_by: number;
   } | null;
@@ -66,7 +65,7 @@ export interface Match {
 export interface Team {
   id: number;
   name: string;
-  university_id: number;
+  universityId: number;
   status: string;
   created_by: number;
   wins?: number;
@@ -120,7 +119,7 @@ export const api = {
   }) => {
     const response = await axios.post(
       `${API_BASE_URL}/auth/register`,
-      userData
+      userData,
     );
     return response.data;
   },
@@ -134,7 +133,7 @@ export const api = {
   getCurrentTeam: async (): Promise<Team | null> => {
     try {
       const userResponse = await api.getCurrentUser();
-      const universityId = userResponse.user?.university_id;
+      const universityId = userResponse.user?.universityId;
       const userRole = userResponse.user?.role;
 
       if (!universityId) {
@@ -142,7 +141,7 @@ export const api = {
       }
 
       const response = await axios.get(
-        `${API_BASE_URL}/university/${universityId}/teams`
+        `${API_BASE_URL}/universities/${universityId}/teams`,
       );
 
       if (!response.data.teams || response.data.teams.length === 0) {
@@ -162,7 +161,7 @@ export const api = {
       const userTeam = response.data.teams.find(
         (team: any) =>
           team.players &&
-          team.players.some((player: any) => player.email === userEmail)
+          team.players.some((player: any) => player.email === userEmail),
       );
 
       if (!userTeam) {
@@ -201,7 +200,7 @@ export const api = {
       const userResponse = await api.getCurrentUser();
       console.log("User data for team creation:", userResponse);
 
-      const universityId = userResponse.user?.university_id;
+      const universityId = userResponse.user?.universityId;
       console.log("University ID for team creation:", universityId);
 
       if (!universityId) {
@@ -211,7 +210,7 @@ export const api = {
 
       const response = await axios.post(`${API_BASE_URL}/teams`, {
         ...teamData,
-        university_id: universityId,
+        universityId: universityId,
       });
 
       console.log("Team creation response:", response.data);
@@ -244,7 +243,7 @@ export const api = {
   leaveTeam: async (teamId: number): Promise<any> => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/teams/${teamId}/leave`
+        `${API_BASE_URL}/teams/${teamId}/leave`,
       );
       console.log("Team leave response:", response.data);
       toast.success("Successfully left the team");
@@ -271,7 +270,7 @@ export const api = {
 
   getUniversityTeams: async (universityId: number): Promise<Team[]> => {
     const response = await axios.get(
-      `${API_BASE_URL}/university/${universityId}/teams`
+      `${API_BASE_URL}/universities/${universityId}/teams`,
     );
     return response.data.teams || [];
   },
@@ -287,10 +286,10 @@ export const api = {
 
   getTournamentMatches: async (tournamentId: number): Promise<Match[]> => {
     const response = await axios.get(
-      `${API_BASE_URL}/tournaments/${tournamentId}/matches`
+      `${API_BASE_URL}/tournaments/${tournamentId}/matches`,
     );
-    
-    console.log("[getTournamentMatches] response.data:", response.data); 
+
+    console.log("[getTournamentMatches] response.data:", response.data);
     return response.data;
   },
   getDashboardStats: async (): Promise<DashboardStats> => {
@@ -299,7 +298,7 @@ export const api = {
       api
         .getCurrentTournament()
         .then((tournament) =>
-          tournament ? api.getTournamentMatches(tournament.id) : []
+          tournament ? api.getTournamentMatches(tournament.id) : [],
         ),
     ]);
 
@@ -310,7 +309,7 @@ export const api = {
     const userTeamIds = userTeams.map((team) => team.id);
 
     const wins = matchesResponse.filter(
-      (match) => match.winner_id && userTeamIds.includes(match.winner_id)
+      (match) => match.winner_id && userTeamIds.includes(match.winner_id),
     ).length;
 
     return {
@@ -328,7 +327,7 @@ export const api = {
     return matches.filter(
       (match) =>
         new Date(match.scheduled_time) > new Date() &&
-        match.status === "scheduled"
+        match.status === "scheduled",
     );
   },
 
@@ -363,7 +362,7 @@ export const api = {
     registration_deadline: string;
     start_date: string;
     end_date: string;
-    university_id: number;
+    universityId: number;
     bracket_type: string;
     description: string;
     rules: string;
@@ -372,7 +371,7 @@ export const api = {
     try {
       const response = await axios.post(
         `${API_BASE_URL}/tournaments`,
-        tournamentData
+        tournamentData,
       );
       toast.success("Tournament created successfully!");
       return response.data;
@@ -385,12 +384,12 @@ export const api = {
 
   registerTeamInTournament: async (
     tournamentId: number,
-    teamId: number
+    teamId: number,
   ): Promise<any> => {
     try {
       const response = await axios.post(
         `${API_BASE_URL}/tournaments/${tournamentId}/register`,
-        { team_id: teamId }
+        { team_id: teamId },
       );
       toast.success("Team successfully registered for tournament!");
       return response.data;
@@ -403,12 +402,12 @@ export const api = {
 
   updateTournamentStatus: async (
     tournamentId: number,
-    status: string
+    status: string,
   ): Promise<any> => {
     try {
       const response = await axios.patch(
         `${API_BASE_URL}/tournaments/${tournamentId}/status`,
-        { status }
+        { status },
       );
       toast.success(`Tournament status updated to: ${status}`);
       return response.data;
@@ -418,7 +417,6 @@ export const api = {
       throw error;
     }
   },
-  
 
   // getTournaments: async (): Promise<any> => {
   //   const response = await axios.get(`${API_BASE_URL}/tournaments`);
@@ -426,20 +424,20 @@ export const api = {
   // },
 
   getTournaments: async (universityId: number): Promise<any> => {
-    const response = await axios.get(`${API_BASE_URL}/universities/${universityId}/tournaments`);
+    const response = await axios.get(
+      `${API_BASE_URL}/universities/${universityId}/tournaments`,
+    );
     return response.data;
   },
 
   // University endpoints
   getUniversities: async (): Promise<University[]> => {
-    const response = await axios.get(`${API_BASE_URL}/uni/universities`);
+    const response = await axios.get(`${API_BASE_URL}/universities`);
     return response.data.universities;
   },
 
   getUniversityById: async (id: number): Promise<University> => {
-    const response = await axios.get(
-      `${API_BASE_URL}/uni/universities/${id}`
-    );
+    const response = await axios.get(`${API_BASE_URL}/universities/${id}`);
     return response.data.university;
   },
 
@@ -453,8 +451,8 @@ export const api = {
   }): Promise<{ university: University; user: any }> => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/uni/universities`,
-        universityData
+        `${API_BASE_URL}/universities`,
+        universityData,
       );
       console.log(response);
       toast.success("University created successfully!");
@@ -467,7 +465,7 @@ export const api = {
   },
 
   joinUniversity: async (data: {
-    university_id: number;
+    universityId: string;
   }): Promise<{ message: string; user: any }> => {
     const response = await axios.patch(`${API_BASE_URL}/users/me`, data);
     toast.success("Successfully joined university!");
@@ -498,19 +496,19 @@ export const api = {
         {
           currentPassword: data.currentPassword,
           newPassword: data.newPassword,
-        }
+        },
       );
       return response.data;
     } catch (error: any) {
       throw new Error(
-        error.response?.data?.message || "Failed to change password"
+        error.response?.data?.message || "Failed to change password",
       );
     }
   },
 
   getUniversityUsers: async (universityId: number) => {
     const response = await axios.get(
-      `${API_BASE_URL}/uni/universities/${universityId}/users`
+      `${API_BASE_URL}/universities/${universityId}/users`,
     );
     return response.data;
   },
@@ -518,7 +516,7 @@ export const api = {
   // Get Manager Candidates
   getManagerCandidates: async (universityId: number) => {
     const response = await axios.get(
-      `${API_BASE_URL}/uni/universities/${universityId}/manager-candidates`
+      `${API_BASE_URL}/universities/${universityId}/manager-candidates`,
     );
     return response.data?.users || [];
   },
@@ -526,14 +524,14 @@ export const api = {
   // Transfer University Manager Role
   transferUniversityManagerRole: async (
     universityId: number,
-    newManagerId: number
+    newManagerId: number,
   ) => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/uni/universities/${universityId}/transfer-manager`,
+        `${API_BASE_URL}/universities/${universityId}/transfer-manager`,
         {
           new_manager_user_id: newManagerId,
-        }
+        },
       );
       return response.data;
     } catch (error) {
@@ -548,7 +546,7 @@ export const api = {
     try {
       const response = await axios.patch(
         `${API_BASE_URL}/users/${userId}/role`,
-        { role: newRole }
+        { role: newRole },
       );
       return response.data;
     } catch (error) {

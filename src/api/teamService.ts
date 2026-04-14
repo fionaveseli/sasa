@@ -10,7 +10,7 @@ export const createTeam = (
 export type Team = {
   id: number;
   name: string;
-  university_id: number;
+  universityId: number;
   status: string;
   created_by: number;
   createdAt: string;
