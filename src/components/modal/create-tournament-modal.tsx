@@ -39,7 +39,7 @@ export default function CreateTournamentModal() {
     registration_deadline: "",
     start_date: "",
     end_date: "",
-    university_id: user?.university_id || 0,
+    universityId: user?.universityId || 0,
     bracket_type: "single_elimination",
     description: "",
     rules: "",
@@ -48,9 +48,9 @@ export default function CreateTournamentModal() {
 
   // Update form data when user changes
   useEffect(() => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      university_id: user?.university_id || 0
+      universityId: user?.universityId || 0,
     }));
   }, [user]);
 
@@ -78,7 +78,7 @@ export default function CreateTournamentModal() {
   const handleChange = (
     e: React.ChangeEvent<
       HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
+    >,
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -90,9 +90,7 @@ export default function CreateTournamentModal() {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button disabled={isDisabled}>
-          Create Tournament
-        </Button>
+        <Button disabled={isDisabled}>Create Tournament</Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[600px] max-h-[600px] overflow-auto">
         <DialogHeader>

@@ -35,7 +35,7 @@ export default function TeamsPage() {
     const fetchTeams = async () => {
       try {
         const userData = await api.getCurrentUser();
-        const universityId = userData.user.university_id;
+        const universityId = userData.user.universityId;
         const userRole = userData.user.role;
 
         setIsUniversityManager(userRole === "university_manager");
@@ -48,7 +48,7 @@ export default function TeamsPage() {
 
         const universitiesResponse = await api.getUniversities();
         const universityData = universitiesResponse.find(
-          (uni) => uni.id === universityId
+          (uni) => uni.id === universityId,
         );
         const universityName = universityData?.name || "";
 
@@ -56,7 +56,7 @@ export default function TeamsPage() {
           process.env.NEXT_PUBLIC_API_URL ||
           "https://web-production-3dd4c.up.railway.app/api";
         const response = await axios.get(
-          `${API_BASE_URL}/university/${universityId}/teams`
+          `${API_BASE_URL}/university/${universityId}/teams`,
         );
         let allTeams: ExtendedTeam[] = response.data.teams || [];
 
@@ -156,33 +156,31 @@ export default function TeamsPage() {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {teams
-              .filter(
-                (team) =>
-                  team.name.toLowerCase().includes(searchQuery.toLowerCase())
+              .filter((team) =>
+                team.name.toLowerCase().includes(searchQuery.toLowerCase()),
               )
               .map((team) => (
-              <JoinTeam
-                key={team.id}
-                teamId={team.id}
-                image={team.logo || "/teamtigers.svg"}
-                teamName={team.name}
-                university={team.university_name || ""}
-                members={(team.players || []).map(
-                  (p) => p.fullName || "Player"
-                )}
-                places={2 - (team.players || []).length}
-                isUserTeam={team.isUserTeam}
-                isUniversityManager={isUniversityManager}
-                onJoinSuccess={handleTeamChange}
-                disableJoin={userTeam !== null}
-                bio={team.bio}
-                name={team.name}
-              />
-            ))}
+                <JoinTeam
+                  key={team.id}
+                  teamId={team.id}
+                  image={team.logo || "/teamtigers.svg"}
+                  teamName={team.name}
+                  university={team.university_name || ""}
+                  members={(team.players || []).map(
+                    (p) => p.fullName || "Player",
+                  )}
+                  places={2 - (team.players || []).length}
+                  isUserTeam={team.isUserTeam}
+                  isUniversityManager={isUniversityManager}
+                  onJoinSuccess={handleTeamChange}
+                  disableJoin={userTeam !== null}
+                  bio={team.bio}
+                  name={team.name}
+                />
+              ))}
 
-            {teams.filter(
-              (team) =>
-                team.name.toLowerCase().includes(searchQuery.toLowerCase())
+            {teams.filter((team) =>
+              team.name.toLowerCase().includes(searchQuery.toLowerCase()),
             ).length === 0 && (
               <p className="col-span-full text-center text-gray-500 py-8">
                 No teams found.

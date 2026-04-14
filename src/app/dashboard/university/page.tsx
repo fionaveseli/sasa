@@ -25,7 +25,7 @@ export default function UniversityPage() {
     const fetchUniversityData = async () => {
       try {
         const userResponse = await api.getCurrentUser();
-        const universityId = userResponse.user?.university_id;
+        const universityId = userResponse.user?.universityId;
         const role = userResponse.user?.role;
         setUserRole(role);
 
@@ -37,7 +37,7 @@ export default function UniversityPage() {
 
         const universitiesResponse = await api.getUniversities();
         const universityData = universitiesResponse.find(
-          (uni) => uni.id === universityId
+          (uni) => uni.id === universityId,
         );
         if (!universityData) {
           setError("University not found");

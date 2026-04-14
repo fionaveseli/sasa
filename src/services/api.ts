@@ -35,21 +35,21 @@ export interface Match {
   team1: {
     id: number;
     name: string;
-    university_id: number;
+    universityId: number;
     status: string;
     created_by: number;
   };
   team2: {
     id: number;
     name: string;
-    university_id: number;
+    universityId: number;
     status: string;
     created_by: number;
   };
   winner: {
     id: number;
     name: string;
-    university_id: number;
+    universityId: number;
     status: string;
     created_by: number;
   } | null;
@@ -65,7 +65,7 @@ export interface Match {
 export interface Team {
   id: number;
   name: string;
-  university_id: number;
+  universityId: number;
   status: string;
   created_by: number;
   wins?: number;
@@ -133,7 +133,7 @@ export const api = {
   getCurrentTeam: async (): Promise<Team | null> => {
     try {
       const userResponse = await api.getCurrentUser();
-      const universityId = userResponse.user?.university_id;
+      const universityId = userResponse.user?.universityId;
       const userRole = userResponse.user?.role;
 
       if (!universityId) {
@@ -200,7 +200,7 @@ export const api = {
       const userResponse = await api.getCurrentUser();
       console.log("User data for team creation:", userResponse);
 
-      const universityId = userResponse.user?.university_id;
+      const universityId = userResponse.user?.universityId;
       console.log("University ID for team creation:", universityId);
 
       if (!universityId) {
@@ -210,7 +210,7 @@ export const api = {
 
       const response = await axios.post(`${API_BASE_URL}/teams`, {
         ...teamData,
-        university_id: universityId,
+        universityId: universityId,
       });
 
       console.log("Team creation response:", response.data);
@@ -362,7 +362,7 @@ export const api = {
     registration_deadline: string;
     start_date: string;
     end_date: string;
-    university_id: number;
+    universityId: number;
     bracket_type: string;
     description: string;
     rules: string;
@@ -437,7 +437,7 @@ export const api = {
 
   getUniversityById: async (id: number): Promise<University> => {
     const response = await axios.get(
-      `${API_BASE_URL}/uni/universities-g/${id}`
+      `${API_BASE_URL}/universities/${id}`
     );
     return response.data.university;
   },
@@ -452,7 +452,7 @@ export const api = {
   }): Promise<{ university: University; user: any }> => {
     try {
       const response = await axios.post(
-        `${API_BASE_URL}/uni/universities-r`,
+        `${API_BASE_URL}/universities`,
         universityData
       );
       console.log(response);
@@ -466,7 +466,7 @@ export const api = {
   },
 
   joinUniversity: async (data: {
-    university_id: number;
+    universityId: number;
   }): Promise<{ message: string; user: any }> => {
     const response = await axios.patch(`${API_BASE_URL}/users/me`, data);
     toast.success("Successfully joined university!");

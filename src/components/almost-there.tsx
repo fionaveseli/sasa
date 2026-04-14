@@ -58,12 +58,12 @@ export function AlmostThereCard({
 
       // Use the API function to join university
       await api.joinUniversity({
-        university_id: parseInt(selectedUniversity),
+        universityId: parseInt(selectedUniversity),
         email: email,
       });
 
-      // Update user data in localStorage to include university_id
-      userData.university_id = parseInt(selectedUniversity);
+      // Update user data in localStorage to include universityId
+      userData.universityId = parseInt(selectedUniversity);
       localStorage.setItem("USER", JSON.stringify(userData));
 
       // Add a delay before navigating to allow the toast to be visible
@@ -83,7 +83,7 @@ export function AlmostThereCard({
       <div
         className={cn(
           "flex flex-col gap-6 items-center text-center p-10",
-          className
+          className,
         )}
         {...props}
       >

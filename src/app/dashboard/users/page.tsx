@@ -12,7 +12,7 @@ export default function UniversityUsers() {
   const [loading, setLoading] = useState<boolean>(true);
   const [users, setUsers] = useState<any[]>([]);
 
-  const universityId = user?.university_id;
+  const universityId = user?.universityId;
   const token =
     typeof window !== "undefined" ? localStorage.getItem("token") : null;
 

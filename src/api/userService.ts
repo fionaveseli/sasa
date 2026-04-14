@@ -16,7 +16,7 @@ type RegisterResponse = {
 export const registerUser = (
   data: RegisterUser
 ): Promise<ApiResponse<RegisterResponse>> =>
-  postRequest<RegisterResponse, RegisterUser>("api/auth/register", data);
+  postRequest<RegisterResponse, RegisterUser>("auth/register", data);
 
 export type University = {
   id: number;
@@ -62,12 +62,12 @@ export const createUniversity = async (
         fullName: string;
         email: string;
         role: string;
-        university_id: number;
+        universityId: number;
       };
       token: string;
     },
     typeof data
-  >("api/uni/universities-r", data, {
+  >("api/universities", data, {
     headers: {
       Authorization: `Bearer ${token}`,
     },

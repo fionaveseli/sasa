@@ -1,12 +1,12 @@
 export type CreateTeam = {
     name: string;
-    university_id: number;
+    universityId: number;
   };
   
   export type TeamResponse = {
     id: number;
     name: string;
-    university_id: number;
+    universityId: number;
     
   };
   

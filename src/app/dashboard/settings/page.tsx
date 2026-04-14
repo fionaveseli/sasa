@@ -55,7 +55,7 @@ export default function SettingsPage() {
     const fetchData = async () => {
       try {
         const user = await api.getCurrentUser();
-        const universityId = user.user.university_id;
+        const universityId = user.user.universityId;
 
         setUniversityId(universityId);
 
@@ -117,7 +117,7 @@ export default function SettingsPage() {
     label: string,
     name: keyof FormState,
     show: boolean,
-    setShow: (show: boolean) => void
+    setShow: (show: boolean) => void,
   ) => (
     <div>
       <label className="text-sm text-[#6C2E9C] mb-2 block">{label}</label>
@@ -147,7 +147,7 @@ export default function SettingsPage() {
   const filteredStudents = students.filter(
     (student) =>
       student.fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      student.email.toLowerCase().includes(searchQuery.toLowerCase())
+      student.email.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const columns: ColumnDef<Student>[] = [
@@ -196,7 +196,7 @@ export default function SettingsPage() {
                     "Current Password",
                     "currentPassword",
                     showCurrentPassword,
-                    setShowCurrentPassword
+                    setShowCurrentPassword,
                   )}
                 </div>
                 <div className="w-full"></div>
@@ -208,7 +208,7 @@ export default function SettingsPage() {
                     "New Password",
                     "newPassword",
                     showNewPassword,
-                    setShowNewPassword
+                    setShowNewPassword,
                   )}
                 </div>
                 <div className="w-full">
@@ -216,7 +216,7 @@ export default function SettingsPage() {
                     "Confirm New Password",
                     "confirmPassword",
                     showConfirmPassword,
-                    setShowConfirmPassword
+                    setShowConfirmPassword,
                   )}
                 </div>
               </div>
