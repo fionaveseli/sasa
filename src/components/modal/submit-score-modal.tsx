@@ -55,7 +55,7 @@ export default function SubmitScoreModal({
         {
           method: "POST",
           body: formData,
-        }
+        },
       );
 
       const uploadData = await uploadRes.json();
@@ -66,7 +66,7 @@ export default function SubmitScoreModal({
       }
 
       const token = localStorage.getItem("token") || "";
-      await submitScore(matchId, scoreValue, imageUrl, token);
+      await submitScore(matchId, scoreValue, imageUrl);
 
       toast.success("Score submitted successfully!");
       setOpen(false);

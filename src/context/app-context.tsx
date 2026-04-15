@@ -9,7 +9,7 @@ import { TokenType } from "@/types/enums/TokenType";
 import AppContextData from "@/types/enums/AppContextData";
 import { Progress } from "@/components/ui/progress";
 import { toast } from "sonner";
-import { api } from "@/services/api";
+import { getCurrentUser } from "@/api/userService";
 
 interface SettingsProps {
   children: ReactNode;
@@ -46,7 +46,7 @@ export function AppContextProvider({ children }: SettingsProps) {
       }
 
       // Fetch latest user data
-      const response = await api.getCurrentUser();
+      const response = await getCurrentUser();
       const userData = response.user;
 
       // Check if role has changed

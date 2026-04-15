@@ -9,7 +9,8 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { api } from "@/services/api"; // Updated import to use our API service
+import { uploadLogo } from "@/api/uploadService";
+import { createTeam } from "@/api/teamService";
 import { useState } from "react";
 import { Textarea } from "../ui/textarea";
 import { toast } from "sonner";
@@ -51,7 +52,7 @@ export default function CreateTeamModal({
       // First upload the logo if one was selected
       if (logo) {
         try {
-          logoUrl = await api.uploadLogo(logo);
+          logoUrl = await uploadLogo(logo);
           console.log("Logo uploaded successfully:", logoUrl);
         } catch (logoError: any) {
           console.error("Error uploading logo:", logoError);
@@ -66,7 +67,7 @@ export default function CreateTeamModal({
 
       // Now create the team with the logo URL and bio
       console.log("Attempting to create team with name:", teamName);
-      const team = await api.createTeam({
+      const team = await createTeam({
         name: teamName,
         bio: teamBio,
         logo: logoUrl,

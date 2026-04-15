@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { api } from "@/services/api";
+import { deleteTeam } from "@/api/teamService";
 import { useState } from "react";
 
 interface DeleteTeamModalProps {
@@ -32,7 +32,7 @@ export default function DeleteTeamModal({
     try {
       setLoading(true);
       setError(null);
-      await api.deleteTeam(teamId);
+      await deleteTeam(teamId);
 
       // Add delay to allow toast to be visible
       setTimeout(() => {

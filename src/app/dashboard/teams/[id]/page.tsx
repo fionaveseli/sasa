@@ -1,9 +1,12 @@
 "use client";
 
-import CreateTeamModal from "@/components/modal/create-team-modal";
 import LeaveTeamModal from "@/components/modal/leave-team-modal";
 import { Button } from "@/components/ui/button";
-import { Match, Team } from "@/services/api";
+import { getCurrentUser } from "@/api/userService";
+import { getUniversities, getUniversityTeams } from "@/api/universityService";
+import { getCurrentTournament, getTournamentMatches } from "@/api/tournamentService";
+import type { Match } from "@/api/tournamentService";
+import type { Team } from "@/api/teamService";
 import { Calendar, Trophy, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -40,63 +43,17 @@ export default function TeamPage({ params }: TeamPageProps) {
       try {
         if (!id) return;
 
-        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+        const userData = await getCurrentUser();
+        const universities = await getUniversities();
 
-        // Fetch current user to check team membership
-        const userResponse = await fetch(`${API_BASE_URL}/users/me`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!userResponse.ok) {
-          throw new Error("Failed to fetch user data");
-        }
-
-        const userData = await userResponse.json();
-
-        // Fetch all universities
-        const universitiesResponse = await fetch(
-          `${API_BASE_URL}/universities`,
-          {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        if (!universitiesResponse.ok) {
-          throw new Error("Failed to fetch universities");
-        }
-
-        const universities = await universitiesResponse.json();
-
-        // Try to find the team in each university
-        let foundTeam = null;
-        for (const university of universities.universities) {
-          const teamsResponse = await fetch(
-            `${API_BASE_URL}/university/${university.id}/teams`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            },
-          );
-
-          if (teamsResponse.ok) {
-            const teamsJson = await teamsResponse.json();
-            const team = teamsJson.teams.find(
-              (team: Team) => team.id === Number(id),
-            );
-            if (team) {
-              foundTeam = team;
-              break;
-            }
+        // Search all universities for the team with this id
+        let foundTeam: Team | null = null;
+        for (const university of universities) {
+          const teams = await getUniversityTeams(university.id);
+          const match = teams.find((t: Team) => t.id === Number(id));
+          if (match) {
+            foundTeam = match;
+            break;
           }
         }
 
@@ -106,54 +63,32 @@ export default function TeamPage({ params }: TeamPageProps) {
 
         setTeam(foundTeam);
 
-        // Check if current user is a team member
         const isMember = foundTeam.players.some(
-          (player: { email: any }) => player.email === userData.user.email,
+          (player) => player.email === userData.user.email,
         );
         setIsTeamMember(isMember);
 
-        // Fetch tournament matches
-        const tournamentResponse = await fetch(
-          `${API_BASE_URL}/tournament/current`,
-          {
-            method: "GET",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${token}`,
-            },
-          },
-        );
-
-        if (tournamentResponse.ok) {
-          const tournament = await tournamentResponse.json();
-
-          const matchesResponse = await fetch(
-            `${API_BASE_URL}/tournament/${tournament.id}/matches`,
-            {
-              method: "GET",
-              headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${token}`,
-              },
-            },
-          );
-
-          if (matchesResponse.ok) {
-            const matches = await matchesResponse.json();
+        // Fetch upcoming matches for this team
+        try {
+          const tournament = await getCurrentTournament();
+          if (tournament) {
+            const matches = await getTournamentMatches(tournament.id);
             const teamMatches = matches.filter(
-              (match: Match) =>
+              (match) =>
                 (match.team1_id === Number(id) ||
                   match.team2_id === Number(id)) &&
                 new Date(match.scheduled_time) > new Date() &&
                 match.status === "scheduled",
             );
             teamMatches.sort(
-              (a: Match, b: Match) =>
+              (a, b) =>
                 new Date(a.scheduled_time).getTime() -
                 new Date(b.scheduled_time).getTime(),
             );
             setUpcomingMatches(teamMatches);
           }
+        } catch {
+          // no tournament, skip
         }
       } catch (error: any) {
         console.error("Error fetching team data:", error);
@@ -191,10 +126,7 @@ export default function TeamPage({ params }: TeamPageProps) {
   const formatMatchDate = (dateString: string) => {
     const date = new Date(dateString);
     return (
-      date.toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "short",
-      }) +
+      date.toLocaleDateString("en-US", { day: "numeric", month: "short" }) +
       " " +
       date.toLocaleTimeString("en-US", {
         hour: "2-digit",
@@ -202,10 +134,6 @@ export default function TeamPage({ params }: TeamPageProps) {
         hour12: true,
       })
     );
-  };
-
-  const getWins = () => {
-    return team?.wins || 0;
   };
 
   return (
@@ -235,7 +163,7 @@ export default function TeamPage({ params }: TeamPageProps) {
       <div className="flex items-start mt-4 gap-2">
         <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-md">
           <Trophy className="text-yellow-500" />
-          <span>{getWins()} Times Winner</span>
+          <span>{team.wins || 0} Times Winner</span>
         </div>
         {upcomingMatches.length > 0 && (
           <div className="flex items-center gap-2 bg-gray-100 p-2 rounded-md">

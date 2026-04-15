@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Users } from "@/types/dto/users/Users";
-import { api } from "@/services/api";
+import { getCurrentUser, updateProfile } from "@/api/userService";
 import { toast } from "sonner";
 
 interface EditProfileModalProps {
@@ -35,7 +35,7 @@ export default function EditProfileModal({
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        const response = await api.getCurrentUser();
+        const response = await getCurrentUser();
         if (response.user) {
           setFormData({
             fullName: response.user.fullName || "",
@@ -81,13 +81,13 @@ export default function EditProfileModal({
       }
 
       // Update profile
-      await api.updateProfile({
+      await updateProfile({
         fullName: formData.fullName.trim(),
         graduationYear: formData.graduationYear,
       });
 
       // Update local storage with new user data
-      const updatedUser = await api.getCurrentUser();
+      const updatedUser = await getCurrentUser();
       if (updatedUser.user) {
         localStorage.setItem("USER", JSON.stringify(updatedUser.user));
       }

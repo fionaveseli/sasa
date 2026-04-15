@@ -2,7 +2,10 @@
 
 import { Trophy, Calendar, Users } from "lucide-react";
 import { useEffect, useState } from "react";
-import { api, University, Team, Match } from "@/services/api";
+import { getUniversities, getUniversityTeams } from "@/api/universityService";
+import type { University } from "@/api/universityService";
+import type { Team } from "@/api/teamService";
+import type { Match } from "@/api/tournamentService";
 import { MoonLoader } from "react-spinners";
 import { useParams } from "next/navigation";
 
@@ -26,7 +29,7 @@ export default function UniversityDetailPage() {
           return;
         }
 
-        const universitiesResponse = await api.getUniversities();
+        const universitiesResponse = await getUniversities();
         const universityData = universitiesResponse.find(
           (uni) => uni.id === universityId
         );
@@ -39,7 +42,7 @@ export default function UniversityDetailPage() {
 
         setUniversity(universityData);
 
-        const teamsResponse = await api.getUniversityTeams(universityId);
+        const teamsResponse = await getUniversityTeams(universityId);
         setTeams(teamsResponse);
 
         // const tournament = await api.getCurrentTournament();

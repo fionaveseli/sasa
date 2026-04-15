@@ -8,7 +8,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { api } from "@/services/api";
+import { joinTeam } from "@/api/teamService";
 
 interface JoinTeamModalProps {
   isOpen: boolean;
@@ -34,7 +34,7 @@ export default function JoinTeamModal({
 
     try {
       // Use the api.joinTeam function which has toast notifications
-      await api.joinTeam(teamId);
+      await joinTeam(teamId);
 
       // Add a delay to allow the toast to be visible
       setTimeout(() => {

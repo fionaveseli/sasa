@@ -3,6 +3,6 @@ import { TournamentVote } from "@/types/dto/votes/TournamentVotes";
 import { ApiResponse } from "@/types/dto/Axios";
 
 export const getTournamentVotes = (
-    tournamentId: number
+  tournamentId: number,
 ): Promise<ApiResponse<TournamentVote[]>> =>
-    getRequest<TournamentVote[]>(`api/tournaments/${tournamentId}/votes`);
+  getRequest<TournamentVote[]>(`/tournaments/${tournamentId}/votes`);

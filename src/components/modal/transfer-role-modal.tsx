@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { AlertCircle } from "lucide-react";
-import { api } from "@/services/api"; // ✅ Import the API
+import { transferManagerRole } from "@/api/universityService";
 import { useState } from "react";
 import { toast } from "sonner"; // ✅ For success/error messages
 
@@ -31,7 +31,7 @@ export default function TransferRoleModal({
   const handleTransfer = async () => {
     setLoading(true);
     try {
-      await api.transferUniversityManagerRole(universityId, parseInt(candidate.id));
+      await transferManagerRole(universityId, parseInt(candidate.id));
       
       toast.success(`Successfully transferred role to ${candidate.name}!`);
       onTransferSuccess(); // Notify parent

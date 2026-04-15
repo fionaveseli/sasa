@@ -4,9 +4,16 @@ import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import BracketCard from "@/components/dashboard/bracket-placeholder";
 import MatchCard from "@/components/dashboard/match-card";
-
 import TeamCard from "@/components/dashboard/team-card";
-import { api, DashboardStats, Match, Team, BracketRound } from "@/services/api";
+import { getCurrentTeam } from "@/api/teamService";
+import {
+  getDashboardStats,
+  getUpcomingMatches,
+  getTournamentBracket,
+  getCurrentTournament,
+} from "@/api/tournamentService";
+import type { Match, DashboardStats, BracketRound } from "@/api/tournamentService";
+import type { Team } from "@/api/teamService";
 import { MoonLoader } from "react-spinners";
 import BannerCard from "@/components/dashboard/banner-card";
 import { AppContext } from "@/context/app-context";
@@ -28,8 +35,8 @@ export default function DashboardPage() {
   const title = `Hi ${userName} (${
     formattedRole.charAt(0).toUpperCase() + formattedRole.slice(1)
   })`;
+
   useEffect(() => {
-    // Check if user is logged in
     const token = localStorage.getItem("token");
     if (!token) {
       router.push("/login");
@@ -38,33 +45,25 @@ export default function DashboardPage() {
 
     const fetchDashboardData = async () => {
       try {
-        // Try to get the team info
         let teamData = null;
         try {
-          teamData = await api.getCurrentTeam();
+          teamData = await getCurrentTeam();
           setTeam(teamData);
         } catch (teamError) {
-          console.log(
-            "No team found for this user, continuing without team data"
-          );
+          console.log("No team found for this user, continuing without team data");
         }
 
-        // Try to get tournament data
-        let tournamentData = null;
         let matchesData: Match[] = [];
         let bracketData: BracketRound[] = [];
 
         try {
-          tournamentData = await api.getCurrentTournament();
+          const tournamentData = await getCurrentTournament();
           if (tournamentData) {
-            // Get matches and bracket only if we have a tournament
-            matchesData = await api.getUpcomingMatches();
-            bracketData = await api.getTournamentBracket();
+            matchesData = await getUpcomingMatches();
+            bracketData = await getTournamentBracket();
           }
         } catch (tournamentError) {
-          console.log(
-            "No tournament found, continuing without tournament data"
-          );
+          console.log("No tournament found, continuing without tournament data");
         }
 
         if (matchesData.length > 0) {
@@ -73,23 +72,16 @@ export default function DashboardPage() {
 
         setBracket(bracketData.length > 0 ? bracketData : null);
 
-        // Get stats last, as it depends on team and tournament data
         try {
-          const statsData = await api.getDashboardStats();
-          console.log("[dashboard] statsData", statsData); // ← inspect this
+          const statsData = await getDashboardStats();
           setStats(statsData);
         } catch (statsError) {
           console.log("Could not get stats, using defaults");
-          setStats({
-            wins: 0,
-            totalMatches: 0,
-            tournaments: 0,
-          });
+          setStats({ wins: 0, totalMatches: 0, tournaments: 0 });
         }
       } catch (error: any) {
         console.error("Error fetching dashboard data:", error);
 
-        // If we get a 401 error, the token is invalid
         if (error.response?.status === 401) {
           localStorage.removeItem("token");
           router.push("/login");
@@ -112,6 +104,7 @@ export default function DashboardPage() {
       </div>
     );
   }
+
   if (error) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -124,10 +117,6 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col space-y-4">
-      {/* <h1 className="text-2xl font-normal">
-        Welcome, {user?.fullName || team?.players[0]?.fullName || "User"}
-      </h1> */}
-
       <div className="grid min-h-fit grid-cols-1 lg:grid-cols-4 gap-4">
         <div className="lg:col-span-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <div className="col-span-1 sm:col-span-2 md:col-span-3">

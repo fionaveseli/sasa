@@ -7,7 +7,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
-import { api } from "@/services/api";
+import { leaveTeam } from "@/api/teamService";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
@@ -34,7 +34,7 @@ export default function LeaveTeamModal({
     try {
       setLoading(true);
       setError(null);
-      await api.leaveTeam(teamId);
+      await leaveTeam(teamId);
 
       // Add a delay to allow toast to be visible
       setTimeout(() => {

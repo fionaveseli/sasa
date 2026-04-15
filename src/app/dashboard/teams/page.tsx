@@ -4,8 +4,10 @@ import JoinTeam from "@/components/dashboard/join-team";
 import CreateTeamModal from "@/components/modal/create-team-modal";
 import SearchInput from "@/components/search-input";
 import { Button } from "@/components/ui/button";
-import { api, Team } from "@/services/api";
-import axios from "axios";
+import { getCurrentTeam } from "@/api/teamService";
+import { getCurrentUser } from "@/api/userService";
+import { getUniversities, getUniversityTeams } from "@/api/universityService";
+import type { Team } from "@/api/teamService";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { MoonLoader } from "react-spinners";
@@ -34,7 +36,7 @@ export default function TeamsPage() {
 
     const fetchTeams = async () => {
       try {
-        const userData = await api.getCurrentUser();
+        const userData = await getCurrentUser();
         const universityId = userData.user.universityId;
         const userRole = userData.user.role;
 
@@ -46,29 +48,23 @@ export default function TeamsPage() {
           return;
         }
 
-        const universitiesResponse = await api.getUniversities();
-        const universityData = universitiesResponse.find(
+        const universities = await getUniversities();
+        const universityData = universities.find(
           (uni) => uni.id === universityId,
         );
         const universityName = universityData?.name || "";
 
-        const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-        const response = await axios.get(
-          `${API_BASE_URL}/universities/${universityId}/teams`,
-        );
-        let allTeams: ExtendedTeam[] = response.data.teams || [];
-
+        let allTeams: ExtendedTeam[] = await getUniversityTeams(universityId);
         allTeams = allTeams.map((team) => ({
           ...team,
           university_name: universityName,
         }));
 
-        if (!isUniversityManager) {
+        if (userRole !== "university_manager") {
           try {
-            const userTeamData = await api.getCurrentTeam();
+            const userTeamData = await getCurrentTeam();
             setUserTeam(userTeamData);
 
-            // ✅ ADD: Save teamId to localStorage when user has a team
             if (userTeamData) {
               localStorage.setItem("teamId", String(userTeamData.id));
             }

@@ -3,7 +3,11 @@
 import CreateTeamModal from "@/components/modal/create-team-modal";
 import LeaveTeamModal from "@/components/modal/leave-team-modal";
 import { Button } from "@/components/ui/button";
-import { api, Match, Team } from "@/services/api";
+import { getCurrentUser } from "@/api/userService";
+import { getCurrentTeam } from "@/api/teamService";
+import { getCurrentTournament, getTournamentMatches } from "@/api/tournamentService";
+import type { Match } from "@/api/tournamentService";
+import type { Team } from "@/api/teamService";
 import { Calendar, Trophy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -33,40 +37,34 @@ export default function TeamPage() {
     const fetchTeamData = async () => {
       try {
         // First check if user is a university manager
-        const userData = await api.getCurrentUser();
+        const userData = await getCurrentUser();
         const userRole = userData.user?.role;
 
         if (userRole === "university_manager") {
           setIsUniversityManager(true);
           setLoading(false);
-          return; // Don't try to fetch team data for university managers
+          return;
         }
 
-        // Get the team data
-        const teamData = await api.getCurrentTeam();
+        const teamData = await getCurrentTeam();
 
         if (teamData) {
           setTeam(teamData);
 
-          // Get upcoming matches for the team
-          const tournamentData = await api.getCurrentTournament();
+          const tournamentData = await getCurrentTournament();
           if (tournamentData) {
-            const matches = await api.getTournamentMatches(tournamentData.id);
-            // Filter matches related to this team and scheduled in the future
-            const teamMatches = teamData
-            ? matches.filter(
-                  (match) =>
-                    (match.team1_id === teamData.id ||
-                      match.team2_id === teamData.id) &&
-                    new Date(match.scheduled_time) > new Date() &&
-                    match.status === "scheduled"
-                )
-            : [];
-            // Sort by date (closest first)
+            const matches = await getTournamentMatches(tournamentData.id);
+            const teamMatches = matches.filter(
+              (match: Match) =>
+                (match.team1_id === teamData.id ||
+                  match.team2_id === teamData.id) &&
+                new Date(match.scheduled_time) > new Date() &&
+                match.status === "scheduled",
+            );
             teamMatches.sort(
-              (a, b) =>
+              (a: Match, b: Match) =>
                 new Date(a.scheduled_time).getTime() -
-                new Date(b.scheduled_time).getTime()
+                new Date(b.scheduled_time).getTime(),
             );
             setUpcomingMatches(teamMatches);
           }

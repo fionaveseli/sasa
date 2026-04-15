@@ -6,9 +6,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
-import { getUniversities, University } from "@/api/userService";
+import { getUniversities, joinUniversity } from "@/api/universityService";
+import type { University } from "@/api/universityService";
 import { useRouter } from "next/navigation";
-import { api } from "@/services/api";
 
 export function AlmostThereCard({
   className,
@@ -23,16 +23,10 @@ export function AlmostThereCard({
 
   useEffect(() => {
     const fetchUniversities = async () => {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        setError("Authorization token is missing.");
-        return;
-      }
-
-      const res = await getUniversities(token);
-      if (res.data) {
-        setUniversities(res.data.universities);
-      } else {
+      try {
+        const universities = await getUniversities();
+        setUniversities(universities);
+      } catch {
         setError("Failed to fetch universities.");
       }
     };
@@ -50,7 +44,7 @@ export function AlmostThereCard({
     setError(null);
 
     try {
-      const response = await api.joinUniversity({
+      const response = await joinUniversity({
         universityId: selectedUniversity,
       });
 

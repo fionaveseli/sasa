@@ -1,6 +1,7 @@
 "use client";
 
-import { api } from "@/services/api";
+import { getTournaments, updateTournamentStatus, registerTeamInTournament } from "@/api/tournamentService";
+import { getUniversityTeams } from "@/api/universityService";
 import { getSearchParams } from "@/utils/paginationUtils";
 import { useSearchParams } from "next/navigation";
 import { useContext, useEffect, useState } from "react";
@@ -28,7 +29,7 @@ export default function Tournament() {
 
   const handleActivateTournament = async (tournamentId: number) => {
     try {
-      await api.updateTournamentStatus(tournamentId, "active");
+      await updateTournamentStatus(tournamentId, "active");
       fetchTournaments();
     } catch (error) {
       console.error("Error activating tournament:", error);
@@ -212,7 +213,7 @@ export default function Tournament() {
         console.error("University ID not found for user.");
         return;
       }
-      const response = await api.getTournaments(universityId);
+      const response = await getTournaments(universityId);
       setTournaments(formatTournaments(response.tournaments));
       setFilteredTournaments(formatTournaments(response.tournaments));
       console.log("Raw tournaments from API:", response.tournaments);
@@ -247,7 +248,7 @@ export default function Tournament() {
         return;
       }
 
-      await api.registerTeamInTournament(tournamentId, teamId);
+      await registerTeamInTournament(tournamentId, teamId);
 
       toast.success("You have successfully joined the tournament!");
 
@@ -287,8 +288,7 @@ export default function Tournament() {
           return;
         }
 
-        const token = localStorage.getItem("token") || "";
-        const teamsResponse = await api.getUniversityTeams(user.universityId);
+        const teamsResponse = await getUniversityTeams(user.universityId);
 
         console.log("Fetched university teams:", teamsResponse);
 

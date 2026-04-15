@@ -2,7 +2,11 @@
 
 import { Trophy, Calendar, Users, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
-import { api, University, Team, Match } from "@/services/api";
+import { getCurrentUser } from "@/api/userService";
+import { getUniversities, getUniversityTeams } from "@/api/universityService";
+import type { University } from "@/api/universityService";
+import type { Team } from "@/api/teamService";
+import type { Match } from "@/api/tournamentService";
 import { useRouter } from "next/navigation";
 import CreateTeamModal from "@/components/modal/create-team-modal";
 import { MoonLoader } from "react-spinners";
@@ -16,7 +20,6 @@ export default function UniversityPage() {
   const [error, setError] = useState<string | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
   const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
-  const [userRole, setUserRole] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState("bracket");
   const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
   const [tournamentWins, setTournamentWins] = useState(0);
@@ -24,10 +27,8 @@ export default function UniversityPage() {
   useEffect(() => {
     const fetchUniversityData = async () => {
       try {
-        const userResponse = await api.getCurrentUser();
+        const userResponse = await getCurrentUser();
         const universityId = userResponse.user?.universityId;
-        const role = userResponse.user?.role;
-        setUserRole(role);
 
         if (!universityId) {
           setError("You are not associated with any university");
@@ -35,7 +36,7 @@ export default function UniversityPage() {
           return;
         }
 
-        const universitiesResponse = await api.getUniversities();
+        const universitiesResponse = await getUniversities();
         const universityData = universitiesResponse.find(
           (uni) => uni.id === universityId,
         );
@@ -47,7 +48,7 @@ export default function UniversityPage() {
 
         setUniversity(universityData);
 
-        const teamsResponse = await api.getUniversityTeams(universityId);
+        const teamsResponse = await getUniversityTeams(universityId);
         setTeams(teamsResponse);
 
         setLoading(false);

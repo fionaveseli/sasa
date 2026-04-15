@@ -7,9 +7,9 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { createUniversity } from "@/api/userService";
+import { createUniversity } from "@/api/universityService";
+import { uploadLogo } from "@/api/uploadService";
 import { toast } from "sonner";
-import { api } from "@/services/api";
 
 export default function AddUniversityForm() {
   const [step, setStep] = useState(1);
@@ -59,13 +59,11 @@ export default function AddUniversityForm() {
     setError(null);
     setLoading(true);
     try {
-      const oldToken = localStorage.getItem("TOKEN");
-
       let uploadedLogoUrl = "";
 
       if (logoFile) {
         try {
-          uploadedLogoUrl = await api.uploadLogo(logoFile);
+          uploadedLogoUrl = await uploadLogo(logoFile);
           console.log("Logo uploaded:", uploadedLogoUrl);
         } catch (uploadError) {
           console.error("Failed to upload logo:", uploadError);
@@ -80,26 +78,10 @@ export default function AddUniversityForm() {
         logo: uploadedLogoUrl,
       };
 
-      const res = (await createUniversity(finalForm, oldToken!)) as {
-        data: CreateUniversity;
-      };
+      await createUniversity(finalForm);
 
-      if (res.data) {
-        const { user, token: authToken } = res.data;
-
-        if (authToken) {
-          localStorage.setItem("TOKEN", authToken);
-        }
-        if (user) {
-          localStorage.setItem("USER", JSON.stringify(user));
-        }
-
-        toast.success("University created successfully! 🎓");
-        router.push("/dashboard");
-      } else {
-        setError("Something went wrong.");
-        toast.error("Failed to create university. Please try again.");
-      }
+      toast.success("University created successfully!");
+      router.push("/dashboard");
     } catch (err) {
       console.error(err);
       setError("Unexpected error occurred.");

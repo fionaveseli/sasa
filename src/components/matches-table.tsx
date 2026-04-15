@@ -145,10 +145,9 @@ export default function Matches() {
         return;
       }
 
-      const token = localStorage.getItem("token") || "";
-      const response = await getMatches(tournamentId, token);
-      setMatches(formatMatches(response.data?.matches ?? []));
-      const formattedMatches = formatMatches(response.data?.matches ?? []);
+      const response = await getMatches(tournamentId);
+      setMatches(formatMatches(response.data ?? []));
+      const formattedMatches = formatMatches(response.data ?? []);
       setMatches(formattedMatches);
       setTotalRows(formattedMatches.length);
     } catch (error) {

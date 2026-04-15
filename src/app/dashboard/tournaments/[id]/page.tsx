@@ -38,8 +38,7 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
 
   const startMatch = async (matchId: number) => {
     try {
-      const token = localStorage.getItem("token") || "";
-      await updateMatchStatus(matchId, "in_progress", token);
+      await updateMatchStatus(matchId, "in_progress");
       toast.success("Match started successfully!");
       await fetchMatches();
     } catch (err) {
@@ -51,9 +50,8 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      const token = localStorage.getItem("token") || "";
-      const response = await getMatches(Number(id), token);
-      setMatches(response.data?.matches ?? []);
+      const response = await getMatches(Number(id));
+      setMatches(response.data ?? []);
     } catch (error) {
       console.error("Error fetching matches:", error);
     } finally {

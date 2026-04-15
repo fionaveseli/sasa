@@ -7,8 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
-import { registerUser } from "@/api/userService";
-import { RegisterUser } from "@/types/dto/users/RegisterUser";
+import { register } from "@/api/authService";
 import { toast } from "sonner";
 
 export function SignupForm({
@@ -35,15 +34,11 @@ export function SignupForm({
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
-    
-    // Handle graduation year validation
-    if (name === 'graduationYear') {
-      // Only allow numbers while typing
-      if (!/^\d*$/.test(value)) {
-        return;
-      }
+
+    if (name === "graduationYear") {
+      if (!/^\d*$/.test(value)) return;
     }
-    
+
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -59,35 +54,23 @@ export function SignupForm({
     setLoading(true);
 
     try {
-      const payload: RegisterUser = {
+      const res = await register({
         fullName: form.fullName,
         email: form.email,
         password: form.password,
         graduationYear: parseInt(form.graduationYear),
         timeZone: form.timeZone,
         role: "student",
-      };
+      });
 
-      console.log("Registering with payload:", payload);
+      const { user, token } = res;
+      localStorage.setItem("token", token);
+      localStorage.setItem("USER", JSON.stringify(user));
 
-      const res = await registerUser(payload);
-
-      if (res.data) {
-        const { user, token } = res.data;
-        console.log(res.data);
-        localStorage.setItem("token", token);
-        localStorage.setItem("USER", JSON.stringify(user));
-
-        toast.success("Account created successfully!");
-        router.push("/signup/almost-there");
-      } else {
-        const errorMsg = res.error?.title || "Registration failed.";
-        setError(errorMsg);
-        toast.error(errorMsg);
-      }
-    } catch (err) {
-      console.error(err);
-      const errorMsg = "Something went wrong.";
+      toast.success("Account created successfully!");
+      router.push("/signup/almost-there");
+    } catch (err: any) {
+      const errorMsg = err.message || "Registration failed.";
       setError(errorMsg);
       toast.error(errorMsg);
     } finally {

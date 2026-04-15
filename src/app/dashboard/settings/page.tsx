@@ -9,7 +9,9 @@ import { Eye, EyeOff, Search, RefreshCw } from "lucide-react";
 import ShadcnTable from "@/components/table";
 import type { ColumnDef } from "@tanstack/react-table";
 import { toast } from "sonner";
-import { api } from "@/services/api";
+import { getCurrentUser } from "@/api/userService";
+import { getUniversityUsers } from "@/api/universityService";
+import { changePassword } from "@/api/authService";
 import { AppContext } from "@/context/app-context";
 import TransferRoleModal from "@/components/modal/transfer-role-modal"; // <-- Added
 
@@ -54,12 +56,12 @@ export default function SettingsPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const user = await api.getCurrentUser();
+        const user = await getCurrentUser();
         const universityId = user.user.universityId;
 
         setUniversityId(universityId);
 
-        const response = await api.getUniversityUsers(universityId);
+        const response = await getUniversityUsers(universityId);
         setStudents(response.users || []);
       } catch (error) {
         console.error("Failed to fetch data:", error);
@@ -96,7 +98,7 @@ export default function SettingsPage() {
     }
 
     try {
-      await api.changePassword({
+      await changePassword({
         currentPassword: form.currentPassword,
         newPassword: form.newPassword,
       });

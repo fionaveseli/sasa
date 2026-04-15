@@ -6,7 +6,8 @@ import { Pencil } from "lucide-react";
 import { useContext, useState, useEffect } from "react";
 import { RoleLabels } from "@/types/enums/AppRole";
 import EditProfileModal from "@/components/modal/edit-profile-modal";
-import { api } from "@/services/api";
+import { getCurrentUser } from "@/api/userService";
+import { getUniversities } from "@/api/universityService";
 
 export default function ProfilePage() {
   const { user, setUser } = useContext(AppContext);
@@ -19,7 +20,7 @@ export default function ProfilePage() {
     const fetchUniversityName = async () => {
       if (user?.universityId) {
         try {
-          const universities = await api.getUniversities();
+          const universities = await getUniversities();
           const university = universities.find(
             (u) => u.id === user.universityId,
           );
@@ -37,7 +38,7 @@ export default function ProfilePage() {
 
   const handleProfileUpdate = async () => {
     try {
-      const response = await api.getCurrentUser();
+      const response = await getCurrentUser();
       const updatedUser = response.user;
 
       // Ensure graduationYear is a number

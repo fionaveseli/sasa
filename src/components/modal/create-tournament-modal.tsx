@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { AppContext } from "@/context/app-context";
-import { api } from "@/services/api";
+import { createTournament } from "@/api/tournamentService";
 import { useRouter } from "next/navigation";
 import { useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -36,17 +36,16 @@ export default function CreateTournamentModal() {
   const [formData, setFormData] = useState({
     name: "",
     type: "university",
-    registration_deadline: "",
-    start_date: "",
-    end_date: "",
+    registrationDeadline: "",
+    startDate: "",
+    endDate: "",
     universityId: user?.universityId || 0,
-    bracket_type: "single_elimination",
+    bracketType: "single_elimination",
     description: "",
     rules: "",
-    time_zone: "UTC",
+    timeZone: "UTC",
   });
 
-  // Update form data when user changes
   useEffect(() => {
     setFormData((prev) => ({
       ...prev,
@@ -63,7 +62,7 @@ export default function CreateTournamentModal() {
     setIsLoading(true);
 
     try {
-      const response = await api.createTournament(formData);
+      const response = await createTournament(formData);
       if (response) {
         setIsOpen(false);
         router.refresh();
@@ -87,6 +86,7 @@ export default function CreateTournamentModal() {
   if (userRole === "student") {
     return null;
   }
+
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
@@ -128,48 +128,48 @@ export default function CreateTournamentModal() {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="registration_deadline">Registration Deadline</Label>
+            <Label htmlFor="registrationDeadline">Registration Deadline</Label>
             <Input
-              id="registration_deadline"
-              name="registration_deadline"
+              id="registrationDeadline"
+              name="registrationDeadline"
               type="datetime-local"
-              value={formData.registration_deadline}
+              value={formData.registrationDeadline}
               onChange={handleChange}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="start_date">Start Date</Label>
+            <Label htmlFor="startDate">Start Date</Label>
             <Input
-              id="start_date"
-              name="start_date"
+              id="startDate"
+              name="startDate"
               type="datetime-local"
-              value={formData.start_date}
+              value={formData.startDate}
               onChange={handleChange}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="end_date">End Date</Label>
+            <Label htmlFor="endDate">End Date</Label>
             <Input
-              id="end_date"
-              name="end_date"
+              id="endDate"
+              name="endDate"
               type="datetime-local"
-              value={formData.end_date}
+              value={formData.endDate}
               onChange={handleChange}
               required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="bracket_type">Bracket Type</Label>
+            <Label htmlFor="bracketType">Bracket Type</Label>
             <Select
-              name="bracket_type"
-              value={formData.bracket_type}
+              name="bracketType"
+              value={formData.bracketType}
               onValueChange={(value) =>
-                setFormData((prev) => ({ ...prev, bracket_type: value }))
+                setFormData((prev) => ({ ...prev, bracketType: value }))
               }
             >
               <SelectTrigger>

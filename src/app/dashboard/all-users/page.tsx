@@ -12,16 +12,11 @@ export default function AdminUsers() {
   const [loading, setLoading] = useState<boolean>(true);
   const [users, setUsers] = useState<any[]>([]);
 
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
-
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        if (!token) return;
-
         setLoading(true);
-        const response = await getAllUsersFromAllUniversities(token);
+        const response = await getAllUsersFromAllUniversities();
         setUsers(flattenUsers(response.data?.universities ?? []));
       } catch (error) {
         console.error("Error fetching all users:", error);
@@ -31,7 +26,7 @@ export default function AdminUsers() {
     };
 
     fetchUsers();
-  }, [token]);
+  }, []);
 
   const columns = [
     { accessorKey: "fullName", header: "FULL NAME" },

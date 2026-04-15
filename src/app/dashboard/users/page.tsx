@@ -13,16 +13,14 @@ export default function UniversityUsers() {
   const [users, setUsers] = useState<any[]>([]);
 
   const universityId = user?.universityId;
-  const token =
-    typeof window !== "undefined" ? localStorage.getItem("token") : null;
 
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        if (!universityId || !token) return;
+        if (!universityId) return;
 
         setLoading(true);
-        const response = await getUsersFromUniversity(universityId, token);
+        const response = await getUsersFromUniversity(universityId);
         setUsers(formatUsers(response.data?.users ?? []));
       } catch (error) {
         console.error("Error fetching users from university:", error);
@@ -32,7 +30,7 @@ export default function UniversityUsers() {
     };
 
     fetchUsers();
-  }, [universityId, token]);
+  }, [universityId]);
 
   const columns = [
     { accessorKey: "fullName", header: "FULL NAME" },

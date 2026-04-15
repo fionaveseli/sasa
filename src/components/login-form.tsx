@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Eye, EyeOff } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { api } from "@/services/api";
+import { login } from "@/api/authService";
 import { toast } from "sonner";
 
 export function LoginForm({
@@ -27,7 +27,7 @@ export function LoginForm({
     setError("");
 
     try {
-      const response = await api.login(email, password);
+      const response = await login(email, password);
 
       localStorage.setItem("token", response.token);
       localStorage.setItem("USER", JSON.stringify(response.user));
