@@ -44,12 +44,12 @@ export default function TeamPage({ params }: TeamPageProps) {
         if (!id) return;
 
         const userData = await getCurrentUser();
-        const universities = await getUniversities();
+        const { universities } = await getUniversities();
 
         // Search all universities for the team with this id
         let foundTeam: Team | null = null;
         for (const university of universities) {
-          const teams = await getUniversityTeams(university.id);
+          const { teams } = await getUniversityTeams(university.id);
           const match = teams.find((t: Team) => t.id === Number(id));
           if (match) {
             foundTeam = match;
@@ -70,7 +70,8 @@ export default function TeamPage({ params }: TeamPageProps) {
 
         // Fetch upcoming matches for this team
         try {
-          const tournament = await getCurrentTournament();
+          const data = await getCurrentTournament();
+          const tournament = data?.tournaments?.[0] ?? null;
           if (tournament) {
             const matches = await getTournamentMatches(tournament.id);
             const teamMatches = matches.filter(

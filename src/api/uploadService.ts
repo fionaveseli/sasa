@@ -1,6 +1,6 @@
 import axiosInstance from "@/utils/axios";
 
-export const uploadLogo = async (logoFile: File): Promise<string> => {
+export const uploadLogo = async (logoFile: File) => {
   const formData = new FormData();
   formData.append("logo", logoFile);
 
@@ -10,5 +10,5 @@ export const uploadLogo = async (logoFile: File): Promise<string> => {
     },
   });
 
-  return response.data.file.url;
+  return response.data;
 };

@@ -6,23 +6,18 @@ import { getCurrentUser } from "@/api/userService";
 import { getUniversities, getUniversityTeams } from "@/api/universityService";
 import type { University } from "@/api/universityService";
 import type { Team } from "@/api/teamService";
-import type { Match } from "@/api/tournamentService";
-import { useRouter } from "next/navigation";
 import CreateTeamModal from "@/components/modal/create-team-modal";
 import { MoonLoader } from "react-spinners";
 import TabContentTransition from "@/components/university/university-animation";
 import PathDrawing from "@/components/university/path-drawing";
 
 export default function UniversityPage() {
-  const router = useRouter();
   const [university, setUniversity] = useState<University | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
   const [activeTab, setActiveTab] = useState("bracket");
   const [isCreateTeamModalOpen, setIsCreateTeamModalOpen] = useState(false);
-  const [tournamentWins, setTournamentWins] = useState(0);
 
   useEffect(() => {
     const fetchUniversityData = async () => {
@@ -36,8 +31,8 @@ export default function UniversityPage() {
           return;
         }
 
-        const universitiesResponse = await getUniversities();
-        const universityData = universitiesResponse.find(
+        const { universities } = await getUniversities();
+        const universityData = universities.find(
           (uni) => uni.id === universityId,
         );
         if (!universityData) {
@@ -48,8 +43,8 @@ export default function UniversityPage() {
 
         setUniversity(universityData);
 
-        const teamsResponse = await getUniversityTeams(universityId);
-        setTeams(teamsResponse);
+        const { teams: fetchedTeams } = await getUniversityTeams(universityId);
+        setTeams(fetchedTeams);
 
         setLoading(false);
       } catch (err) {
@@ -61,22 +56,6 @@ export default function UniversityPage() {
 
     fetchUniversityData();
   }, []);
-
-  const formatMatchDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return (
-      date.toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "short",
-      }) +
-      " " +
-      date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      })
-    );
-  };
 
   if (loading) {
     return (
@@ -144,36 +123,14 @@ export default function UniversityPage() {
     <TabContentTransition>
       <div className="mt-4 bg-gray-100 p-4 rounded-lg">
         <h3 className="text-lg font-semibold mb-2">Tournament Bracket</h3>
-        {upcomingMatches.length > 0 ? (
-          <div className="space-y-4">
-            {upcomingMatches.map((match) => (
-              <div key={match.id} className="bg-white p-4 rounded-lg shadow">
-                <div className="flex justify-between items-center">
-                  <div>
-                    <p className="font-medium">{match.team1.name}</p>
-                    <p className="text-sm text-gray-500">vs</p>
-                    <p className="font-medium">{match.team2.name}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-sm">
-                      {formatMatchDate(match.scheduled_time)}
-                    </p>
-                    <p className="text-sm text-gray-500">{match.status}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center p-6 rounded-lg bg-gray-100">
-            <img
-              src="/empty-bracket.svg"
-              alt="No Matches"
-              className="w-32 mb-4"
-            />
-            <p className="text-gray-600">No upcoming matches scheduled.</p>
-          </div>
-        )}
+        <div className="flex flex-col items-center p-6 rounded-lg bg-gray-100">
+          <img
+            src="/empty-bracket.svg"
+            alt="No Matches"
+            className="w-32 mb-4"
+          />
+          <p className="text-gray-600">No upcoming matches scheduled.</p>
+        </div>
       </div>
     </TabContentTransition>
   );
@@ -239,7 +196,7 @@ export default function UniversityPage() {
         <div className="bg-white rounded-xl shadow p-5 flex items-center gap-4">
           <Trophy className="text-yellow-400 w-10 h-10" />
           <div className="flex flex-col justify-center">
-            <p className="text-xl font-bold">{tournamentWins}</p>
+            <p className="text-xl font-bold">0</p>
             <p className="text-gray-500 text-sm">Tournament Wins</p>
           </div>
         </div>
@@ -247,11 +204,7 @@ export default function UniversityPage() {
         <div className="bg-white rounded-xl shadow p-5 flex items-center gap-4">
           <Calendar className="text-gray-400 w-10 h-10" />
           <div className="flex flex-col justify-center">
-            <p className="text-lg font-semibold">
-              {upcomingMatches.length > 0
-                ? formatMatchDate(upcomingMatches[0].scheduled_time)
-                : "TBD"}
-            </p>
+            <p className="text-lg font-semibold">TBD</p>
             <p className="text-gray-500 text-sm">Next Match</p>
           </div>
         </div>

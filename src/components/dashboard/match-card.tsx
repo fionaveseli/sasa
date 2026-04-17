@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Calendar, Clock } from "lucide-react";
-import { Match } from "@/services/api";
+import type { Match } from "@/api/tournamentService";
 
 interface MatchCardProps {
   match: Match;

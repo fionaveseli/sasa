@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { getUniversities, getUniversityTeams } from "@/api/universityService";
 import type { University } from "@/api/universityService";
 import type { Team } from "@/api/teamService";
-import type { Match } from "@/api/tournamentService";
 import { MoonLoader } from "react-spinners";
 import { useParams } from "next/navigation";
 
@@ -15,8 +14,6 @@ export default function UniversityDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [teams, setTeams] = useState<Team[]>([]);
-  const [upcomingMatches, setUpcomingMatches] = useState<Match[]>([]);
-  const [tournamentWins, setTournamentWins] = useState(0);
 
   const universityId = parseInt(params.id as string);
 
@@ -29,8 +26,8 @@ export default function UniversityDetailPage() {
           return;
         }
 
-        const universitiesResponse = await getUniversities();
-        const universityData = universitiesResponse.find(
+        const { universities } = await getUniversities();
+        const universityData = universities.find(
           (uni) => uni.id === universityId
         );
 
@@ -45,32 +42,6 @@ export default function UniversityDetailPage() {
         const teamsResponse = await getUniversityTeams(universityId);
         setTeams(teamsResponse);
 
-        // const tournament = await api.getCurrentTournament();
-        // if (tournament) {
-        //   const matches = await api.getTournamentMatches(tournament.id);
-        //   const universityTeamIds = teamsResponse.map((team) => team.id);
-        //   // const universityMatches = matches.filter(
-        //   //   (match) =>
-        //   //     universityTeamIds.includes(match.team1_id) ||
-        //   //     universityTeamIds.includes(match.team2_id)
-        //   // );
-        //   // setUpcomingMatches(
-        //   //   universityMatches.filter((match) => match.status === "scheduled")
-        //   // );
-
-        //   const completedMatches = matches.filter(
-        //     (match) => match.status === "completed"
-        //   );
-        //   const wins = completedMatches.filter((match) => {
-        //     const winningTeamId = match.winner_id;
-        //     return (
-        //       winningTeamId !== null &&
-        //       universityTeamIds.includes(winningTeamId)
-        //     );
-        //   }).length;
-        //   setTournamentWins(wins);
-        // }
-
         setLoading(false);
       } catch (err) {
         console.error("Error fetching university data:", err);
@@ -81,22 +52,6 @@ export default function UniversityDetailPage() {
 
     fetchUniversityData();
   }, [universityId]);
-
-  const formatMatchDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return (
-      date.toLocaleDateString("en-US", {
-        day: "numeric",
-        month: "short",
-      }) +
-      " " +
-      date.toLocaleTimeString("en-US", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: true,
-      })
-    );
-  };
 
   if (loading) {
     return (
@@ -142,7 +97,7 @@ export default function UniversityDetailPage() {
         <div className="bg-white rounded-xl shadow p-5 flex items-center gap-4">
           <Trophy className="text-yellow-400 w-10 h-10" />
           <div className="flex flex-col justify-center">
-            <p className="text-xl font-bold">{tournamentWins}</p>
+            <p className="text-xl font-bold">0</p>
             <p className="text-gray-500 text-sm">Tournament Wins</p>
           </div>
         </div>
@@ -150,11 +105,7 @@ export default function UniversityDetailPage() {
         <div className="bg-white rounded-xl shadow p-5 flex items-center gap-4">
           <Calendar className="text-gray-400 w-10 h-10" />
           <div className="flex flex-col justify-center">
-            <p className="text-lg font-semibold">
-              {upcomingMatches.length > 0
-                ? formatMatchDate(upcomingMatches[0].scheduled_time)
-                : "TBD"}
-            </p>
+            <p className="text-lg font-semibold">TBD</p>
             <p className="text-gray-500 text-sm">Next Match</p>
           </div>
         </div>

@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
-import { resolveDispute } from "@/api/matchesService"; // ← create this API method
+import { resolveDispute } from "@/api/tournamentService";
 
 interface DisputeScoreModalProps {
   open: boolean;
@@ -46,7 +46,7 @@ export default function DisputeScoreModal({
       await resolveDispute(matchId, selectedWinner);
       toast.success("Dispute resolved and winner selected!");
       setOpen(false);
-      await refreshMatches();
+      refreshMatches();
     } catch (error) {
       console.error("Dispute resolution failed:", error);
       toast.error("Could not resolve the dispute. Try again.");

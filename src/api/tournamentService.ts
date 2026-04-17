@@ -66,10 +66,7 @@ export const getTournaments = async (universityId: number) => {
 
 export const getCurrentTournament = async () => {
   const response = await axiosInstance.get("/tournaments");
-  if (!response.data.tournaments || response.data.tournaments.length === 0) {
-    return null;
-  }
-  return response.data.tournaments[0];
+  return response.data;
 };
 
 export const createTournament = async (data: {
@@ -137,7 +134,8 @@ export const getTournamentMatches = async (
 };
 
 export const getDashboardStats = async (): Promise<DashboardStats> => {
-  const tournament = await getCurrentTournament();
+  const data = await getCurrentTournament();
+  const tournament = data?.tournaments?.[0] ?? null;
   const matchesData: Match[] = tournament
     ? await getTournamentMatches(tournament.id)
     : [];
@@ -173,7 +171,8 @@ export const getDashboardStats = async (): Promise<DashboardStats> => {
 };
 
 export const getUpcomingMatches = async (): Promise<Match[]> => {
-  const tournament = await getCurrentTournament();
+  const data = await getCurrentTournament();
+  const tournament = data?.tournaments?.[0] ?? null;
   if (!tournament) return [];
 
   const matches = await getTournamentMatches(tournament.id);
@@ -185,7 +184,8 @@ export const getUpcomingMatches = async (): Promise<Match[]> => {
 };
 
 export const getTournamentBracket = async (): Promise<BracketRound[]> => {
-  const tournament = await getCurrentTournament();
+  const data = await getCurrentTournament();
+  const tournament = data?.tournaments?.[0] ?? null;
   if (!tournament) return [];
 
   const matches = await getTournamentMatches(tournament.id);
@@ -205,4 +205,36 @@ export const getTournamentBracket = async (): Promise<BracketRound[]> => {
   }, {});
 
   return Object.values(rounds);
+};
+
+export const submitScore = async (
+  matchId: number,
+  scoreValue: number,
+  proofImageUrl: string,
+) => {
+  const response = await axiosInstance.post(`/matches/${matchId}/scores`, {
+    score_value: scoreValue,
+    proof_image_url: proofImageUrl,
+  });
+  return response.data;
+};
+
+export const updateMatchStatus = async (
+  matchId: number,
+  status: "in_progress" | "completed" | "disputed",
+) => {
+  const response = await axiosInstance.patch(`/matches/${matchId}/status`, {
+    status,
+  });
+  return response.data;
+};
+
+export const resolveDispute = async (
+  matchId: number,
+  winnerTeamId: number,
+) => {
+  const response = await axiosInstance.patch(`/matches/${matchId}/resolve`, {
+    winner_team_id: winnerTeamId,
+  });
+  return response.data;
 };

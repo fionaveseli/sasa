@@ -1,5 +1,6 @@
 import axiosInstance from "@/utils/axios";
 import { toast } from "sonner";
+import type { Team } from "@/api/teamService";
 
 export interface University {
   id: number;
@@ -15,9 +16,9 @@ export interface University {
   updatedAt: string;
 }
 
-export const getUniversities = async (): Promise<University[]> => {
+export const getUniversities = async (): Promise<{ universities: University[] }> => {
   const response = await axiosInstance.get("/universities");
-  return response.data.universities;
+  return response.data;
 };
 
 export const createUniversity = async (data: {
@@ -46,11 +47,11 @@ export const getUniversityUsers = async (universityId: number) => {
   return response.data;
 };
 
-export const getUniversityTeams = async (universityId: number) => {
+export const getUniversityTeams = async (universityId: number): Promise<{ teams: Team[] }> => {
   const response = await axiosInstance.get(
     `/universities/${universityId}/teams`,
   );
-  return response.data.teams || [];
+  return response.data;
 };
 
 export const getUniversityTournaments = async (universityId: number) => {
@@ -66,15 +67,7 @@ export const joinUniversity = async (data: { universityId: string }) => {
   return response.data;
 };
 
-// NOTE: /universities/:id/manager-candidates is not in the backend contract
-export const getManagerCandidates = async (universityId: number) => {
-  const response = await axiosInstance.get(
-    `/universities/${universityId}/manager-candidates`,
-  );
-  return response.data?.users || [];
-};
-
-// NOTE: /universities/:id/transfer-manager is not in the backend contract
+// TODO: confirm /universities/:id/transfer-manager exists in backend
 export const transferManagerRole = async (
   universityId: number,
   newManagerId: number,

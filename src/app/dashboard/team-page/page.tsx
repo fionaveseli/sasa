@@ -51,7 +51,8 @@ export default function TeamPage() {
         if (teamData) {
           setTeam(teamData);
 
-          const tournamentData = await getCurrentTournament();
+          const data = await getCurrentTournament();
+          const tournamentData = data?.tournaments?.[0] ?? null;
           if (tournamentData) {
             const matches = await getTournamentMatches(tournamentData.id);
             const teamMatches = matches.filter(

@@ -57,7 +57,8 @@ export default function DashboardPage() {
         let bracketData: BracketRound[] = [];
 
         try {
-          const tournamentData = await getCurrentTournament();
+          const data = await getCurrentTournament();
+          const tournamentData = data?.tournaments?.[0] ?? null;
           if (tournamentData) {
             matchesData = await getUpcomingMatches();
             bracketData = await getTournamentBracket();

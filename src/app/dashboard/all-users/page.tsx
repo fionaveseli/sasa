@@ -16,8 +16,8 @@ export default function AdminUsers() {
     const fetchUsers = async () => {
       try {
         setLoading(true);
-        const response = await getAllUsersFromAllUniversities();
-        setUsers(flattenUsers(response.data?.universities ?? []));
+        const data = await getAllUsersFromAllUniversities();
+        setUsers(flattenUsers(data.universities ?? []));
       } catch (error) {
         console.error("Error fetching all users:", error);
       } finally {

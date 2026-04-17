@@ -20,8 +20,8 @@ export default function UniversityUsers() {
         if (!universityId) return;
 
         setLoading(true);
-        const response = await getUsersFromUniversity(universityId);
-        setUsers(formatUsers(response.data?.users ?? []));
+        const data = await getUsersFromUniversity(universityId);
+        setUsers(formatUsers(data.users ?? []));
       } catch (error) {
         console.error("Error fetching users from university:", error);
       } finally {

@@ -9,7 +9,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { toast } from "sonner";
-import { submitScore } from "@/api/matchesService";
+import { submitScore } from "@/api/tournamentService";
 
 interface SubmitScoreModalProps {
   open: boolean;
@@ -65,13 +65,12 @@ export default function SubmitScoreModal({
         throw new Error("Image upload failed");
       }
 
-      const token = localStorage.getItem("token") || "";
       await submitScore(matchId, scoreValue, imageUrl);
 
       toast.success("Score submitted successfully!");
       setOpen(false);
       setProofImage(null);
-      await refreshMatches();
+      refreshMatches();
     } catch (err) {
       console.error("Error submitting score:", err);
       toast.error("Failed to submit score.");

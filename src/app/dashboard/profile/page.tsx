@@ -20,7 +20,7 @@ export default function ProfilePage() {
     const fetchUniversityName = async () => {
       if (user?.universityId) {
         try {
-          const universities = await getUniversities();
+          const { universities } = await getUniversities();
           const university = universities.find(
             (u) => u.id === user.universityId,
           );

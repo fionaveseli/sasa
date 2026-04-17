@@ -48,13 +48,14 @@ export default function TeamsPage() {
           return;
         }
 
-        const universities = await getUniversities();
+        const { universities } = await getUniversities();
         const universityData = universities.find(
           (uni) => uni.id === universityId,
         );
         const universityName = universityData?.name || "";
 
-        let allTeams: ExtendedTeam[] = await getUniversityTeams(universityId);
+        const { teams } = await getUniversityTeams(universityId);
+        let allTeams: ExtendedTeam[] = teams;
         allTeams = allTeams.map((team) => ({
           ...team,
           university_name: universityName,

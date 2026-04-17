@@ -23,7 +23,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { logout } from "@/components/nav-user";
-import { api } from "@/services/api";
+import { search } from "@/api/searchService";
 import { useDebouncedCallback } from "use-debounce";
 import { useState } from "react";
 
@@ -43,7 +43,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
 
     try {
       setLoading(true);
-      const response = await api.search(
+      const response = await search(
         value,
         searchType === "all" ? undefined : searchType,
       );

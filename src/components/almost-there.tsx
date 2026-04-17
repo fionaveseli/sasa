@@ -24,7 +24,7 @@ export function AlmostThereCard({
   useEffect(() => {
     const fetchUniversities = async () => {
       try {
-        const universities = await getUniversities();
+        const { universities } = await getUniversities();
         setUniversities(universities);
       } catch {
         setError("Failed to fetch universities.");

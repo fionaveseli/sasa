@@ -1,7 +1,7 @@
 "use client";
 
 import { use, useContext, useEffect, useState } from "react";
-import { getMatches, updateMatchStatus } from "@/api/matchesService";
+import { getTournamentMatches, updateMatchStatus } from "@/api/tournamentService";
 import { AppContext } from "@/context/app-context";
 import Table from "@/components/table";
 import { Button } from "@/components/ui/button";
@@ -50,8 +50,8 @@ export default function TournamentDetails({ params }: TournamentPageProps) {
   const fetchMatches = async () => {
     try {
       setLoading(true);
-      const response = await getMatches(Number(id));
-      setMatches(response.data ?? []);
+      const matches = await getTournamentMatches(Number(id));
+      setMatches(matches ?? []);
     } catch (error) {
       console.error("Error fetching matches:", error);
     } finally {

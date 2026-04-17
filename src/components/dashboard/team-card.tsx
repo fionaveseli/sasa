@@ -1,5 +1,5 @@
 import { Card } from "@/components/ui/card";
-import { Team } from "@/services/api";
+import type { Team } from "@/api/teamService";
 import Link from "next/link";
 
 interface TeamCardProps {

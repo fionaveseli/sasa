@@ -288,12 +288,10 @@ export default function Tournament() {
           return;
         }
 
-        const teamsResponse = await getUniversityTeams(user.universityId);
+        const { teams: fetchedTeams } = await getUniversityTeams(user.universityId);
 
-        console.log("Fetched university teams:", teamsResponse);
-
-        setTeams(teamsResponse || []);
-        setFilteredTeams(teamsResponse || []);
+        setTeams(fetchedTeams);
+        setFilteredTeams(fetchedTeams);
       } catch (error) {
         console.error("Error fetching university teams:", error);
       }

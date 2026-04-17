@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { List } from "lucide-react";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
-import { getMatches } from "@/api/matchesService"; // ✅ using getMatches
+import { getTournamentMatches } from "@/api/tournamentService";
 import Table from "./table";
 import SubmitScoreModal from "./modal/submit-score-modal";
 
@@ -145,9 +145,8 @@ export default function Matches() {
         return;
       }
 
-      const response = await getMatches(tournamentId);
-      setMatches(formatMatches(response.data ?? []));
-      const formattedMatches = formatMatches(response.data ?? []);
+      const matches = await getTournamentMatches(tournamentId);
+      const formattedMatches = formatMatches(matches ?? []);
       setMatches(formattedMatches);
       setTotalRows(formattedMatches.length);
     } catch (error) {

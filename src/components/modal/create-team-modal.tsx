@@ -52,7 +52,8 @@ export default function CreateTeamModal({
       // First upload the logo if one was selected
       if (logo) {
         try {
-          logoUrl = await uploadLogo(logo);
+          const uploadData = await uploadLogo(logo);
+          logoUrl = uploadData.file.url;
           console.log("Logo uploaded successfully:", logoUrl);
         } catch (logoError: any) {
           console.error("Error uploading logo:", logoError);

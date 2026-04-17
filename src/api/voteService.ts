@@ -1,8 +1,11 @@
-import { getRequest } from "@/utils/axios";
+import axiosInstance from "@/utils/axios";
 import { TournamentVote } from "@/types/dto/votes/TournamentVotes";
-import { ApiResponse } from "@/types/dto/Axios";
 
-export const getTournamentVotes = (
+export const getTournamentVotes = async (
   tournamentId: number,
-): Promise<ApiResponse<TournamentVote[]>> =>
-  getRequest<TournamentVote[]>(`/tournaments/${tournamentId}/votes`);
+): Promise<TournamentVote[]> => {
+  const response = await axiosInstance.get(
+    `/tournaments/${tournamentId}/votes`,
+  );
+  return response.data;
+};

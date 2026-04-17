@@ -1,7 +1,7 @@
 "use client";
 import { Bracket, IRoundProps } from "@sportsgram/brackets";
 import { Card, CardContent } from "@/components/ui/card";
-import { BracketRound } from "@/services/api";
+import type { BracketRound } from "@/api/tournamentService";
 
 interface BracketCardProps {
   rounds: BracketRound[];

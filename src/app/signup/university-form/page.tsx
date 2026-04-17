@@ -63,7 +63,8 @@ export default function AddUniversityForm() {
 
       if (logoFile) {
         try {
-          uploadedLogoUrl = await uploadLogo(logoFile);
+          const uploadData = await uploadLogo(logoFile);
+          uploadedLogoUrl = uploadData.file.url;
           console.log("Logo uploaded:", uploadedLogoUrl);
         } catch (uploadError) {
           console.error("Failed to upload logo:", uploadError);

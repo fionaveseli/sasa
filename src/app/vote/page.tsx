@@ -20,12 +20,9 @@ export default function Home() {
 
   useEffect(() => {
     const fetchVotes = async () => {
-      const response = await getTournamentVotes(1); 
-      if (response.data) {
-        setVotes(response.data);
-        console.log("Fetched votes:", response.data);
-      } else {
-        console.error("Failed to fetch votes:", response);
+      const votes = await getTournamentVotes(1);
+      if (votes) {
+        setVotes(votes);
       }
     };
 

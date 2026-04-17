@@ -1,5 +1,4 @@
-import axiosInstance, { getRequest } from "@/utils/axios";
-import { ApiResponse } from "@/types/dto/Axios";
+import axiosInstance from "@/utils/axios";
 
 export const getCurrentUser = async () => {
   const response = await axiosInstance.get("/users/me");
@@ -29,14 +28,17 @@ export type UniversityUser = {
   graduationYear: number;
 };
 
-export const getUsersFromUniversity = (
+export const getUsersFromUniversity = async (
   universityId: number,
-): Promise<ApiResponse<{ users: UniversityUser[] }>> =>
-  getRequest<{ users: UniversityUser[] }>(
-    `/universities/${universityId}/users`,
-  );
+): Promise<{ users: UniversityUser[] }> => {
+  const response = await axiosInstance.get(`/universities/${universityId}/users`);
+  return response.data;
+};
 
 // NOTE: /users/all is not in the backend contract
-export const getAllUsersFromAllUniversities = (): Promise<
-  ApiResponse<{ universities: any[] }>
-> => getRequest<{ universities: any[] }>("/users/all");
+export const getAllUsersFromAllUniversities = async (): Promise<{
+  universities: any[];
+}> => {
+  const response = await axiosInstance.get("/users/all");
+  return response.data;
+};
